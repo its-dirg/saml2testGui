@@ -1,0 +1,42 @@
+2013-11-06 10:52:40,640 root:INFO Server starting
+2013-11-06 10:53:08,302 root:INFO Server starting
+2013-11-06 10:53:27,490 root:INFO CONTENT_TYPE:GET
+2013-11-06 10:53:27,490 root:INFO Path:robots.txt
+2013-11-06 10:53:27,490 root:INFO Query:
+2013-11-06 10:53:27,490 root:INFO {}
+2013-11-06 10:53:27,490 root:INFO [static]sending: static/robots.txt
+2013-11-06 10:53:27,523 root:INFO CONTENT_TYPE:GET
+2013-11-06 10:53:27,523 root:INFO Path:favicon.ico
+2013-11-06 10:53:27,523 root:INFO Query:
+2013-11-06 10:53:27,523 root:INFO {}
+2013-11-06 10:53:27,523 root:INFO response:
+2013-11-06 10:53:27,524 root:INFO ['https://hashog.umdc.umu.se:4545/favicon.ico']
+2013-11-06 10:55:12,948 root:INFO CONTENT_TYPE:GET
+2013-11-06 10:55:12,948 root:INFO Path:static/jquery.min.1.9.1.js
+2013-11-06 10:55:12,948 root:INFO Query:
+2013-11-06 10:55:12,949 root:INFO {}
+2013-11-06 10:55:12,949 root:INFO [static]sending: static/jquery.min.1.9.1.js
+2013-11-06 10:56:10,336 root:INFO CONTENT_TYPE:GET
+2013-11-06 10:56:10,336 root:INFO Path:static/jquery.min.1.9.1.js
+2013-11-06 10:56:10,336 root:INFO Query:
+2013-11-06 10:56:10,336 root:INFO {}
+2013-11-06 10:56:10,336 root:INFO [static]sending: static/jquery.min.1.9.1.js
+2013-11-06 10:56:10,393 root:INFO CONTENT_TYPE:GET
+2013-11-06 10:56:10,393 root:INFO Path:favicon.ico
+2013-11-06 10:56:10,393 root:INFO Query:
+2013-11-06 10:56:10,393 root:INFO {}
+2013-11-06 10:56:10,393 root:INFO response:
+2013-11-06 10:56:10,393 root:INFO ['https://hashog.umdc.umu.se:4545/favicon.ico']
+2013-11-06 10:56:10,404 root:INFO CONTENT_TYPE:GET
+2013-11-06 10:56:10,404 root:INFO Path:favicon.ico
+2013-11-06 10:56:10,404 root:INFO Query:
+2013-11-06 10:56:10,404 root:INFO {}
+2013-11-06 10:56:10,404 root:INFO response:
+2013-11-06 10:56:10,404 root:INFO ['https://hashog.umdc.umu.se:4545/favicon.ico']
+2013-11-06 10:57:33,595 root:INFO Server starting
+2013-11-06 10:57:55,315 root:INFO Server starting
+2013-11-06 10:57:59,261 root:INFO CONTENT_TYPE:GET
+2013-11-06 10:57:59,261 root:INFO Path:static/jquery.min.1.9.1.js
+2013-11-06 10:57:59,261 root:INFO Query:
+2013-11-06 10:57:59,261 root:INFO {}
+2013-11-06 10:57:59,261 root:INFO [static]sending: static/jquery.min.1.9.1.js
