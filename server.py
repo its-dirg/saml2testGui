@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
+
 __author__ = 'haho0032'
 #Imports within the project
 from saml2testGui.util.log import create_logger
 from saml2testGui.util.http import HttpHandler
 from saml2testGui.util.session import Session
+from saml2testGui.TestHandler import Test
 
 #External imports
 import importlib
@@ -13,6 +15,7 @@ from cherrypy import wsgiserver
 from cherrypy.wsgiserver import ssl_pyopenssl
 from beaker.middleware import SessionMiddleware
 from mako.lookup import TemplateLookup
+
 
 #Lookup for all mako templates.
 LOOKUP = TemplateLookup(directories=['mako/templates', 'mako/htdocs'],
@@ -31,12 +34,16 @@ def application(environ, start_response):
     session = Session(environ)
 
     http_helper = HttpHandler(environ, start_response, session, logger)
+    test = Test(environ, start_response, session, logger, LOOKUP)
     path = http_helper.getPath()
 
     http_helper.logRequest()
     response = None
     if http_helper.verifyStatic(path):
         return http_helper.handleStatic(path)
+
+    if test.verify(path):
+        return test.handle(path)
 
     if response is None:
         response = http_helper.Http404()

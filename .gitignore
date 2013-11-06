@@ -44,3 +44,7 @@ src/saml2testGui/util/log.pyc
 src/saml2testGui/util/session.pyc
 
 src/saml2testGui/util/session.pyc
+
+mako/modules/base.mako.pyc
+
+*.pyc
