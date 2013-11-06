@@ -24,7 +24,7 @@ ${helloWorld(a_value)}
 
 <div ng-controller="IndexCtrl" >
     <div ng-click="getList();">CLICK ME</div>
-    <div ng-repeat="tests in list order by id">
+    <div ng-repeat="tests in list | orderBy:'id':true">
         <span>{{tests.id}}</span>
     </div>
 
