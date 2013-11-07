@@ -55,8 +55,6 @@
             notificationFactory.error(data.ExceptionMessage);
         };
 
-        //testFactory.getTests();
-
         testFactory.getTests().success(getListSuccessCallback).error(errorCallback);
         configFactory.getConfig().success(getConfigSuccessCallback).error(errorCallback);
 

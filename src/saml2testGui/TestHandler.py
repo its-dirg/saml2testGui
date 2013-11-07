@@ -10,6 +10,7 @@ __author__ = 'haho0032'
 
 class Test:
     IDP_TESTDRV = '/usr/local/bin/idp_testdrv.py'
+
     def __init__(self, environ, start_response, session, logger, lookup, config):
         """
         Constructor for the class.
@@ -27,13 +28,16 @@ class Test:
         self.urls = {
             "" : "index.mako",
             "list" : None,
-            "config" : None
+            "config" : None,
+            "run_test" : None
         }
+
 
     def verify(self, path):
         for url, file in self.urls.iteritems():
             if path == url:
                 return True
+
 
     def handle(self, path):
         if path == "":
@@ -42,6 +46,9 @@ class Test:
             return self.handleList()
         elif path == "config":
             return self.handleConfigFiles()
+        elif path == "run_test":
+            return self.handleRunTest()
+
 
     def handleIndex(self, file):
         resp = Response(mako_template=file,
@@ -52,6 +59,7 @@ class Test:
         }
         return resp(self.environ, self.start_response, **argv)
 
+
     def handleList(self):
         ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-l'])
         if (ok):
@@ -60,10 +68,23 @@ class Test:
             return self.serviceError("Cannot list the tests.")
         return self.returnJSON(myJson)
 
+
     def handleConfigFiles(self):
         self.checkForNewConfigFiles()
         configJSONString = json.dumps(self.config.IDPTESTENVIROMENT)
         return self.returnJSON(configJSONString)
+
+    """
+    TIMES UPP CONTINUE HERE!! Börja köra test hårdkodat för att sedan ta in info från web gränssnitt
+    """
+    def handleRunTest(self):
+        ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J'])
+        if (ok):
+            myJson = p_out #[{'id':'1'}, {'id':'3'}, {'id':'2'}])
+        else:
+            return self.serviceError("Cannot list the tests.")
+        return self.returnJSON(myJson)
+
 
     def checkForNewConfigFiles(self):
         listedIdpEnviroments = []
@@ -91,6 +112,7 @@ class Test:
         message = {"ExceptionMessage": message}
         resp = ServiceError(json.dumps(message))
         return resp(self.environ, self.start_response)
+
 
     def runScript(self, command):
         try:

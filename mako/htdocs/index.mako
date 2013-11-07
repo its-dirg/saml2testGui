@@ -1,30 +1,6 @@
 ## index.html
 <%inherit file="base.mako"/>
 
-<%!
-    def helloWorld(a_value):
-      """
-      A hello world function.
-      :return: A vallue.
-      """
-      return "From function: " + a_value
-%>
-
-<!--
-
-<%block name="header">
-    <!-- List all type of tests -->
-</%block>
-
-this is the body content.
-
-
-${a_value}
-<br />
-${helloWorld(a_value)}
-
--->
-
 <div ng-controller="IndexCtrl" >
     <h1>Tests</h1>
 
@@ -39,15 +15,4 @@ ${helloWorld(a_value)}
              <span>{{tests.Name}}</span>
         </option>
     </select>
-
-
-     <!---
-    <div ng-repeat="tests in list | orderBy:'Name':true">
-        <span>{{tests.Name}}</span>
-    </div>
-
-
-
-    --->
-
 </div>
