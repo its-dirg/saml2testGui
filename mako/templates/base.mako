@@ -15,7 +15,7 @@
 
         <div class="footer">
             <%block name="footer">
-                this is the footer
+
             </%block>
         </div>
         <script src="/static/test.js"></script>

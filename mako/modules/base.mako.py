@@ -3,8 +3,8 @@ from mako import runtime, filters, cache
 UNDEFINED = runtime.UNDEFINED
 __M_dict_builtin = dict
 __M_locals_builtin = locals
-_magic_number = 8
-_modified_time = 1383751208.089234
+_magic_number = 9
+_modified_time = 1383834505.652213
 _enable_loop = True
 _template_filename = u'mako/templates/base.mako'
 _template_uri = u'base.mako'
@@ -17,10 +17,10 @@ def render_body(context,**pageargs):
     try:
         __M_locals = __M_dict_builtin(pageargs=pageargs)
         def header():
-            return render_header(context.locals_(__M_locals))
+            return render_header(context._locals(__M_locals))
         self = context.get('self', UNDEFINED)
         def footer():
-            return render_footer(context.locals_(__M_locals))
+            return render_footer(context._locals(__M_locals))
         __M_writer = context.writer()
         # SOURCE LINE 1
         __M_writer(u'<!DOCTYPE html>\n<html ng-app="app">\n    <head>\n        <script src="/static/angular.min.js"></script>\n        <script src="/static/jquery.min.1.9.1.js"></script>\n        <script src="/static/bootstrap/js/bootstrap.min.js"></script>\n        <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">\n    </head>\n    <body>\n        <div class="header">\n            ')
@@ -62,7 +62,7 @@ def render_footer(context,**pageargs):
             return render_footer(context)
         __M_writer = context.writer()
         # SOURCE LINE 17
-        __M_writer(u'\n                this is the footer\n            ')
+        __M_writer(u'\n                \n            ')
         return ''
     finally:
         context.caller_stack._pop_frame()

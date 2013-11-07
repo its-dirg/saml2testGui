@@ -2,12 +2,17 @@ import json
 import subprocess
 from saml2.httputil import Response, ServiceError
 
+import glob
+from os.path import basename
+import os
+
+
 
 __author__ = 'haho0032'
 
 class Test:
     IDP_TESTDRV = '/usr/local/bin/idp_testdrv.py'
-    def __init__(self, environ, start_response, session, logger, lookup):
+    def __init__(self, environ, start_response, session, logger, lookup, config):
         """
         Constructor for the class.
         :param environ:        WSGI enviroment
@@ -20,9 +25,11 @@ class Test:
         self.session = session
         self.logger = logger
         self.lookup = lookup
+        self.config = config
         self.urls = {
             "" : "index.mako",
-            "list" : None
+            "list" : None,
+            "config" : None
         }
 
     def verify(self, path):
@@ -35,6 +42,8 @@ class Test:
             return self.handleIndex(self.urls[path])
         elif path == "list":
             return self.handleList()
+        elif path == "config":
+            return self.handleConfigFiles()
 
     def handleIndex(self, file):
         resp = Response(mako_template=file,
@@ -46,13 +55,35 @@ class Test:
         return resp(self.environ, self.start_response, **argv)
 
     def handleList(self):
-        ok, p_out, p_err = self.runScript(['ls','-la'])
         ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-l'])
         if (ok):
             myJson = p_out #[{'id':'1'}, {'id':'3'}, {'id':'2'}])
         else:
             return self.serviceError("Cannot list the tests.")
         return self.returnJSON(myJson)
+
+    def handleConfigFiles(self):
+
+        listedIdpEnviroments = []
+
+        for dictionary in self.config.IDPTESTENVIROMENT:
+            listedIdpEnviroments.append(dictionary["Name"])
+
+        configPaths = glob.glob("configFiles/*.json")
+
+        for path in configPaths:
+            filename = basename(path)
+            filenameNoExtention = os.path.splitext(filename)[0]
+            if (filenameNoExtention in listedIdpEnviroments):
+                print filenameNoExtention
+            else:
+                print filenameNoExtention + " not specified in server_conf"
+
+        configJSONString = json.dumps(self.config.IDPTESTENVIROMENT)
+
+        print configJSONString
+
+        return self.returnJSON(configJSONString)
 
     def returnJSON(self, text):
         resp = Response(text, headers=[('Content-Type', "application/json")])

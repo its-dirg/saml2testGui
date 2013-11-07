@@ -3,8 +3,8 @@ from mako import runtime, filters, cache
 UNDEFINED = runtime.UNDEFINED
 __M_dict_builtin = dict
 __M_locals_builtin = locals
-_magic_number = 8
-_modified_time = 1383753625.407492
+_magic_number = 9
+_modified_time = 1383834505.642
 _enable_loop = True
 _template_filename = 'mako/htdocs/index.mako'
 _template_uri = 'index.mako'
@@ -39,24 +39,24 @@ def render_body(context,**pageargs):
         __M_locals = __M_dict_builtin(pageargs=pageargs)
         a_value = context.get('a_value', UNDEFINED)
         def header():
-            return render_header(context.locals_(__M_locals))
+            return render_header(context._locals(__M_locals))
         __M_writer = context.writer()
         # SOURCE LINE 2
         __M_writer(u'\n\n')
         # SOURCE LINE 11
-        __M_writer(u'\n\n\n')
+        __M_writer(u'\n\n<!--\n\n')
         if 'parent' not in context._data or not hasattr(context._data['parent'], 'header'):
             context['self'].header(**pageargs)
         
 
-        # SOURCE LINE 16
-        __M_writer(u'\n\nthis is the body content.\n\n')
-        # SOURCE LINE 20
+        # SOURCE LINE 17
+        __M_writer(u'\n\nthis is the body content.\n\n\n')
+        # SOURCE LINE 22
         __M_writer(unicode(a_value))
         __M_writer(u'\n<br />\n')
-        # SOURCE LINE 22
+        # SOURCE LINE 24
         __M_writer(unicode(helloWorld(a_value)))
-        __M_writer(u'\n\n\n<div ng-controller="IndexCtrl" >\n    <div ng-click="getList();">CLICK ME</div>\n    <div ng-repeat="tests in list">\n        <span>{{tests.id}}</span>\n    </div>\n\n</div>')
+        __M_writer(u'\n\n-->\n\n<div ng-controller="IndexCtrl" >\n    <button ng-click="getList();">GETList</button>\n\n    <br>\n\n    <div ng-repeat="tests in list | orderBy:\'id\':true">\n        <span>{{tests.id}}</span>\n    </div>\n\n\n    <button ng-click="getConfigFileList();">GET CONFIG LIST</button>\n    <br>\n    <select>\n        <option ng-repeat="tests in list | orderBy:\'Name\':true">\n             <span>{{tests.Name}}</span>\n        </option>\n    </select>\n\n\n     <!---\n    <div ng-repeat="tests in list | orderBy:\'Name\':true">\n        <span>{{tests.Name}}</span>\n    </div>\n\n\n\n    --->\n\n</div>')
         return ''
     finally:
         context.caller_stack._pop_frame()
@@ -68,8 +68,8 @@ def render_header(context,**pageargs):
         def header():
             return render_header(context)
         __M_writer = context.writer()
-        # SOURCE LINE 14
-        __M_writer(u'\n    List all type of tests\n')
+        # SOURCE LINE 15
+        __M_writer(u'\n    <!-- List all type of tests -->\n')
         return ''
     finally:
         context.caller_stack._pop_frame()
