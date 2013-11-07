@@ -26,19 +26,16 @@ ${helloWorld(a_value)}
 -->
 
 <div ng-controller="IndexCtrl" >
-    <button ng-click="getList();">GETList</button>
+    <h1>Tests</h1>
 
-    <br>
-
-    <div ng-repeat="tests in list | orderBy:'id':true" ng-click="testClick(tests.id);">
+    <div ng-repeat="tests in testList | orderBy:'id':true" ng-click="testClick(tests.id);">
         <span>{{tests.id}}</span>
     </div>
 
-
-    <button ng-click="getConfigFileList();">GET CONFIG LIST</button>
+    <h1>Test configurations:</h1>
     <br>
     <select>
-        <option ng-repeat="tests in list | orderBy:'Name':true">
+        <option ng-repeat="tests in configList | orderBy:'Name':true">
              <span>{{tests.Name}}</span>
         </option>
     </select>

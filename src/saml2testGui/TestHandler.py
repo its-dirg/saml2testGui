@@ -6,8 +6,6 @@ import glob
 from os.path import basename
 import os
 
-
-
 __author__ = 'haho0032'
 
 class Test:
@@ -63,7 +61,11 @@ class Test:
         return self.returnJSON(myJson)
 
     def handleConfigFiles(self):
+        self.checkForNewConfigFiles()
+        configJSONString = json.dumps(self.config.IDPTESTENVIROMENT)
+        return self.returnJSON(configJSONString)
 
+    def checkForNewConfigFiles(self):
         listedIdpEnviroments = []
 
         for dictionary in self.config.IDPTESTENVIROMENT:
@@ -79,11 +81,6 @@ class Test:
             else:
                 print filenameNoExtention + " not specified in server_conf"
 
-        configJSONString = json.dumps(self.config.IDPTESTENVIROMENT)
-
-        print configJSONString
-
-        return self.returnJSON(configJSONString)
 
     def returnJSON(self, text):
         resp = Response(text, headers=[('Content-Type', "application/json")])

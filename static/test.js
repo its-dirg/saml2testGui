@@ -36,17 +36,18 @@
 
     app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, configFactory) {
         //alert('controller')
-        $scope.list = [];
+        $scope.testList = [];
+        $scope.configList = [];
 
         var getListSuccessCallback = function (data, status, headers, config) {
-            alert('getListSuccessCallback');
-            $scope.list = data;
+            //alert('getListSuccessCallback');
+            $scope.testList = data;
         };
 
         var getConfigSuccessCallback = function (data, status, headers, config) {
             //alert('getConfigSuccessCallback');
 
-            $scope.list = data;
+            $scope.configList = data;
         };
 
         var errorCallback = function (data, status, headers, config) {
@@ -56,15 +57,8 @@
 
         //testFactory.getTests();
 
-        //testFactory.getTests().success(getListSuccessCallback).error(errorCallback);
-
-        $scope.getList = function () {
-            return testFactory.getTests().success(getListSuccessCallback).error(errorCallback);
-        };
-
-        $scope.getConfigFileList = function () {
-            return configFactory.getConfig().success(getConfigSuccessCallback).error(errorCallback);
-        };
+        testFactory.getTests().success(getListSuccessCallback).error(errorCallback);
+        configFactory.getConfig().success(getConfigSuccessCallback).error(errorCallback);
 
         $scope.testClick = function (id) {
             alert(id)

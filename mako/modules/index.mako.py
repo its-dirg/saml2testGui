@@ -4,7 +4,7 @@ UNDEFINED = runtime.UNDEFINED
 __M_dict_builtin = dict
 __M_locals_builtin = locals
 _magic_number = 9
-_modified_time = 1383835791.15445
+_modified_time = 1383837384.814091
 _enable_loop = True
 _template_filename = 'mako/htdocs/index.mako'
 _template_uri = 'index.mako'
@@ -56,7 +56,7 @@ def render_body(context,**pageargs):
         __M_writer(u'\n<br />\n')
         # SOURCE LINE 24
         __M_writer(unicode(helloWorld(a_value)))
-        __M_writer(u'\n\n-->\n\n<div ng-controller="IndexCtrl" >\n    <button ng-click="getList();">GETList</button>\n\n    <br>\n\n    <div ng-repeat="tests in list | orderBy:\'id\':true" ng-click="testClick(tests.id);">\n        <span>{{tests.id}}</span>\n    </div>\n\n\n    <button ng-click="getConfigFileList();">GET CONFIG LIST</button>\n    <br>\n    <select>\n        <option ng-repeat="tests in list | orderBy:\'Name\':true">\n             <span>{{tests.Name}}</span>\n        </option>\n    </select>\n\n\n     <!---\n    <div ng-repeat="tests in list | orderBy:\'Name\':true">\n        <span>{{tests.Name}}</span>\n    </div>\n\n\n\n    --->\n\n</div>')
+        __M_writer(u'\n\n-->\n\n<div ng-controller="IndexCtrl" >\n    <h1>Tests</h1>\n\n    <div ng-repeat="tests in testList | orderBy:\'id\':true" ng-click="testClick(tests.id);">\n        <span>{{tests.id}}</span>\n    </div>\n\n\n    <h1>Test configurations:</h1>\n    <br>\n    <select>\n        <option ng-repeat="tests in configList | orderBy:\'Name\':true">\n             <span>{{tests.Name}}</span>\n        </option>\n    </select>\n\n\n     <!---\n    <div ng-repeat="tests in list | orderBy:\'Name\':true">\n        <span>{{tests.Name}}</span>\n    </div>\n\n\n\n    --->\n\n</div>')
         return ''
     finally:
         context.caller_stack._pop_frame()
