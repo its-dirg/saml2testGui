@@ -33,11 +33,11 @@
 
         var getListSuccessCallback = function (data, status, headers, config) {
             alert('callback');
-            alert(data)
             $scope.list = data;
         };
 
         var errorCallback = function (data, status, headers, config) {
+            alert(data);
             notificationFactory.error(data.ExceptionMessage);
         };
 
