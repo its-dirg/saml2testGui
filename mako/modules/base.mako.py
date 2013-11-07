@@ -4,7 +4,7 @@ UNDEFINED = runtime.UNDEFINED
 __M_dict_builtin = dict
 __M_locals_builtin = locals
 _magic_number = 9
-_modified_time = 1383834505.652213
+_modified_time = 1383834957.174682
 _enable_loop = True
 _template_filename = u'mako/templates/base.mako'
 _template_uri = u'base.mako'
@@ -62,7 +62,7 @@ def render_footer(context,**pageargs):
             return render_footer(context)
         __M_writer = context.writer()
         # SOURCE LINE 17
-        __M_writer(u'\n                \n            ')
+        __M_writer(u'\n\n            ')
         return ''
     finally:
         context.caller_stack._pop_frame()

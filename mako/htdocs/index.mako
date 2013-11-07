@@ -30,7 +30,7 @@ ${helloWorld(a_value)}
 
     <br>
 
-    <div ng-repeat="tests in list | orderBy:'id':true">
+    <div ng-repeat="tests in list | orderBy:'id':true" ng-click="testClick(tests.id);">
         <span>{{tests.id}}</span>
     </div>
 

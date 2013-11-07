@@ -46,16 +46,6 @@
         var getConfigSuccessCallback = function (data, status, headers, config) {
             //alert('getConfigSuccessCallback');
 
-            alert(data[0].Name);
-
-            /*
-            var newdiv = document.createElement("SELECT");
-            var opt = document.createElement("OPTION");
-            opt.appendChild(document.createTextNode("test1"));
-            newdiv.appendChild(opt);
-            document.body.appendChild(newdiv);
-            */
-
             $scope.list = data;
         };
 
@@ -74,6 +64,10 @@
 
         $scope.getConfigFileList = function () {
             return configFactory.getConfig().success(getConfigSuccessCallback).error(errorCallback);
+        };
+
+        $scope.testClick = function (id) {
+            alert(id)
         };
     });
 
