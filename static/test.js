@@ -5,7 +5,7 @@
         return {
             getTests: function () {
                 //alert('getTests');
-                return $http.get("/list")
+                return $http.get("/list");
             }
         };
     });
@@ -14,16 +14,15 @@
         return {
             getConfig: function () {
                // alert('getConfig');
-                return $http.get("/config")
+                return $http.get("/config");
             }
         };
     });
 
     app.factory('runTestFactory', function ($http) {
         return {
-            getTestResult: function () {
-                //alert('runTestFactory');
-                return $http.get("/run_test")
+            getTestResult: function (testname) {
+                return $http.get("/run_test", {params: { "testname": testname }});
             }
         };
     });
@@ -62,16 +61,32 @@
 
         var getTestResultSuccessCallback = function (data, status, headers, config) {
             //alert(data);
-            tests = data['tests'];
-            testIds = []
+            var tests = data['tests'];
+            var testIds = [];
 
-            for (var i =0; i < tests.length; i++){
-                alert(tests[i].name);
+            /*
+            var test1 =new Object();
+            test1.name = "Daniel";
+            test1.status = "1";
+
+            var test2 =new Object();
+            test2.name = "Bert";
+            test2.status = "1";
+
+            var test3 =new Object();
+            test3.name = "Bert";
+            test3.status = "2";
+
+            var testList = [test1, test2, test3];
+            */
+
+            //'[{"status": "1" , "name":"namn1"},{"status": "1" , "name":"namn2"},{"status": "2" , "name":"namn3"}]'
+
+            for (var i = 0; i < tests.length; i++){
+                testIds.push(tests[i].name);
             }
 
-            //alert(testIds);
-
-            $scope.testResult = tests;
+            $scope.testResult = [{"status":1, "name":"namn1"},{"status":1, "name":"namn2"},{"status":2, "name":"namn3"}];
         };
 
         var errorCallback = function (data, status, headers, config) {
@@ -83,11 +98,11 @@
         configFactory.getConfig().success(getConfigSuccessCallback).error(errorCallback);
 
         $scope.testClick = function (id) {
-            alert(id)
+            //alert(id)
         };
 
-        $scope.runTest = function () {
-            return runTestFactory.getTestResult().success(getTestResultSuccessCallback).error(errorCallback);
+        $scope.runTest = function (testname) {
+            return runTestFactory.getTestResult(testname).success(getTestResultSuccessCallback).error(errorCallback);
         };
     });
 

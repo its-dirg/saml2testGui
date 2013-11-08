@@ -14,7 +14,7 @@ class Test:
     IDP_TESTDRV = '/usr/local/bin/idp_testdrv.py'
     CONFIG_FILE_PATH = 'saml2test/configFiles/'
 
-    def __init__(self, environ, start_response, session, logger, lookup, config):
+    def __init__(self, environ, start_response, session, logger, lookup, config, parameters):
         """
         Constructor for the class.
         :param environ:        WSGI enviroment
@@ -28,6 +28,7 @@ class Test:
         self.logger = logger
         self.lookup = lookup
         self.config = config
+        self.parameters = parameters
         self.urls = {
             "" : "index.mako",
             "list" : None,
@@ -79,11 +80,16 @@ class Test:
 
 
     def handleRunTest(self):
-        ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J', 'configFiles/target.json', 'log-in-out'], "./saml2test")
-        if (ok):
-            return self.returnJSON(p_out)
-        else:
-            return self.serviceError("Cannot list the tests.")
+        incommingParameters = self.parameters['testname']
+
+        if self.checkIfParameterIsLeagal(incommingParameters):
+            ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J', 'configFiles/target.json', incommingParameters], "./saml2test")
+            if (ok):
+                return self.returnJSON(p_out)
+            else:
+                return self.serviceError("Cannot run test")
+
+        return self.serviceError("The test is not valid")
 
 
     def checkForNewConfigFiles(self):
@@ -101,6 +107,19 @@ class Test:
                 print filenameNoExtention
             else:
                 print filenameNoExtention + " not specified in server_conf"
+
+
+    def checkIfParameterIsLeagal(self, tmpTest):
+        testToRun = None
+        ok, p_out, p_err = self.runScript([self.IDP_TESTDRV, '-l'])
+        tests = json.loads(p_out)
+        for test in tests:
+            if test["id"] == tmpTest:
+                testToRun = test["id"]
+        if testToRun is None:
+            return False
+        else:
+            return True
 
 
     def returnJSON(self, text):

@@ -5,7 +5,7 @@
 
     <h1>Tests</h1>
 
-    <div ng-repeat="tests in testList | orderBy:'id':true" ng-click="testClick(tests.id);">
+    <div ng-repeat="tests in testList | orderBy:'id':true" ng-click="runTest(tests.id);">
         <span>{{tests.id}}</span>
     </div>
 
@@ -19,9 +19,11 @@
     </select>
     <br>
 
-    <button ng-click="runTest();">Run "log-in-out" test</button>
-
     <h1>Result</h1>
-    <div ng-show="testResult">{{testResult}}</div>
+    <!---
+    <div ng-repeat="t in testResult" | filter: { status: '1' }>{{t.name}}</div>
 
+    Den sorterar inte ut efter status som den ska!!!
+    --->
+    <div ng-repeat="t in testResult" | filter: { status : 1}>{{t}}</div>
 </div>

@@ -34,7 +34,10 @@ def application(environ, start_response):
     session = Session(environ)
 
     http_helper = HttpHandler(environ, start_response, session, logger)
-    test = Test(environ, start_response, session, logger, LOOKUP, config)
+
+    parameters = http_helper.getQueryDict()
+
+    test = Test(environ, start_response, session, logger, LOOKUP, config, parameters)
     path = http_helper.getPath()
 
     http_helper.logRequest()
