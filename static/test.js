@@ -19,6 +19,15 @@
         };
     });
 
+    app.factory('runTestFactory', function ($http) {
+        return {
+            getTestResult: function () {
+                //alert('runTestFactory');
+                return $http.get("/run_test")
+            }
+        };
+    });
+
     app.factory('notificationFactory', function () {
 
         return {
@@ -34,10 +43,11 @@
     });
 
 
-    app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, configFactory) {
+    app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, configFactory, runTestFactory) {
         //alert('controller')
         $scope.testList = [];
         $scope.configList = [];
+        $scope.testResult = "Empty";
 
         var getListSuccessCallback = function (data, status, headers, config) {
             //alert('getListSuccessCallback');
@@ -50,8 +60,22 @@
             $scope.configList = data;
         };
 
+        var getTestResultSuccessCallback = function (data, status, headers, config) {
+            //alert(data);
+            tests = data['tests'];
+            testIds = []
+
+            for (var i =0; i < tests.length; i++){
+                alert(tests[i].name);
+            }
+
+            //alert(testIds);
+
+            $scope.testResult = tests;
+        };
+
         var errorCallback = function (data, status, headers, config) {
-            alert(data);
+            //alert(data);
             notificationFactory.error(data.ExceptionMessage);
         };
 
@@ -60,6 +84,10 @@
 
         $scope.testClick = function (id) {
             alert(id)
+        };
+
+        $scope.runTest = function () {
+            return runTestFactory.getTestResult().success(getTestResultSuccessCallback).error(errorCallback);
         };
     });
 

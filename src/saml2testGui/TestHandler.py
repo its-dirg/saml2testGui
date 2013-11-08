@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import json
 import subprocess
 from saml2.httputil import Response, ServiceError
@@ -10,6 +12,7 @@ __author__ = 'haho0032'
 
 class Test:
     IDP_TESTDRV = '/usr/local/bin/idp_testdrv.py'
+    CONFIG_FILE_PATH = 'saml2test/configFiles/'
 
     def __init__(self, environ, start_response, session, logger, lookup, config):
         """
@@ -74,16 +77,13 @@ class Test:
         configJSONString = json.dumps(self.config.IDPTESTENVIROMENT)
         return self.returnJSON(configJSONString)
 
-    """
-    TIMES UPP CONTINUE HERE!! Börja köra test hårdkodat för att sedan ta in info från web gränssnitt
-    """
+
     def handleRunTest(self):
-        ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J'])
+        ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J', 'configFiles/target.json', 'log-in-out'], "./saml2test")
         if (ok):
-            myJson = p_out #[{'id':'1'}, {'id':'3'}, {'id':'2'}])
+            return self.returnJSON(p_out)
         else:
             return self.serviceError("Cannot list the tests.")
-        return self.returnJSON(myJson)
 
 
     def checkForNewConfigFiles(self):
@@ -92,7 +92,7 @@ class Test:
         for dictionary in self.config.IDPTESTENVIROMENT:
             listedIdpEnviroments.append(dictionary["Name"])
 
-        configPaths = glob.glob("configFiles/*.json")
+        configPaths = glob.glob(self.CONFIG_FILE_PATH + "*.json")
 
         for path in configPaths:
             filename = basename(path)
@@ -114,11 +114,12 @@ class Test:
         return resp(self.environ, self.start_response)
 
 
-    def runScript(self, command):
+    def runScript(self, command, working_directory=None):
         try:
             p = subprocess.Popen(command,
                                  stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE)
+                                 stderr=subprocess.PIPE,
+                                 cwd=working_directory)
             while(True):
                 retcode = p.poll() #returns None while subprocess is running
                 if(retcode is not None):
