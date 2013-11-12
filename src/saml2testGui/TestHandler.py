@@ -66,8 +66,63 @@ class Test:
 
     def handleList(self):
         ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-l'])
+
+        allTests = json.loads(p_out)
+
+        childTestsList = []
+        rootTestsList = []
+
+        for item in allTests:
+            if not ('depend' in item):
+                newDict = self.createNewTestDict(item)
+                rootTestsList.append(newDict)
+            else:
+                childTestsList.append(item)
+
+
+        parentList = rootTestsList
+
+        while len(childTestsList) > 0:
+            newParentTestsList = []
+            newChildTestsList = []
+
+            for item in parentList:
+                for child in childTestsList:
+                    dependId = child['depend']
+
+                    if len(dependId) == 1:
+                        dependId = str(dependId[0])
+                    else:
+                        pass
+                        #Kasta ett fel.
+
+                    if item['id'] == dependId:
+                        newChild = self.createNewTestDict(child)
+                        item["children"].append(newChild)
+                        newParentTestsList.append(newChild)
+
+            for child in childTestsList:
+                convertedChild = self.createNewTestDict(child)
+
+                if not (convertedChild in newParentTestsList):
+                    newChildTestsList.append(child)
+                #else:
+                    #print child
+
+            childTestsList = newChildTestsList
+            parentList = newParentTestsList
+
+        #print rootTestsList
+
+        #for item in sortedList:
+           # print item['id']
+
+        test = [{"id": "Node", "children": []}]
+        test[0]["children"].append({"id": "Node2", "children": []})
+
+
         if (ok):
-            myJson = p_out #[{'id':'1'}, {'id':'3'}, {'id':'2'}])
+            myJson = json.dumps(rootTestsList) #json.dumps([{"id": "Node", "children": [{"id": "Node2","children": [{"id": "Node4","children": []}]}, {"id": "Node3","children": []}]}])
         else:
             return self.serviceError("Cannot list the tests.")
         return self.returnJSON(myJson)
@@ -84,6 +139,7 @@ class Test:
 
         if self.checkIfParameterIsLeagal(incommingParameters):
             ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J', 'configFiles/target.json', incommingParameters], "./saml2test")
+
             if (ok):
                 return self.returnJSON(p_out)
             else:
@@ -91,6 +147,11 @@ class Test:
 
         return self.serviceError("The test is not valid")
 
+    def createNewTestDict(self, item):
+        newDict = {}
+        newDict['id'] = str(item["id"])
+        newDict['children'] = []
+        return newDict
 
     def checkForNewConfigFiles(self):
         listedIdpEnviroments = []
@@ -103,11 +164,13 @@ class Test:
         for path in configPaths:
             filename = basename(path)
             filenameNoExtention = os.path.splitext(filename)[0]
+
+            """
             if (filenameNoExtention in listedIdpEnviroments):
                 print filenameNoExtention
             else:
                 print filenameNoExtention + " not specified in server_conf"
-
+            """
 
     def checkIfParameterIsLeagal(self, tmpTest):
         testToRun = None
