@@ -5,7 +5,7 @@
         return {
             getTests: function () {
                 //alert('getTests');
-                return $http.get("/list");
+                return $http.get("/list", {params: { "bottomUp": "True"}});
             }
         };
     });
@@ -22,7 +22,8 @@
     app.factory('runTestFactory', function ($http) {
         return {
             getTestResult: function (testname) {
-                return $http.get("/run_test", {params: { "testname": testname }});
+                targetFile = $('#targetIdp').val();
+                return $http.get("/run_test", {params: { "testname": testname, "targetFile": targetFile}});
             }
         };
     });
@@ -76,6 +77,7 @@
         configFactory.getConfig().success(getConfigSuccessCallback).error(errorCallback);
 
         $scope.runTest = function (testname) {
+            //alert(testname);
             return runTestFactory.getTestResult(testname).success(getTestResultSuccessCallback).error(errorCallback);
         };
     });

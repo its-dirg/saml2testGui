@@ -65,68 +65,27 @@ class Test:
 
 
     def handleList(self):
+        #Gör en knapp som ändrar synen på trädet
+        showBottomUp = self.parameters['bottomUp']
+
         ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-l'])
 
         allTests = json.loads(p_out)
 
-        childTestsList = []
-        rootTestsList = []
+        childTestsList, rootTestsList = self.identifyRootTests(allTests)
 
-        for item in allTests:
-            if not ('depend' in item):
-                newDict = self.createNewTestDict(item)
-                rootTestsList.append(newDict)
-            else:
-                childTestsList.append(item)
+        if showBottomUp == True:
+            tree = self.insertRemaningChildTestsBottomUp(childTestsList, rootTestsList)
+        else:
+            tree = self.insertRemaningChildTestsTopdown(childTestsList, rootTestsList)
 
-
-        parentList = rootTestsList
-
-        while len(childTestsList) > 0:
-            newParentTestsList = []
-            newChildTestsList = []
-
-            for item in parentList:
-                for child in childTestsList:
-                    dependId = child['depend']
-
-                    if len(dependId) == 1:
-                        dependId = str(dependId[0])
-                    else:
-                        pass
-                        #Kasta ett fel.
-
-                    if item['id'] == dependId:
-                        newChild = self.createNewTestDict(child)
-                        item["children"].append(newChild)
-                        newParentTestsList.append(newChild)
-
-            for child in childTestsList:
-                convertedChild = self.createNewTestDict(child)
-
-                if not (convertedChild in newParentTestsList):
-                    newChildTestsList.append(child)
-                #else:
-                    #print child
-
-            childTestsList = newChildTestsList
-            parentList = newParentTestsList
-
-        #print rootTestsList
-
-        #for item in sortedList:
-           # print item['id']
-
-        test = [{"id": "Node", "children": []}]
-        test[0]["children"].append({"id": "Node2", "children": []})
 
 
         if (ok):
-            myJson = json.dumps(rootTestsList) #json.dumps([{"id": "Node", "children": [{"id": "Node2","children": [{"id": "Node4","children": []}]}, {"id": "Node3","children": []}]}])
+            myJson = json.dumps(tree) #json.dumps([{"id": "Node", "children": [{"id": "Node2","children": [{"id": "Node4","children": []}]}, {"id": "Node3","children": []}]}])
         else:
             return self.serviceError("Cannot list the tests.")
         return self.returnJSON(myJson)
-
 
     def handleConfigFiles(self):
         self.checkForNewConfigFiles()
@@ -135,10 +94,12 @@ class Test:
 
 
     def handleRunTest(self):
-        incommingParameters = self.parameters['testname']
+        testToRun = self.parameters['testname']
+        targetFile = self.parameters['targetFile']
+        targetFile = targetFile.strip(' \n\t')
 
-        if self.checkIfParameterIsLeagal(incommingParameters):
-            ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J', 'configFiles/target.json', incommingParameters], "./saml2test")
+        if self.checkIfParamentersAreValid(targetFile, testToRun):
+            ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J', 'configFiles/'+ targetFile + '.json', testToRun], "./saml2test")
 
             if (ok):
                 return self.returnJSON(p_out)
@@ -153,11 +114,92 @@ class Test:
         newDict['children'] = []
         return newDict
 
-    def checkForNewConfigFiles(self):
-        listedIdpEnviroments = []
 
+    def identifyRootTests(self, allTests):
+        childTestsList = []
+        rootTestsList = []
+        for item in allTests:
+            if not ('depend' in item):
+                newDict = self.createNewTestDict(item)
+                rootTestsList.append(newDict)
+            else:
+                childTestsList.append(item)
+        return childTestsList, rootTestsList
+
+
+    def insertRemaningChildTestsBottomUp(self, childTestsList, leafTestList):
+        tree = []
+
+        while len(leafTestList) > 0:
+            newleafTestsList = []
+            newChildTestsList = []
+            leafsToRemove = []
+
+            for leaf in leafTestList:
+                for child in childTestsList:
+                    dependList = child['depend']
+
+                    for depend in dependList:
+                        depend = str(depend)
+
+                        if leaf['id'] == depend:
+                            newChild = self.createNewTestDict(child)
+                            newChild["children"].append(leaf)
+                            newleafTestsList.append(newChild)
+                            leafsToRemove.append(leaf)
+
+            for leaf in leafTestList:
+                if not (leaf in leafsToRemove):
+                    tree.append(leaf)
+
+            leafTestList = newleafTestsList
+
+        return tree
+
+
+
+
+    def insertRemaningChildTestsTopdown(self, childTestsList, parentList):
+        tree = parentList #Tree will be correct since it working on pointers.
+        while len(childTestsList) > 0:
+            newParentTestsList = []
+            newChildTestsList = []
+
+            for parent in parentList:
+                for child in childTestsList:
+                    dependId = child['depend']
+
+                    if len(dependId) == 1:
+                        dependId = str(dependId[0])
+                    else:
+                        pass
+                        #Kasta ett fel.
+
+                    if parent['id'] == dependId:
+                        newChild = self.createNewTestDict(child)
+                        parent["children"].append(newChild)
+                        newParentTestsList.append(newChild)
+
+            for child in childTestsList:
+                convertedChild = self.createNewTestDict(child)
+
+                if not (convertedChild in newParentTestsList):
+                    newChildTestsList.append(child)
+                    #else:
+                    #print child
+
+            childTestsList = newChildTestsList
+            parentList = newParentTestsList
+        return tree
+
+    def getListedIdpEnviroments(self):
+        listedIdpEnviroments = []
         for dictionary in self.config.IDPTESTENVIROMENT:
             listedIdpEnviroments.append(dictionary["Name"])
+        return listedIdpEnviroments
+
+    def checkForNewConfigFiles(self):
+        listedIdpEnviroments = self.getListedIdpEnviroments()
 
         configPaths = glob.glob(self.CONFIG_FILE_PATH + "*.json")
 
@@ -172,7 +214,16 @@ class Test:
                 print filenameNoExtention + " not specified in server_conf"
             """
 
-    def checkIfParameterIsLeagal(self, tmpTest):
+
+    def checkIfParamentersAreValid(self, targetFile, testToRun):
+        listedIdpEnviroments = self.getListedIdpEnviroments();
+
+        if targetFile in listedIdpEnviroments:
+            if self.checkIfIncommingTestIsLeagal(testToRun):
+                return True
+
+
+    def checkIfIncommingTestIsLeagal(self, tmpTest):
         testToRun = None
         ok, p_out, p_err = self.runScript([self.IDP_TESTDRV, '-l'])
         tests = json.loads(p_out)

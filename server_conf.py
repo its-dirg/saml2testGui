@@ -37,7 +37,7 @@ CONFIGFILES="configFiles"
 
 IDPTESTENVIROMENT = [
     {
-        "Name": "target 2",
+        "Name": "target2",
         "Description" : "Local IdP"
     },
     {
