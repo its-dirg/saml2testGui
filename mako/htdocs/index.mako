@@ -3,60 +3,55 @@
 
 <div ng-controller="IndexCtrl" >
     <div class="container">
-        <div class="row">
+        <div id="formContainer" class="jumbotron">
 
-            <div class="jumbotron">
+            Tree layout:
+            <br>
+            <select ng-model="selectedItem"
+                ng-options="item.type for item in items" ng-change="updateTree();">
+            </select>
 
-                <!---
-                <table class="table table-hover">
-                    <tr>
-                        <th>Test</th>
-                        <th>Status</th>
-                        <th>Run test</th>
-                    </tr>
+            <br>
 
-                    <tr>
-                        <td  ng-click="click();">row 1, cell 1</td>
-                        <td>row 1, cell 2</td>
-                        <td><button>tests</button></td>
-                    </tr>
+            Available configurations:
+            <select id="targetIdp">
+                <option ng-repeat="tests in configList | orderBy:'Name':true">
+                     {{tests.Name}}
+                </option>
+            </select>
+            <br>
 
-                    <tr>
-                        <td>row 2, cell 1</td>
-                        <td>row 2, cell 2</td>
-                        <td><button>tests</button></td>
-                    </tr>
 
-                    <tr>
-                        <td>row 3, cell 1</td>
-                        <td>row 3, cell 2</td>
-                        <td><button>tests</button></td>
-                    </tr>
-                </table>
-                --->
 
-                <h1>Tests </h1>
-                    <!--- Start starting point for tree containing all tests --->
-                    <ul>
-                        <li ng-repeat="data in tree" ng-include="'tree_item_renderer.html'">
-                        </li>
-                    </ul>
 
-                    <h1>Test configurations:</h1>
-                    <br>
-                    <select id="targetIdp">
-                        <option ng-repeat="tests in configList | orderBy:'Name':true">
-                             {{tests.Name}}
-                        </option>
-                    </select>
-                    <br>
+            <!--- Start starting point for tree containing all tests --->
 
-                    <h1>Result</h1>
-
-                    <div ng-show="testResult">{{testResult}}</div>
-
-                </div>
+            <div class="col-lg-6">
+                Test
             </div>
+
+            <div class="col-lg-6" id="block">
+                <span style="display: inline" id="status">
+                Status
+                </span>
+
+                <span>
+                Button
+                </span>
+            </div>
+
+            <ul>
+                <li ng-repeat="data in tree" ng-include="'tree_item_renderer.html'">
+                </li>
+            </ul>
+
+
+
+
+            Result:
+            <div ng-show="testResult">{{testResult}}</div>
+
+
         </div>
     </div>
 
@@ -68,8 +63,20 @@
 <script type="text/ng-template"  id="tree_item_renderer.html">
 
     <!--- The element in which the test info is stored --->
-    <div ng-click="runTest(data.id);">{{data.id}}</div>
+    <div class="row">
+        <div class="col-lg-6">
+            {{data.id}}
+        </div>
 
+        <div class="col-lg-6" id="block">
+                <span style="display: inline" id="status">
+                Status
+                </span>
+
+                <button type="button" class="btn btn-primary btn-sm" ng-click="runTest(data.id);">Run test</button>
+
+        </div>
+    </div>
     <ul>
         <li ng-repeat="data in data.children" ng-include="'tree_item_renderer.html'">
         </li>

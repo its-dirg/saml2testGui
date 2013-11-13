@@ -3,9 +3,9 @@
 
     app.factory('testFactory', function ($http) {
         return {
-            getTests: function () {
-                //alert('getTests');
-                return $http.get("/list", {params: { "bottomUp": "True"}});
+            getTests: function (treeType) {
+                //alert("getTests");
+                return $http.get("/list", {params: { "treeType": treeType}});
             }
         };
     });
@@ -47,8 +47,14 @@
         //alert('controller')
         $scope.configList = [];
         $scope.testResult = "Empty";
-
         $scope.tree = "Nothing";
+
+        $scope.items = [
+            { type: 'Top down' },
+            { type: 'Bottom up' }
+        ];
+
+        $scope.selectedItem = $scope.items[0];
 
         var getListSuccessCallback = function (data, status, headers, config) {
             //alert('getListSuccessCallback');
@@ -73,7 +79,7 @@
             notificationFactory.error(data.ExceptionMessage);
         };
 
-        testFactory.getTests().success(getListSuccessCallback).error(errorCallback);
+        testFactory.getTests($scope.selectedItem.type).success(getListSuccessCallback).error(errorCallback);
         configFactory.getConfig().success(getConfigSuccessCallback).error(errorCallback);
 
         $scope.runTest = function (testname) {
@@ -81,9 +87,10 @@
             return runTestFactory.getTestResult(testname).success(getTestResultSuccessCallback).error(errorCallback);
         };
 
-        $scope.click = function () {
-            alert("click");
+        $scope.updateTree = function () {
+            testFactory.getTests($scope.selectedItem.type).success(getListSuccessCallback).error(errorCallback);
         }
+
     });
 
 

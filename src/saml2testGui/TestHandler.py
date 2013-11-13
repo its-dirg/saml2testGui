@@ -66,7 +66,7 @@ class Test:
 
     def handleList(self):
         #Gör en knapp som ändrar synen på trädet
-        showBottomUp = self.parameters['bottomUp']
+        showBottomUp = self.parameters['treeType']
 
         ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-l'])
 
@@ -74,10 +74,10 @@ class Test:
 
         childTestsList, rootTestsList = self.identifyRootTests(allTests)
 
-        if showBottomUp == True:
-            tree = self.insertRemaningChildTestsBottomUp(childTestsList, rootTestsList)
-        else:
+        if showBottomUp == "Top down":
             tree = self.insertRemaningChildTestsTopdown(childTestsList, rootTestsList)
+        elif showBottomUp =="Bottom up" :
+            tree = self.insertRemaningChildTestsBottomUp(childTestsList, rootTestsList)
 
 
 
