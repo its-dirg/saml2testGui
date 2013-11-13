@@ -74,12 +74,14 @@ class Test:
 
         childTestsList, rootTestsList = self.identifyRootTests(allTests)
 
+        """
         if showBottomUp == "Top down":
             tree = self.insertRemaningChildTestsTopdown(childTestsList, rootTestsList)
         elif showBottomUp =="Bottom up" :
             tree = self.insertRemaningChildTestsBottomUp(childTestsList, rootTestsList)
+        """
 
-
+        tree = [{'id': 'verify', 'level': 'level1', 'children': [{'id': 'authn', 'level': 'level2', 'children': [{'id': 'authn-post', 'level': 'level3', 'children': [{'id': 'authn-post-transient', 'level': 'level4', 'children': []}]}]}]}, {'id': 'ecp_authn', 'level': 'level1' , 'children': []}]
 
         if (ok):
             myJson = json.dumps(tree) #json.dumps([{"id": "Node", "children": [{"id": "Node2","children": [{"id": "Node4","children": []}]}, {"id": "Node3","children": []}]}])
@@ -161,6 +163,7 @@ class Test:
 
     def insertRemaningChildTestsTopdown(self, childTestsList, parentList):
         tree = parentList #Tree will be correct since it working on pointers.
+
         while len(childTestsList) > 0:
             newParentTestsList = []
             newChildTestsList = []

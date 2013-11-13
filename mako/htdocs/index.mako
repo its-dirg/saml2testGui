@@ -40,13 +40,9 @@
                 </span>
             </div>
 
-            <ul>
-                <li ng-repeat="data in tree" ng-include="'tree_item_renderer.html'">
-                </li>
-            </ul>
 
-
-
+            <div ng-repeat="data in tree" ng-include="'tree_item_renderer.html'" id="{{data.level}}">
+            </div>
 
             Result:
             <div ng-show="testResult">{{testResult}}</div>
@@ -61,6 +57,7 @@
 
 <!--- Script used to actually generate the tree containing the tests  --->
 <script type="text/ng-template"  id="tree_item_renderer.html">
+
 
     <!--- The element in which the test info is stored --->
     <div class="row">
@@ -77,10 +74,10 @@
 
         </div>
     </div>
-    <ul>
-        <li ng-repeat="data in data.children" ng-include="'tree_item_renderer.html'">
-        </li>
-    </ul>
+
+    <div ng-repeat="data in data.children" ng-include="'tree_item_renderer.html'" id="{{data.level}}">
+    </div>
+
 </script>
 
 

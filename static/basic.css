@@ -4,6 +4,7 @@ ul {
     margin: 0;
     padding: 0;
 }
+
 li {
     margin-left: 20px;
     font-size: 16px;
@@ -44,4 +45,8 @@ body {
 
 #status{
     padding-right:200px;
+}
+
+#level1, #level2, #level3, #level4 {
+    padding-left:30px;
 }
