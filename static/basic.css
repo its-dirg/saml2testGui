@@ -1,3 +1,7 @@
+body {
+    background-image:url('background.png');
+}
+
 ul {
     list-style: None;
     margin: 0;
@@ -9,5 +13,24 @@ li {
 }
 
 li:hover {
-    color: #FF0000;
+    color: #FFFFFF;
+}
+
+
+.jumbotron {
+    padding: 30px;
+    margin-bottom: 30px;
+    font-size: 21px;
+    font-weight: 200;
+    line-height: 2.1428571435;
+    color: #cfcfcf;
+
+    background-color: #000000;
+    opacity:0.95;
+    filter:alpha(opacity=95); /* For IE8 and earlier */
+}
+
+table-hover > tbody > tr:hover > td,
+table-hover > tbody > tr:hover > th {
+  background-color: #333333;
 }

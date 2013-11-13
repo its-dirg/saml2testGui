@@ -80,6 +80,10 @@
             //alert(testname);
             return runTestFactory.getTestResult(testname).success(getTestResultSuccessCallback).error(errorCallback);
         };
+
+        $scope.click = function () {
+            alert("click");
+        }
     });
 
 
