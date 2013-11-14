@@ -81,7 +81,9 @@ class Test:
             tree = self.insertRemaningChildTestsBottomUp(childTestsList, rootTestsList)
         """
 
-        tree = [{'id': 'verify', 'level': 'level1', 'children': [{'id': 'authn', 'level': 'level2', 'children': [{'id': 'authn-post', 'level': 'level3', 'children': [{'id': 'authn-post-transient', 'level': 'level4', 'children': []}]}]}]}, {'id': 'ecp_authn', 'level': 'level1' , 'children': []}]
+        tree =  self.insertRemaningChildTestsTopdown(childTestsList, rootTestsList)
+
+        #tree = [{'id': 'verify', 'level': '1', 'children': [{'id': 'authn', 'level': '2', 'children': [{'id': 'authn-post', 'level': '3', 'children': [{'id': 'authn-post-transient', 'level': '4', 'children': []}]}]}]}, {'id': 'ecp_authn', 'level': '1' , 'children': []}]
 
         if (ok):
             myJson = json.dumps(tree) #json.dumps([{"id": "Node", "children": [{"id": "Node2","children": [{"id": "Node4","children": []}]}, {"id": "Node3","children": []}]}])
@@ -110,10 +112,11 @@ class Test:
 
         return self.serviceError("The test is not valid")
 
-    def createNewTestDict(self, item):
+    def createNewTestDict(self, item, level=1):
         newDict = {}
         newDict['id'] = str(item["id"])
         newDict['children'] = []
+        newDict['level'] = level
         return newDict
 
 
@@ -128,7 +131,9 @@ class Test:
                 childTestsList.append(item)
         return childTestsList, rootTestsList
 
-
+    """
+    Fungerar inte än eftersom att den inte lägger in levels på rätt sätt
+    """
     def insertRemaningChildTestsBottomUp(self, childTestsList, leafTestList):
         tree = []
 
@@ -179,17 +184,17 @@ class Test:
                         #Kasta ett fel.
 
                     if parent['id'] == dependId:
-                        newChild = self.createNewTestDict(child)
+                        childLevel = parent["level"] + 1
+                        newChild = self.createNewTestDict(child, childLevel)
                         parent["children"].append(newChild)
                         newParentTestsList.append(newChild)
 
             for child in childTestsList:
-                convertedChild = self.createNewTestDict(child)
+                for newParent in newParentTestsList:
+                    if not (child['id'] == newParent['id']):
+                        if not (child in newChildTestsList):
+                            newChildTestsList.append(child)
 
-                if not (convertedChild in newParentTestsList):
-                    newChildTestsList.append(child)
-                    #else:
-                    #print child
 
             childTestsList = newChildTestsList
             parentList = newParentTestsList

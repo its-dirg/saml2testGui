@@ -11,11 +11,6 @@ li {
     color: #AAAAAA
 }
 
-li:hover {
-    color: #FFFFFF;
-}
-
-
 body {
     background-image:url('background.png');
 }
@@ -29,24 +24,44 @@ body {
     color: #cfcfcf;
 
     background-color: #000000;
-    opacity:0.95;
-    filter:alpha(opacity=95); /* For IE8 and earlier */
+    opacity:0.80;
+    filter:alpha(opacity=80); /* For IE8 and earlier */
 
-}
-
-.col-lg-3 {
-    width: 25%;
-    text-align:right;
 }
 
 #block{
-    text-align:right;
+    margin-left:auto;
+    margin-right:0px;
 }
 
 #status{
     padding-right:200px;
 }
 
-#level1, #level2, #level3, #level4 {
-    padding-left:30px;
+.row{
+    font-size: 17px;
+}
+
+#level1{
+    padding-left:50px;
+}
+
+#level2{
+    padding-left:100px;
+}
+
+#level3{
+    padding-left:150px;
+}
+
+#level4 {
+    padding-left:200px;
+}
+
+#test {
+    font-size: 17px;
+}
+
+.row:hover {
+    color: #FFFFFF;
 }

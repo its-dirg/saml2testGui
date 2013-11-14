@@ -22,10 +22,6 @@
             <br>
 
 
-
-
-            <!--- Start starting point for tree containing all tests --->
-
             <div class="col-lg-6">
                 Test
             </div>
@@ -40,8 +36,8 @@
                 </span>
             </div>
 
-
-            <div ng-repeat="data in tree" ng-include="'tree_item_renderer.html'" id="{{data.level}}">
+            <!--- Start starting point for tree containing all tests --->
+            <div ng-repeat="data in tree" class="row" ng-include="'tree_item_renderer.html'">
             </div>
 
             Result:
@@ -60,22 +56,19 @@
 
 
     <!--- The element in which the test info is stored --->
-    <div class="row">
-        <div class="col-lg-6">
-            {{data.id}}
-        </div>
-
-        <div class="col-lg-6" id="block">
-                <span style="display: inline" id="status">
-                Status
-                </span>
-
-                <button type="button" class="btn btn-primary btn-sm" ng-click="runTest(data.id);">Run test</button>
-
-        </div>
+    <div class="col-lg-6" id="level{{data.level}}">
+        {{data.id}}
     </div>
 
-    <div ng-repeat="data in data.children" ng-include="'tree_item_renderer.html'" id="{{data.level}}">
+    <div class="col-lg-6" id="block">
+        <span style="display: inline" id="status">
+            Status
+        </span>
+
+        <button type="button" class="btn btn-primary btn-sm" ng-click="runTest(data.id);">Run test</button>
+    </div>
+
+    <div ng-repeat="data in data.children" class="row" ng-include="'tree_item_renderer.html'">
     </div>
 
 </script>
