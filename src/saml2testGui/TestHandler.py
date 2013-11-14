@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import cgi
 
 import json
 import subprocess
@@ -7,7 +8,7 @@ from saml2.httputil import Response, ServiceError
 import glob
 from os.path import basename
 import os
-
+from urllib import quote
 __author__ = 'haho0032'
 
 class Test:
@@ -106,7 +107,11 @@ class Test:
             ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J', 'configFiles/'+ targetFile + '.json', testToRun], "./saml2test")
 
             if (ok):
-                return self.returnJSON(p_out)
+                response = {
+                    "result" : json.loads(p_out),
+                    "errorlog" : cgi.escape(p_err)
+                }
+                return self.returnJSON(json.dumps(response))
             else:
                 return self.serviceError("Cannot run test")
 
@@ -175,15 +180,15 @@ class Test:
 
             for parent in parentList:
                 for child in childTestsList:
-                    dependId = child['depend']
+                    parentID = child['depend']
 
-                    if len(dependId) == 1:
-                        dependId = str(dependId[0])
+                    if len(parentID) == 1:
+                        parentID = str(parentID[0])
                     else:
                         pass
                         #Kasta ett fel.
 
-                    if parent['id'] == dependId:
+                    if parent['id'] == parentID:
                         childLevel = parent["level"] + 1
                         newChild = self.createNewTestDict(child, childLevel)
                         parent["children"].append(newChild)

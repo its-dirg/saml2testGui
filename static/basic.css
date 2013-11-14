@@ -1,16 +1,4 @@
 
-ul {
-    list-style: None;
-    margin: 0;
-    padding: 0;
-}
-
-li {
-    margin-left: 20px;
-    font-size: 16px;
-    color: #AAAAAA
-}
-
 body {
     background-image:url('background.png');
 }
@@ -34,34 +22,35 @@ body {
     margin-right:0px;
 }
 
+#runTestButton{
+
+}
+
 #status{
-    padding-right:200px;
+
 }
 
 .row{
     font-size: 17px;
 }
 
-#level1{
-    padding-left:50px;
-}
-
-#level2{
-    padding-left:100px;
-}
-
-#level3{
-    padding-left:150px;
-}
-
-#level4 {
-    padding-left:200px;
-}
-
-#test {
-    font-size: 17px;
-}
-
 .row:hover {
     color: #FFFFFF;
 }
+
+#level1{
+    padding-left:0px;
+}
+
+#level2{
+    padding-left:30px;
+}
+
+#level3{
+    padding-left:60px;
+}
+
+#level4 {
+    padding-left:90px;
+}
+
