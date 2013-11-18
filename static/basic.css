@@ -1,6 +1,6 @@
 
 body {
-    background-image:url('background.png');
+    background-image:url('pitures/background.png');
 }
 
 .jumbotron {
@@ -9,12 +9,19 @@ body {
     font-size: 21px;
     font-weight: 200;
     line-height: 2.1428571435;
-    color: #cfcfcf;
+    color: #000000;
 
-    background-color: #000000;
-    opacity:0.80;
-    filter:alpha(opacity=80); /* For IE8 and earlier */
+    background-color: #eeeeee;
+    opacity:1.00;
+    filter:alpha(opacity=100); /* For IE8 and earlier */
 
+}
+
+.container .jumbotron {
+    padding-right: 0px;
+    padding-left: 0px;
+    border:2px solid;
+    border-color:#CFCFCF;
 }
 
 #block{
@@ -22,20 +29,19 @@ body {
     margin-right:0px;
 }
 
-#runTestButton{
-
-}
-
-#status{
-
+#testHeadline{
+    background-color: #CFCFCF;
 }
 
 .row{
     font-size: 17px;
+    background-color: #ffffff;
+    margin-left: 0px;
+    margin-right: 0px;
 }
 
 .row:hover {
-    color: #FFFFFF;
+    background-color: #D4EDF3;
 }
 
 #level1{

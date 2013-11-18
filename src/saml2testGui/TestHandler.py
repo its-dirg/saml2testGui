@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import cgi
+import copy
 
 import json
 import subprocess
@@ -8,6 +9,7 @@ from saml2.httputil import Response, ServiceError
 import glob
 from os.path import basename
 import os
+import uuid
 from urllib import quote
 __author__ = 'haho0032'
 
@@ -75,19 +77,22 @@ class Test:
 
         childTestsList, rootTestsList = self.identifyRootTests(allTests)
 
-        """
+
         if showBottomUp == "Top down":
             tree = self.insertRemaningChildTestsTopdown(childTestsList, rootTestsList)
-        elif showBottomUp =="Bottom up" :
+        elif showBottomUp =="Bottom up" or showBottomUp == "Bottom up flat":
             tree = self.insertRemaningChildTestsBottomUp(childTestsList, rootTestsList)
-        """
 
-        tree =  self.insertRemaningChildTestsTopdown(childTestsList, rootTestsList)
+        self.setupTestId(tree)
 
+        result = {
+            "treeType": showBottomUp,
+            "tree": tree
+        }
         #tree = [{'id': 'verify', 'level': '1', 'children': [{'id': 'authn', 'level': '2', 'children': [{'id': 'authn-post', 'level': '3', 'children': [{'id': 'authn-post-transient', 'level': '4', 'children': []}]}]}]}, {'id': 'ecp_authn', 'level': '1' , 'children': []}]
 
         if (ok):
-            myJson = json.dumps(tree) #json.dumps([{"id": "Node", "children": [{"id": "Node2","children": [{"id": "Node4","children": []}]}, {"id": "Node3","children": []}]}])
+            myJson = json.dumps(result) #json.dumps([{"id": "Node", "children": [{"id": "Node2","children": [{"id": "Node4","children": []}]}, {"id": "Node3","children": []}]}])
         else:
             return self.serviceError("Cannot list the tests.")
         return self.returnJSON(myJson)
@@ -101,6 +106,8 @@ class Test:
     def handleRunTest(self):
         testToRun = self.parameters['testname']
         targetFile = self.parameters['targetFile']
+        testid = self.parameters['testid']
+
         targetFile = targetFile.strip(' \n\t')
 
         if self.checkIfParamentersAreValid(targetFile, testToRun):
@@ -108,8 +115,9 @@ class Test:
 
             if (ok):
                 response = {
-                    "result" : json.loads(p_out),
-                    "errorlog" : cgi.escape(p_err)
+                    "result": json.loads(p_out),
+                    "errorlog": cgi.escape(p_err),
+                    "testid": testid
                 }
                 return self.returnJSON(json.dumps(response))
             else:
@@ -122,6 +130,7 @@ class Test:
         newDict['id'] = str(item["id"])
         newDict['children'] = []
         newDict['level'] = level
+        newDict['testid'] = ""
         return newDict
 
 
@@ -136,27 +145,34 @@ class Test:
                 childTestsList.append(item)
         return childTestsList, rootTestsList
 
-    """
-    Fungerar inte än eftersom att den inte lägger in levels på rätt sätt
-    """
+    def setupTestId(self, tree, visible=True):
+        for element in tree:
+            element["visible"] = visible
+            element["testid"] = uuid.uuid4().urn
+            if element["children"] is not None and len(element["children"])>0:
+                self.setupTestId(element["children"], False)
+
     def insertRemaningChildTestsBottomUp(self, childTestsList, leafTestList):
         tree = []
 
         while len(leafTestList) > 0:
             newleafTestsList = []
-            newChildTestsList = []
             leafsToRemove = []
 
             for leaf in leafTestList:
                 for child in childTestsList:
-                    dependList = child['depend']
+                    parentList = child['depend']
 
-                    for depend in dependList:
-                        depend = str(depend)
+                    for parent in parentList:
+                        parent = str(parent)
 
-                        if leaf['id'] == depend:
+                        if leaf['id'] == parent:
                             newChild = self.createNewTestDict(child)
-                            newChild["children"].append(leaf)
+                            newChild["children"].append(copy.deepcopy(leaf))
+                            newChild["hasChildren"] = True
+                            #Gå igenom alla barn och uppdatera deras level med 1
+                            self.updateChildrensLevel(newChild);
+
                             newleafTestsList.append(newChild)
                             leafsToRemove.append(leaf)
 
@@ -167,6 +183,13 @@ class Test:
             leafTestList = newleafTestsList
 
         return tree
+
+
+    def updateChildrensLevel(self, child):
+        childrenList = child['children']
+        for unvisitedChild in childrenList:
+            unvisitedChild['level'] = child['level'] + 1
+            self.updateChildrensLevel(unvisitedChild)
 
 
 
@@ -192,6 +215,7 @@ class Test:
                         childLevel = parent["level"] + 1
                         newChild = self.createNewTestDict(child, childLevel)
                         parent["children"].append(newChild)
+                        parent["hasChildren"] = True
                         newParentTestsList.append(newChild)
 
             for child in childTestsList:
