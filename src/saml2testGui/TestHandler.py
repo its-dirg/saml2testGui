@@ -78,18 +78,24 @@ class Test:
         childTestsList, rootTestsList = self.identifyRootTests(allTests)
 
 
-        if showBottomUp == "Top down":
-            tree = self.insertRemaningChildTestsTopdown(childTestsList, rootTestsList)
-        elif showBottomUp =="Bottom up" or showBottomUp == "Bottom up flat":
-            tree = self.insertRemaningChildTestsBottomUp(childTestsList, rootTestsList)
+        topDownChildList = copy.deepcopy(childTestsList)
+        topDownRootList = copy.deepcopy(rootTestsList)
 
-        self.setupTestId(tree)
+        topDownTree = self.insertRemaningChildTestsTopdown(topDownChildList, topDownRootList)
+        bottomUpTree = self.insertRemaningChildTestsBottomUp(childTestsList, rootTestsList)
+
+        self.setupTestId(topDownTree)
+        self.setupTestId(bottomUpTree)
+
+        flatBottomUpTree = self.convertToFlatBottomTree(bottomUpTree)
 
         result = {
-            "treeType": showBottomUp,
-            "tree": tree
+            "topDownTree": topDownTree,
+            "bottomUpTree": bottomUpTree,
+            "flatBottomUpTree": flatBottomUpTree
         }
-        #tree = [{'id': 'verify', 'level': '1', 'children': [{'id': 'authn', 'level': '2', 'children': [{'id': 'authn-post', 'level': '3', 'children': [{'id': 'authn-post-transient', 'level': '4', 'children': []}]}]}]}, {'id': 'ecp_authn', 'level': '1' , 'children': []}]
+
+        #currentFlattenedTree = [{'id': 'verify', 'level': '1', 'children': [{'id': 'authn', 'level': '2', 'children': [{'id': 'authn-post', 'level': '3', 'children': [{'id': 'authn-post-transient', 'level': '4', 'children': []}]}]}]}, {'id': 'ecp_authn', 'level': '1' , 'children': []}]
 
         if (ok):
             myJson = json.dumps(result) #json.dumps([{"id": "Node", "children": [{"id": "Node2","children": [{"id": "Node4","children": []}]}, {"id": "Node3","children": []}]}])
@@ -113,6 +119,8 @@ class Test:
         if self.checkIfParamentersAreValid(targetFile, testToRun):
             ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J', 'configFiles/'+ targetFile + '.json', testToRun], "./saml2test")
 
+            #self.formatOutput(p_out)
+
             if (ok):
                 response = {
                     "result": json.loads(p_out),
@@ -124,6 +132,14 @@ class Test:
                 return self.serviceError("Cannot run test")
 
         return self.serviceError("The test is not valid")
+
+    #def formatOutput(self, p_out):
+        #print (p_out[0])
+        #returnValue = ""
+        #for test in p_out:
+           #print test.status
+
+
 
     def createNewTestDict(self, item, level=1):
         newDict = {}
@@ -145,12 +161,14 @@ class Test:
                 childTestsList.append(item)
         return childTestsList, rootTestsList
 
+
     def setupTestId(self, tree, visible=True):
         for element in tree:
             element["visible"] = visible
             element["testid"] = uuid.uuid4().urn
             if element["children"] is not None and len(element["children"])>0:
                 self.setupTestId(element["children"], False)
+
 
     def insertRemaningChildTestsBottomUp(self, childTestsList, leafTestList):
         tree = []
@@ -191,7 +209,44 @@ class Test:
             unvisitedChild['level'] = child['level'] + 1
             self.updateChildrensLevel(unvisitedChild)
 
+    def convertToFlatBottomTree(self, bottomUpTree):
+        flatBottomUpTree = []
+        for rootTest in bottomUpTree:
+            newTest = copy.deepcopy(rootTest)
+            children = self.getChildren(newTest)
+            newTest['children'] = children
+            flatBottomUpTree.append(newTest)
+        return flatBottomUpTree
 
+    def getChildren(self, child):
+        childrenToVisitList = child['children']
+        allChildren = []
+
+        while len(childrenToVisitList) > 0:
+            newChildrenToVisitList = []
+            for childToVisit in childrenToVisitList:
+                grandchildren = childToVisit['children']
+                for grandChild in grandchildren:
+                    newChildrenToVisitList.append(grandChild)
+                childToVisit['children'] = []
+                childToVisit['hasChildren'] = False
+                childToVisit['level'] = 2
+                allChildren.insert(0, childToVisit)
+
+            childrenToVisitList = newChildrenToVisitList
+        return allChildren
+
+
+
+
+    def updateChildrensLevelFlat(self, child):
+        childrenList = child['children']
+        for unvisitedChild in childrenList:
+            if (child['level'] + 1) > 2:
+                unvisitedChild['level'] = 2;
+            else:
+                unvisitedChild['level'] = child['level'] + 1
+            self.updateChildrensLevel(unvisitedChild)
 
 
     def insertRemaningChildTestsTopdown(self, childTestsList, parentList):

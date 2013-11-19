@@ -48,9 +48,16 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     //alert('controller')
     $scope.configList = [];
     $scope.testResult = "";
-    $scope.tree = "None";
-    $scope.originalTree;
+    $scope.currentFlattenedTree = "None";
+    $scope.currentOriginalTree;
+
+    $scope.topDownTree;
+    $scope.bottomUpTree;
+    $scope.flatBottomUpTree;
+
     var testIsOpen = [];
+
+
 
     $scope.items = [
         { type: 'Top down' },
@@ -62,22 +69,15 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
     var getListSuccessCallback = function (data, status, headers, config) {
         //alert('getListSuccessCallback');
-        treeType = data["treeType"]
+        $scope.topDownTree = data["topDownTree"];
+        $scope.bottomUpTree = data["bottomUpTree"];
+        $scope.flatBottomUpTree = data["flatBottomUpTree"];
 
-        $scope.originalTree = data["tree"];
-
-        if (treeType == "Bottom up flat"){
-            $scope.tree = buildTreeFlatBottomUp(data["tree"]);
-        }else if(treeType == "Bottom up"){
-            $scope.tree = buildTree(data["tree"]);
-        }else if(treeType == "Top down"){
-            $scope.tree = buildTree(data["tree"]);
-        }
+        changeCurrentTree($scope.selectedItem.type);
     };
 
     var getConfigSuccessCallback = function (data, status, headers, config) {
         //alert('getConfigSuccessCallback');
-
         $scope.configList = data;
     };
 
@@ -89,15 +89,14 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         var tests = data['result']['tests'];
         */
 
-        var testID = data['result']['id'];
+        var id = data['result']['id'];
         testid = data['testid'];
 
-        for (var i = 0; i < $scope.tree.length; i++){
-            if ($scope.tree[i].testid == testid){
-                $scope.tree[i].result = data['result'];
+        for (var i = 0; i < $scope.currentFlattenedTree.length; i++){
+            if ($scope.currentFlattenedTree[i].testid == testid){
+                $scope.currentFlattenedTree[i].result = data['result'];
             }
         }
-
         $scope.testResult = data;
 
     };
@@ -107,42 +106,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         notificationFactory.error(data.ExceptionMessage);
     };
 
-    var enterTestResult = function(data){
-        testID = data['result']['id'];
-
-        var testElement = document.getElementById(testID);
-        var child = testElement.children[3];
-
-        var numberOfResults = data['result']['tests'].length;
-        var resultString = "";
-
-        for (var i= 0; i < numberOfResults; i++){
-            resultName =  data['result']['tests'][i].name;
-            resultStatus = data['result']['tests'][i].status;
-
-            resultString = resultString + resultStatus + " : " + resultName + "\n";
-        }
-
-        var txtNode = document.createTextNode(resultString);
-        child.appendChild(txtNode);
-    }
-
-    var showResultStatus = function(data){
-
-        var testID = data['result']['id'];
-        var testElement = document.getElementById(testID);
-        var child = testElement.children[1];
-
-        var txtNode = document.createTextNode(data['result']['status']);
-
-        var text = child.firstChild;
-        child.removeChild(text);
-        child.appendChild(txtNode);
-
-    }
-
     var buildTree = function (newTree){
-        //Sort tree elements by name or test result
+        //Sort currentFlattenedTree elements by name or test result
 
         var flatTree = [];
 
@@ -157,48 +122,36 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         return flatTree;
     }
 
-    var buildTreeFlatBottomUp = function (newTree){
-        //Sort tree elements by name or test result
-
-        var flatTree = [];
-
-        for (var i = 0; i < newTree.length; i++) {
-            var element = newTree[i];
-
-            if (element.level == 1){
-                flatTree.push(element);
-                if (element.children.length > 0){
-                    flatTree = flatTree.concat(buildTreeFlatBottomUp(element.children));
-                }
-            }else{
-                element.level=2;
-
-                if (element.children.length > 0){
-                    flatTree = flatTree.concat(buildTreeFlatBottomUp(element.children));
-                }
-                flatTree.push(element);
-            }
-
-        }
-        return flatTree;
-    }
-
-    testFactory.getTests($scope.selectedItem.type).success(getListSuccessCallback).error(errorCallback);
+    testFactory.getTests($scope.items[1].type).success(getListSuccessCallback).error(errorCallback);
     configFactory.getConfig().success(getConfigSuccessCallback).error(errorCallback);
 
-    $scope.runTest = function (testID, testid) {
-        return runTestFactory.getTestResult(testID, testid).success(getTestResultSuccessCallback).error(errorCallback);
+    $scope.runTest = function (id, testid) {
+        findTestInTree($scope.bottomUpTree)
+        runTestFactory.getTestResult(id, testid).success(getTestResultSuccessCallback).error(errorCallback);
     };
 
     $scope.updateTree = function () {
-        testFactory.getTests($scope.selectedItem.type).success(getListSuccessCallback).error(errorCallback);
+        changeCurrentTree($scope.selectedItem.type);
+    }
+
+    var changeCurrentTree = function (treeType) {
+        if (treeType == "Bottom up flat") {
+            $scope.currentOriginalTree = $scope.flatBottomUpTree;
+            $scope.currentFlattenedTree = buildTreeFlatBottomUp($scope.flatBottomUpTree);
+        } else if (treeType == "Bottom up") {
+            $scope.currentOriginalTree = $scope.bottomUpTree;
+            $scope.currentFlattenedTree = buildTree($scope.bottomUpTree);
+        } else if (treeType == "Top down") {
+            $scope.currentOriginalTree = $scope.topDownTree;
+            $scope.currentFlattenedTree = buildTree($scope.topDownTree);
+        }
     }
 
     $scope.removeTestResult = function (testid) {
 
-        for (var i = 0; i < $scope.tree.length; i++){
-            if ($scope.tree[i].testid == testid){
-                delete $scope.tree[i].result;
+        for (var i = 0; i < $scope.currentFlattenedTree.length; i++){
+            if ($scope.currentFlattenedTree[i].testid == testid){
+                delete $scope.currentFlattenedTree[i].result;
             }
         }
     }
@@ -207,11 +160,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
     $scope.identifyTestNode = function (testid) {
 
-        var children = findTestInOriginalTree($scope.originalTree, testid);
+        var children = findTestInTree($scope.currentOriginalTree, testid);
 
-
-        alert(children);
-/*
         if(shouldOpen){
             showChildrenInTree(children, true);
             shouldOpen = false;
@@ -219,23 +169,22 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
             showChildrenInTree(children, false);
             shouldOpen = true;
         }
-*/
-        showChildrenInTree(children, true);
+
     }
 
-    var findTestInOriginalTree = function (tree, targetTestID) {
+    var findTestInTree = function (tree, targetID) {
         var result = null;
 
         for (var i = 0; i < tree.length; i++){
             numberOfChildren = tree[i].children.length
 
             if(numberOfChildren != 0){
-                if (tree[i].testid == targetTestID){
+                if (tree[i].testid == targetID){
                     result =  tree[i].children;
                     break;
                 }
                 else if (result == null){
-                    result =  findTestInOriginalTree(tree[i].children, targetTestID);
+                    result =  findTestInTree(tree[i].children, targetID);
                 }
             }
         }
@@ -245,9 +194,9 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     var showChildrenInTree = function (children, visible) {
 
         for(var j= 0; j < children.length; j++){
-            for (var i = 0; i < $scope.tree.length; i++){
-                if (children[j].testid == $scope.tree[i].testid){
-                    $scope.tree[i].visible = visible;
+            for (var i = 0; i < $scope.currentFlattenedTree.length; i++){
+                if (children[j].testid == $scope.currentFlattenedTree[i].testid){
+                    $scope.currentFlattenedTree[i].visible = visible;
                 }
             }
         }

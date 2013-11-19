@@ -35,8 +35,7 @@
 
             <br>
 
-            <!--- Id på raden ska vara ett nummer istället för data.id detta eftersom att då vet man vilken rad man tryck på --->
-            <div ng-repeat="data in tree" class="row">
+            <div ng-repeat="data in currentFlattenedTree" class="row">
 
                 <div ng-show="data.visible == true">
 
@@ -48,7 +47,7 @@
                     </div>
 
                     <div class="col-lg-2" id="status">
-                        Status
+                        {{data.result.status}}
                     </div>
 
 
@@ -62,7 +61,6 @@
                 </div>
 
             </div>
-
         </div>
     </div>
 
