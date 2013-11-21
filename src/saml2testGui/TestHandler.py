@@ -69,14 +69,13 @@ class Test:
 
     def handleList(self):
         #Gör en knapp som ändrar synen på trädet
-        showBottomUp = self.parameters['treeType']
+        #showBottomUp = self.parameters['treeType']
 
         ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-l'])
 
         allTests = json.loads(p_out)
 
         childTestsList, rootTestsList = self.identifyRootTests(allTests)
-
 
         topDownChildList = copy.deepcopy(childTestsList)
         topDownRootList = copy.deepcopy(rootTestsList)
@@ -147,6 +146,7 @@ class Test:
         newDict['children'] = []
         newDict['level'] = level
         newDict['testid'] = ""
+        newDict['descr'] = str(item["name"]) #"name" ska bytas up mot "descr" men alla test innehåller inte dessa attribut
         return newDict
 
 

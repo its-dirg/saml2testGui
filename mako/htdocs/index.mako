@@ -19,50 +19,116 @@
                      {{tests.Name}}
                 </option>
             </select>
+
             <br>
 
-            <div class="col-lg-8" id="testHeadline">
+            <!-- The information box -->
+            <div class="informationBox">
+                <div class="row" id="no-hover">
+
+                  <div class="col-xs-12 col-md-9">In the table bellow all tests are presented. Test which depend on others are makred with a little black arrow. In order to see the sub tests press the row containing an arrow. Tests could be executed at three levels, first of a single test could be executed. Then a test and it's sub tests could be executed by pressing the button "Run test". Last of all tests could be executed by pressing the button "Run all tests". The result of the tests are presented by color encoding the row containing the test and a written status. In order to get a more detailed version of the test result press the button "Show result"</div>
+
+                    <div class="col-xs-12 col-md-3">
+                        <div class="colorExampleBox" id="totalStatusINFORMATION">
+                            INFORMATION
+                        </div>
+
+                        <div class="colorExampleBox" id="totalStatusOK">
+                            OK
+                        </div>
+
+                        <div class="colorExampleBox" id="totalStatusWARNING">
+                            WARNING
+                        </div>
+
+                        <div class="colorExampleBox" id="totalStatusINTERACTION">
+                            INTERACTION
+                        </div>
+
+                        <div class="colorExampleBox" id="totalStatusERROR">
+                            ERROR
+                        </div>
+
+                        <div class="colorExampleBox" id="totalStatusCRITICAL">
+                            CRITICAL
+                        </div>
+                  </div>
+                </div>
+            </div>
+
+            <br>
+
+            <!-- The headline of the test table -->
+            <div class="col-lg-6" id="testHeadline">
                 Test
             </div>
 
-            <div class="col-lg-2" id="testHeadline">
+            <div class="col-lg-1" id="testHeadline">
                 Status
             </div>
 
             <div class="col-lg-2" id="testHeadline">
-                <button type="button" class="btn btn-primary btn-sm">Run all tests</button>
+                <button type="button" class="btn btn-primary btn-sm" ng-click="exportTestResultToTextFile();">Export</button>
+
+            </div>
+
+            <div class="col-lg-3" id="testHeadline">
+                <button type="button" class="btn btn-primary" ng-click="runAllTest();">Run all tests</button>
             </div>
 
             <br>
 
+            <!-- The code which genertaes the rows of the test table -->
             <div ng-repeat="data in currentFlattenedTree" class="row">
 
-                <div ng-show="data.visible == true">
+                <div ng-show="data.visible == true" id="testRow">
 
+                    <div class="col-lg-6" id="totalStatus{{data.status}}" ng-click="showOrHideTests(data.testid);">
+                        <div id="level{{data.level}}">
+                            <img src="static/pitures/arrowRight.png" ng-show="data.hasChildren == true">
 
-                    <div class="col-lg-8" id="level{{data.level}}" ng-click="identifyTestNode(data.testid);">
-                        <img src="static/pitures/arrowRight.png" ng-show="data.hasChildren == true">
+                            <span ng-click="removeTestResult(data.testid);" rel="tooltip" title="{{data.descr}}">{{data.id}}</span>
 
-                        <span ng-click="removeTestResult(data.testid);">{{data.id}}</span>
+                            <span class="glyphicon glyphicon-info-sign" rel="tooltip" title="{{data.descr}}" id="infoIcon"></span>
+
+                        </div>
                     </div>
 
-                    <div class="col-lg-2" id="status">
-                        {{data.result.status}}
+                    <div class="col-lg-1" id="totalStatus{{data.status}}">
+                        {{data.status}}
+                     </div>
+
+
+                    <div class="col-lg-2" id="totalStatus{{data.status}}">
+                        <button type="button" class="btn btn-default btn-xs" ng-click="showOrHideResult(data.testid);">Show result</button>
                     </div>
 
 
-                    <div class="col-lg-2" id="runTestButton">
-                        <button type="button" class="btn btn-primary btn-sm" ng-click="runTest(data.id, data.testid);">Run test</button>
+                    <div class="col-lg-3" id="totalStatus{{data.status}}">
+                        <button type="button" class="btn btn-primary btn-sm" ng-click="runMultipleTest(data.id, data.testid);">Run test</button>
+                        <button type="button" class="btn btn-primary btn-sm" ng-click="runOneTest(data.id, data.testid);">Run one test</button>
+
                     </div>
 
-                    <textarea ng-show="data.result" cols="120" rows="5">{{data.result}}</textarea>
+                    <br>
 
+                    <div class="resultFrame" ng-show="data.showResult == true">
+                        Result:
+                        <br>
+
+                        <div ng-repeat="test in data.result">{{test}}</div>
+
+                    </div>
 
                 </div>
 
             </div>
+
+            <div>
+                Test summary for last run test: <p style="text-indent: 5em;">Successful tests:{{resultSummary.success}}</p> <p style="text-indent: 5em;">Failed tests:{{resultSummary.failed}}</p>
+            </div>
+
         </div>
     </div>
-
 </div>
 

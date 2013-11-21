@@ -40,8 +40,51 @@ body {
     margin-right: 0px;
 }
 
+.myRow{
+    font-size: 17px;
+    background-color: #ffffff;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
 .row:hover {
     background-color: #D4EDF3;
+}
+
+#no-hover:hover {
+    background-color: transparent;
+}
+
+.resultFrame{
+    background-color: #FFFFFF;
+    margin-left:20px;
+    margin-right:20px;
+    border:2px solid;
+    border-color:#CFCFCF;
+}
+
+.informationBox{
+    background-color: #FFFFFF;
+    margin-left:20px;
+    margin-right:20px;
+}
+
+.colorExampleBox{
+    font-size: 15px;
+    border:1px solid;
+    border-color:#CFCFCF;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+#infoIcon{
+    opacity: 0.40;
+    font-size: 15px;
+}
+
+#testRow{
+    border-bottom:1px solid;
+    border-color:#CFCFCF;
 }
 
 #level1{
@@ -58,5 +101,39 @@ body {
 
 #level4 {
     padding-left:90px;
+}
+
+
+#statusINFORMATION {
+    color: #000000;
+}
+
+#statusOK {
+    color: #228B22;
+}
+
+#statusWARNING, #statusINTERACTION{
+    color: #dde033;
+}
+
+#statusERROR, #statusCRITICAL{
+    color: #E99600;
+}
+
+
+#totalStatusINFORMATION{
+    background-color: #FFFFFF;
+}
+
+#totalStatusOK{
+    background-color: #BEE297;
+}
+
+#totalStatusWARNING, #totalStatusINTERACTION{
+    background-color: #FEFE7A;
+}
+
+#totalStatusERROR, #totalStatusCRITICAL{
+    background-color: #E57D7C;
 }
 
