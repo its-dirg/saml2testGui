@@ -54,6 +54,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     $scope.bottomUpTree;
     $scope.flatBottomUpTree;
 
+    $scope.numberOfTestsStarted = 0;
+
     $scope.resultSummary = {'success': 0, 'failed': 0};
 
     var testIsOpen = [];
@@ -89,14 +91,14 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         var tests = data['result']['tests'];
         */
 
+        writeResultToTree(data);
+
         $scope.numberOfTestsStarted--;
         if ($scope.numberOfTestsStarted <= 0){
             $('button').prop('disabled', false);
             var resultString = "Successful tests: " + $scope.resultSummary.success +"\n"+ " Failed tests: " + $scope.resultSummary.failed
             toaster.pop('note', "Result summary", resultString);
         }
-
-        writeResultToTree(data);
     };
 
     var errorCallback = function (data, status, headers, config) {
@@ -120,8 +122,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
                 runTestFactory.getTestResult(convertedTestsToRun[i].id, convertedTestsToRun[i].testid).success(getTestResultSuccessCallback).error(errorCallback);
             }
         }else{
-
             var testsToRun = getSubTests(test);
+            $scope.resetNodes(testsToRun);
 
             //this should use run one test
             for (var i = 0; i < testsToRun.length; i++){
@@ -131,8 +133,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         $scope.numberOfTestsStarted = testsToRun.length;
     };
-
-    $scope.numberOfTestsStarted = 0;
 
     //Start counting how many test has been started and enable the buttons when the appropriat number of tests has been returned
     $scope.runOneTest = function (id, testid, isRunningSingelTest) {
@@ -150,6 +150,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
     $scope.runAllTest = function () {
         var treeSize = $scope.currentFlattenedTree.length;
+        $scope.resetAll();
+
 
         for (var i = 0; i < treeSize; i++){
 
@@ -237,6 +239,23 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         a.click();
         e.preventDefault();
+    }
+
+    $scope.resetAll = function () {
+        var tree = $scope.currentFlattenedTree;
+
+        for (var i = 0; i < tree.length; i++){
+            tree[i].result = null;
+            tree[i].status = null;
+        }
+    }
+
+    $scope.resetNodes = function (nodes) {
+
+        for (var i = 0; i < nodes.length; i++){
+            nodes[i].result = null;
+            nodes[i].status = null;
+        }
     }
 
     var writeResultToTree = function(data) {

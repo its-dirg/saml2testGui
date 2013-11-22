@@ -2,10 +2,15 @@
 <%inherit file="base.mako"/>
 
 
-<toaster-container toaster-options="{'time-out': 3000}"></toaster-container>
+<toaster-container toaster-options="{'time-out': 6000}"></toaster-container>
 
 <div ng-controller="IndexCtrl" >
     <div class="container">
+
+        <div class="headline">
+        Test tool for saml
+        </div>
+
         <div id="formContainer" class="jumbotron">
 
             Tree layout:
@@ -64,6 +69,7 @@
             <!-- The headline of the test table -->
             <div class="col-lg-7" id="testHeadline">
                 Test
+                <button class="btn btn-primary btn-sm" ng-click="resetAll();">Reset GUI</button>
             </div>
 
             <div class="col-lg-1" id="testHeadline">
@@ -96,6 +102,7 @@
 
                 <div ng-show="data.visible == true" id="testRow">
 
+                    <!-- Tree containging all the tests -->
                     <div class="col-lg-7" id="totalStatus{{data.status}}" ng-click="showOrHideTests(data.testid);">
                         <div id="level{{data.level}}">
 
@@ -108,16 +115,17 @@
                         </div>
                     </div>
 
+                    <!-- Status of a given test -->
                     <div class="col-lg-1" id="totalStatus{{data.status}}">
                         {{data.status}}
                      </div>
 
-
+                    <!-- Show or hide result button -->
                     <div class="col-lg-2" id="totalStatus{{data.status}}">
-                        <button class="btn btn-default btn-xs" ng-click="showOrHideResult(data.testid);">Show result</button>
+                        <div class="btn btn-default btn-xs" ng-click="showOrHideResult(data.testid);">Show result</div>
                     </div>
 
-
+                    <!-- Run test buttons -->
                     <div class="col-lg-2" id="totalStatus{{data.status}}">
 
                         <div class="btn-group">
@@ -135,6 +143,7 @@
 
                     <br>
 
+                    <!-- Result frame containing the result of a executed test -->
                     <div class="resultFrame" ng-show="data.showResult == true">
                         Result:
                         <br>

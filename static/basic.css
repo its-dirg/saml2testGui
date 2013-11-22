@@ -3,6 +3,19 @@ body {
     background-image:url('pitures/background.png');
 }
 
+.headline {
+    margin-bottom: 30px;
+    font-size: 21px;
+    line-height: 2.1428571435;
+    color: #000000;
+
+    background-color: #F2F2F2;
+
+    border:1px solid;
+    border-color:#CFCFCF;
+    border-radius:5px;
+}
+
 .jumbotron {
     padding: 30px;
     margin-bottom: 30px;
@@ -34,13 +47,6 @@ body {
 }
 
 .row{
-    font-size: 17px;
-    background-color: #ffffff;
-    margin-left: 0px;
-    margin-right: 0px;
-}
-
-.myRow{
     font-size: 17px;
     background-color: #ffffff;
     margin-left: 0px;
@@ -104,23 +110,6 @@ body {
 }
 
 
-#statusINFORMATION {
-    color: #000000;
-}
-
-#statusOK {
-    color: #228B22;
-}
-
-#statusWARNING, #statusINTERACTION{
-    color: #dde033;
-}
-
-#statusERROR, #statusCRITICAL{
-    color: #E99600;
-}
-
-
 #totalStatusINFORMATION{
     background-color: #FFFFFF;
 }
@@ -136,4 +125,3 @@ body {
 #totalStatusERROR, #totalStatusCRITICAL{
     background-color: #E57D7C;
 }
-
