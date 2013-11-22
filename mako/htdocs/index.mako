@@ -1,6 +1,9 @@
 ## index.html
 <%inherit file="base.mako"/>
 
+
+<toaster-container toaster-options="{'time-out': 3000}"></toaster-container>
+
 <div ng-controller="IndexCtrl" >
     <div class="container">
         <div id="formContainer" class="jumbotron">
@@ -83,7 +86,7 @@
 
             <!-- Run all tests button-->
             <div class="col-lg-2" id="testHeadline">
-                <button type="button" class="btn btn-primary" ng-click="runAllTest();">Run all tests</button>
+                <button class="btn btn-primary" ng-click="runAllTest();">Run all tests</button>
             </div>
 
             <br>
@@ -95,11 +98,12 @@
 
                     <div class="col-lg-7" id="totalStatus{{data.status}}" ng-click="showOrHideTests(data.testid);">
                         <div id="level{{data.level}}">
+
+                            <span class="glyphicon glyphicon-info-sign" rel="tooltip" title="{{data.descr}}" id="infoIcon"></span>
+
                             <img src="static/pitures/arrowRight.png" ng-show="data.hasChildren == true">
 
                             <span ng-click="removeTestResult(data.testid);" rel="tooltip" title="{{data.descr}}">{{data.id}}</span>
-
-                            <span class="glyphicon glyphicon-info-sign" rel="tooltip" title="{{data.descr}}" id="infoIcon"></span>
 
                         </div>
                     </div>
@@ -110,20 +114,20 @@
 
 
                     <div class="col-lg-2" id="totalStatus{{data.status}}">
-                        <button type="button" class="btn btn-default btn-xs" ng-click="showOrHideResult(data.testid);">Show result</button>
+                        <button class="btn btn-default btn-xs" ng-click="showOrHideResult(data.testid);">Show result</button>
                     </div>
 
 
                     <div class="col-lg-2" id="totalStatus{{data.status}}">
 
                         <div class="btn-group">
-                            <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
+                            <button class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" id="runButton">
                                 Run test
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
                                 <li ng-click="runMultipleTest(data.id, data.testid);"><a>Run test and sub tests</a></li>
-                                <li ng-click="runOneTest(data.id, data.testid);"><a>Run this test only</a></li>
+                                <li ng-click="runOneTest(data.id, data.testid, true);"><a>Run this test only</a></li>
                             </ul>
                         </div>
 
@@ -146,9 +150,6 @@
             <div>
                 Test summary for last executed test: <p>Successful tests:{{resultSummary.success}}</p> <p>Failed tests:{{resultSummary.failed}}</p>
             </div>
-
-            <toaster-container toaster-options="{'time-out': 3000}"></toaster-container>
-            <button class="btn btn-primary" style="margin: 150px;" ng-click="pressbutton()">Show toasts</button>
 
         </div>
     </div>
