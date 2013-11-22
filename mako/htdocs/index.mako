@@ -59,7 +59,7 @@
             <br>
 
             <!-- The headline of the test table -->
-            <div class="col-lg-6" id="testHeadline">
+            <div class="col-lg-7" id="testHeadline">
                 Test
             </div>
 
@@ -67,12 +67,22 @@
                 Status
             </div>
 
+           <!-- Export button -->
             <div class="col-lg-2" id="testHeadline">
-                <button type="button" class="btn btn-primary btn-sm" ng-click="exportTestResultToTextFile();">Export</button>
-
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
+                        Export
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li ng-click="exportTestResultToTextFile();"><a>Export result to excel file</a></li>
+                        <li ng-click="exportTestResultToExcel();"><a>Export result to text file</a></li>
+                    </ul>
+                </div>
             </div>
 
-            <div class="col-lg-3" id="testHeadline">
+            <!-- Run all tests button-->
+            <div class="col-lg-2" id="testHeadline">
                 <button type="button" class="btn btn-primary" ng-click="runAllTest();">Run all tests</button>
             </div>
 
@@ -83,7 +93,7 @@
 
                 <div ng-show="data.visible == true" id="testRow">
 
-                    <div class="col-lg-6" id="totalStatus{{data.status}}" ng-click="showOrHideTests(data.testid);">
+                    <div class="col-lg-7" id="totalStatus{{data.status}}" ng-click="showOrHideTests(data.testid);">
                         <div id="level{{data.level}}">
                             <img src="static/pitures/arrowRight.png" ng-show="data.hasChildren == true">
 
@@ -104,9 +114,18 @@
                     </div>
 
 
-                    <div class="col-lg-3" id="totalStatus{{data.status}}">
-                        <button type="button" class="btn btn-primary btn-sm" ng-click="runMultipleTest(data.id, data.testid);">Run test</button>
-                        <button type="button" class="btn btn-primary btn-sm" ng-click="runOneTest(data.id, data.testid);">Run one test</button>
+                    <div class="col-lg-2" id="totalStatus{{data.status}}">
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
+                                Run test
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li ng-click="runMultipleTest(data.id, data.testid);"><a>Run test and sub tests</a></li>
+                                <li ng-click="runOneTest(data.id, data.testid);"><a>Run this test only</a></li>
+                            </ul>
+                        </div>
 
                     </div>
 
@@ -125,8 +144,11 @@
             </div>
 
             <div>
-                Test summary for last run test: <p style="text-indent: 5em;">Successful tests:{{resultSummary.success}}</p> <p style="text-indent: 5em;">Failed tests:{{resultSummary.failed}}</p>
+                Test summary for last executed test: <p>Successful tests:{{resultSummary.success}}</p> <p>Failed tests:{{resultSummary.failed}}</p>
             </div>
+
+            <toaster-container toaster-options="{'time-out': 3000}"></toaster-container>
+            <button class="btn btn-primary" style="margin: 150px;" ng-click="pressbutton()">Show toasts</button>
 
         </div>
     </div>

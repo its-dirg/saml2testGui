@@ -1,5 +1,5 @@
 
-var app = angular.module('app', []);
+var app = angular.module('app', ['toaster'])
 
 app.factory('testFactory', function ($http) {
     return {
@@ -43,7 +43,7 @@ app.factory('notificationFactory', function () {
 });
 
 
-app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, configFactory, runTestFactory) {
+app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, configFactory, runTestFactory, toaster) {
     //alert('controller')
     $scope.configList = [];
     $scope.testResult = "";
@@ -239,6 +239,10 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         a.click();
         e.preventDefault();
+    }
+
+    $scope.pressbutton = function () {
+        toaster.pop('success', "title", "text");
     }
 
     var generateExportResultString = function(){
