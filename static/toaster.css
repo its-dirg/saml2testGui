@@ -51,6 +51,7 @@
 #toast-container > div > div {
   margin: 0 0 6px;
   padding: 15px 15px 15px 50px;
+  /* Add 100% here inorder to show result on the entire screen */
   width: 300px;
   -moz-border-radius: 3px 3px 3px 3px;
   -webkit-border-radius: 3px 3px 3px 3px;

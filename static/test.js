@@ -69,6 +69,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
     $scope.selectedItem = $scope.items[1];
 
+
     var getListSuccessCallback = function (data, status, headers, config) {
         //alert('getListSuccessCallback');
         $scope.topDownTree = data["topDownTree"];
@@ -91,7 +92,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         var tests = data['result']['tests'];
         */
 
-        writeResultToTree(data);
+        i = writeResultToTree(data);
 
         $scope.numberOfTestsStarted--;
         if ($scope.numberOfTestsStarted <= 0){
@@ -106,7 +107,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         notificationFactory.error(data.ExceptionMessage);
     };
 
-    testFactory.getTests($scope.items[1].type).success(getListSuccessCallback).error(errorCallback);
+    testFactory.getTests($scope.selectedItem.type).success(getListSuccessCallback).error(errorCallback);
     configFactory.getConfig().success(getConfigSuccessCallback).error(errorCallback);
 
     $scope.runMultipleTest = function (id, testid) {
@@ -122,10 +123,10 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
                 runTestFactory.getTestResult(convertedTestsToRun[i].id, convertedTestsToRun[i].testid).success(getTestResultSuccessCallback).error(errorCallback);
             }
         }else{
-            var testsToRun = getSubTests(test);
+            var testsToRun = getTestAndSubTests(test);
             $scope.resetNodes(testsToRun);
 
-            //this should use run one test
+            //Uses runOneTest in order to gather all result summay code in one place
             for (var i = 0; i < testsToRun.length; i++){
                 $scope.runOneTest(testsToRun[i].id, testsToRun[i].testid), false;
             }
@@ -134,7 +135,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         $scope.numberOfTestsStarted = testsToRun.length;
     };
 
-    //Start counting how many test has been started and enable the buttons when the appropriat number of tests has been returned
     $scope.runOneTest = function (id, testid, isRunningSingelTest) {
         //Reset test summary or else the result of multiply runs for the same test will be presented
         $scope.resultSummary = {'success': 0, 'failed': 0};
@@ -152,7 +152,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         var treeSize = $scope.currentFlattenedTree.length;
         $scope.resetAll();
 
-
         for (var i = 0; i < treeSize; i++){
 
             var id = $scope.currentFlattenedTree[i].id;
@@ -169,7 +168,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     }
 
     $scope.removeTestResult = function (testid) {
-
         for (var i = 0; i < $scope.currentFlattenedTree.length; i++){
             if ($scope.currentFlattenedTree[i].testid == testid){
                 delete $scope.currentFlattenedTree[i].result;
@@ -177,24 +175,18 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }
     }
 
-    $scope.showOrHideTestsAndResult = function (testid) {
-        $scope.showOrHideResult(testid);
-        $scope.showOrHideTests(testid);
-    }
-
     $scope.showOrHideTests = function (testid) {
 
         var test = findTestInTreeByTestid($scope.currentOriginalTree, testid);
-        children = test.children;
+        var children = test.children;
 
         if(children[0].visible == false){
             showChildrenInTree(children, true);
         }else if (children[0].visible == true){
-            children = getSubTests(test);
+            children = getTestAndSubTests(test);
             showChildrenInTree(children, false);
             test.visible = true;
         }
-
     }
 
     $scope.showOrHideResult = function (testid) {
@@ -208,35 +200,25 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     }
 
     $scope.exportTestResultToExcel = function (testid) {
-
-        //creating a temporary HTML link element (they support setting file names)
         var a = document.createElement('a');
-        //getting data from our div that contains the HTML table
         var data_type = 'data:application/vnd.ms-excel';
 
-        //Create table
         var tbl = generateExportResultTable();
         var table_html = tbl.outerHTML.replace(/ /g, '%20');
 
         a.href = data_type + ', ' + table_html;
-        //setting the file name
-        a.download = 'exported_table_' + '.xls';
-        //triggering the function
+        a.download = 'exported_table' + '.xls';
         a.click();
-        //just in case, prevent default behaviour
         e.preventDefault();
     }
 
     $scope.exportTestResultToTextFile = function (testid) {
 
         var resultString  = generateExportResultString();
-
         var a = document.createElement("a");
 
         a.download = "export.txt";
         a.href = "data:text/plain;base64," + btoa(resultString);
-        a.innerHTML = "download example text";
-
         a.click();
         e.preventDefault();
     }
@@ -251,7 +233,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     }
 
     $scope.resetNodes = function (nodes) {
-
         for (var i = 0; i < nodes.length; i++){
             nodes[i].result = null;
             nodes[i].status = null;
@@ -259,32 +240,25 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     }
 
     var writeResultToTree = function(data) {
-        var id = data['result']['id'];
         testid = data['testid'];
         var testResultList = [];
+        var resultString;
 
         for (var i = 0; i < $scope.currentFlattenedTree.length; i++) {
             if ($scope.currentFlattenedTree[i].testid == testid) {
-
                 testList = data['result']['tests'];
 
                 for (var j = 0; j < testList.length; j++) {
-                    var resultString = formatTest(testList[j]);
-                    testResultList.push(resultString);
+                    testResultList.push(testList[j]);
                     testList[j]['status'] = convertStatusToText(testList[j]['status']);
                 }
 
-                //$scope.currentFlattenedTree[i].result = data['result'];
-
                 $scope.currentFlattenedTree[i].result = testResultList;
+
                 $scope.currentFlattenedTree[i].status = convertStatusToText(data['result']['status']);
                 countSuccessAndFails(data['result']['status']);
-                //$scope.currentFlattenedTree[i].visible = true;
 
-                if ($scope.currentFlattenedTree[i].showResult != true) {
-                    $scope.currentFlattenedTree[i].showResult = false;
-                }
-
+                return i;
             }
         }
     }
@@ -296,8 +270,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         for(var i = 0; i < tree.length; i++){
 
             if (tree[i].result != null){
-                resultString += tree[i].id + "\n";
-                resultString += tree[i].result + "\n";
+                resultString += JSON.stringify(tree[i].id) + "\n";
+                resultString += JSON.stringify(tree[i].result) + "\n";
             }
         }
         return resultString;
@@ -305,7 +279,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
     var convertFromBottomUpToTopDownNodes = function (id){
         var test = findTestInTreeByID($scope.bottomUpTree, id);
-        var testsToRun = getSubTests(test);
+        var testsToRun = getTestAndSubTests(test);
         var convertedTestsToRun = [];
 
         for (var j = 0; j < testsToRun.length; j++){
@@ -315,13 +289,13 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         return convertedTestsToRun;
     }
 
-    var getSubTests = function (test){
+    var getTestAndSubTests = function (test){
         var children = test.children;
         var subChildrenList = [];
         subChildrenList.push(test);
 
         for (var i = 0; i < children.length; i++){
-            subChildrenList = subChildrenList.concat(getSubTests(children[i]));
+            subChildrenList = subChildrenList.concat(getTestAndSubTests(children[i]));
         }
         return subChildrenList;
     }
@@ -435,11 +409,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         return tbl;
     }
-
-    var formatTest = function (test) {
-        test = test.status + " : " + test.id + " : " + test.name;
-        return test;
-    };
 
     var convertStatusToText = function (status) {
         if (status == 0){

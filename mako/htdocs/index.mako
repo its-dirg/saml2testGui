@@ -1,8 +1,12 @@
 ## index.html
 <%inherit file="base.mako"/>
 
+<!--
+<toaster-container toaster-options="{'position-class': 'toast-bottom-full-width', 'time-out': 6000}"></toaster-container>
+-->
 
 <toaster-container toaster-options="{'time-out': 6000}"></toaster-container>
+
 
 <div ng-controller="IndexCtrl" >
     <div class="container">
@@ -84,8 +88,8 @@
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu">
-                        <li ng-click="exportTestResultToTextFile();"><a>Export result to excel file</a></li>
-                        <li ng-click="exportTestResultToExcel();"><a>Export result to text file</a></li>
+                        <li ng-click="exportTestResultToTextFile();"><a>Export result to text file</a></li>
+                        <li ng-click="exportTestResultToExcel();"><a>Export result to excel file</a></li>
                     </ul>
                 </div>
             </div>
@@ -148,18 +152,13 @@
                         Result:
                         <br>
 
-                        <div ng-repeat="test in data.result">{{test}}</div>
+                        <div ng-repeat="test in data.result">{{test.status}} : {{test.id}} : {{test.name}}</div>
 
                     </div>
 
                 </div>
 
             </div>
-
-            <div>
-                Test summary for last executed test: <p>Successful tests:{{resultSummary.success}}</p> <p>Failed tests:{{resultSummary.failed}}</p>
-            </div>
-
         </div>
     </div>
 </div>
