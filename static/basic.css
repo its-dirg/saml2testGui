@@ -1,0 +1,127 @@
+
+body {
+    background-image:url('pitures/background.png');
+}
+
+.headline {
+    margin-bottom: 30px;
+    font-size: 21px;
+    line-height: 2.1428571435;
+    color: #000000;
+
+    background-color: #F2F2F2;
+
+    border:1px solid;
+    border-color:#CFCFCF;
+    border-radius:5px;
+}
+
+.jumbotron {
+    padding: 30px;
+    margin-bottom: 30px;
+    font-size: 21px;
+    font-weight: 200;
+    line-height: 2.1428571435;
+    color: #000000;
+
+    background-color: #eeeeee;
+    opacity:1.00;
+    filter:alpha(opacity=100); /* For IE8 and earlier */
+
+}
+
+.container .jumbotron {
+    padding-right: 0px;
+    padding-left: 0px;
+    border:2px solid;
+    border-color:#CFCFCF;
+}
+
+#block{
+    margin-left:auto;
+    margin-right:0px;
+}
+
+#testHeadline{
+    background-color: #CFCFCF;
+}
+
+.row{
+    font-size: 17px;
+    background-color: #ffffff;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.row:hover {
+    background-color: #D4EDF3;
+}
+
+#no-hover:hover {
+    background-color: transparent;
+}
+
+.resultFrame{
+    background-color: #FFFFFF;
+    margin-left:20px;
+    margin-right:20px;
+    border:2px solid;
+    border-color:#CFCFCF;
+}
+
+.informationBox{
+    background-color: #FFFFFF;
+    margin-left:20px;
+    margin-right:20px;
+}
+
+.colorExampleBox{
+    font-size: 15px;
+    border:1px solid;
+    border-color:#CFCFCF;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+#infoIcon{
+    opacity: 0.40;
+    font-size: 15px;
+}
+
+#testRow{
+    border-bottom:1px solid;
+    border-color:#CFCFCF;
+}
+
+#level1{
+    padding-left:0px;
+}
+
+#level2{
+    padding-left:30px;
+}
+
+#level3{
+    padding-left:60px;
+}
+
+#level4 {
+    padding-left:90px;
+}
+
+
+#totalStatusINFORMATION{
+    background-color: #FFFFFF;
+}
+
+#totalStatusOK{
+    background-color: #BEE297;
+}
+
+#totalStatusWARNING, #totalStatusINTERACTION{
+    background-color: #FEFE7A;
+}
+
+#totalStatusERROR, #totalStatusCRITICAL{
+    background-color: #E57D7C;
+}

@@ -34,7 +34,10 @@ def application(environ, start_response):
     session = Session(environ)
 
     http_helper = HttpHandler(environ, start_response, session, logger)
-    test = Test(environ, start_response, session, logger, LOOKUP)
+
+    parameters = http_helper.getQueryDict()
+
+    test = Test(environ, start_response, session, logger, LOOKUP, config, parameters)
     path = http_helper.getPath()
 
     http_helper.logRequest()
@@ -59,8 +62,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(dest="config")
     args = parser.parse_args()
+    global config
     config = importlib.import_module(args.config)
-
 
     global logger
     logger = create_logger(config.LOG_FILE)
