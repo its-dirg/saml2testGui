@@ -23,6 +23,8 @@ LOOKUP = TemplateLookup(directories=['mako/templates', 'mako/htdocs'],
                         input_encoding='utf-8',
                         output_encoding='utf-8')
 
+global CACHE
+CACHE = {}
 
 def application(environ, start_response):
     """
@@ -37,7 +39,7 @@ def application(environ, start_response):
 
     parameters = http_helper.getQueryDict()
 
-    test = Test(environ, start_response, session, logger, LOOKUP, config, parameters)
+    test = Test(environ, start_response, session, logger, LOOKUP, config, parameters, CACHE)
     path = http_helper.getPath()
 
     http_helper.logRequest()

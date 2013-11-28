@@ -69,6 +69,10 @@ body {
     border-color:#CFCFCF;
 }
 
+#instructions{
+    color: #5A8ACD;
+}
+
 .informationBox{
     background-color: #FFFFFF;
     margin-left:20px;
