@@ -15,9 +15,11 @@ __author__ = 'haho0032'
 
 class Test:
     IDP_TESTDRV = '/usr/local/bin/idp_testdrv.py'
+
+    #Only used to check to check for new config files this which does nothing useful for the moment
     CONFIG_FILE_PATH = 'saml2test/configFiles/'
 
-    def __init__(self, environ, start_response, session, logger, lookup, config, parameters):
+    def __init__(self, environ, start_response, session, logger, lookup, config, parameters, cache):
         """
         Constructor for the class.
         :param environ:        WSGI enviroment
@@ -38,6 +40,8 @@ class Test:
             "config" : None,
             "run_test" : None
         }
+        self.cache = cache
+
 
 
     def verify(self, path):
@@ -70,30 +74,40 @@ class Test:
     def handleList(self):
         #Gör en knapp som ändrar synen på trädet
         #showBottomUp = self.parameters['treeType']
+        if "handleList_result" not in self.cache:
 
-        ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-l'])
+            if "test_list" not in self.cache:
+                ok, p_out, p_err = self.runScript([self.IDP_TESTDRV, '-l'])
+                if ok:
+                    self.cache["test_list"] = p_out
+            else:
+                ok = True
+            #ok, p_out, p_err = self.runScript([self.IDP_TESTDRV, '-l'])
+            allTests = json.loads(self.cache["test_list"])
 
-        allTests = json.loads(p_out)
+            childTestsList, rootTestsList = self.identifyRootTests(allTests)
 
-        childTestsList, rootTestsList = self.identifyRootTests(allTests)
+            topDownChildList = copy.deepcopy(childTestsList)
+            topDownRootList = copy.deepcopy(rootTestsList)
 
-        topDownChildList = copy.deepcopy(childTestsList)
-        topDownRootList = copy.deepcopy(rootTestsList)
+            topDownTree = self.insertRemaningChildTestsTopdown(topDownChildList, topDownRootList)
+            bottomUpTree = self.insertRemaningChildTestsBottomUp(childTestsList, rootTestsList)
 
-        topDownTree = self.insertRemaningChildTestsTopdown(topDownChildList, topDownRootList)
-        bottomUpTree = self.insertRemaningChildTestsBottomUp(childTestsList, rootTestsList)
+            self.setupTestId(topDownTree)
+            self.setupTestId(bottomUpTree)
 
-        self.setupTestId(topDownTree)
-        self.setupTestId(bottomUpTree)
+            flatBottomUpTree = self.convertToFlatBottomTree(bottomUpTree)
 
-        flatBottomUpTree = self.convertToFlatBottomTree(bottomUpTree)
+            result = {
+                "topDownTree": topDownTree,
+                "bottomUpTree": bottomUpTree,
+                "flatBottomUpTree": flatBottomUpTree
+            }
 
-        result = {
-            "topDownTree": topDownTree,
-            "bottomUpTree": bottomUpTree,
-            "flatBottomUpTree": flatBottomUpTree
-        }
-
+            self.cache["handleList_result"] = result
+        else:
+            result = self.cache["handleList_result"]
+            ok = True
         #currentFlattenedTree = [{'id': 'verify', 'level': '1', 'children': [{'id': 'authn', 'level': '2', 'children': [{'id': 'authn-post', 'level': '3', 'children': [{'id': 'authn-post-transient', 'level': '4', 'children': []}]}]}]}, {'id': 'ecp_authn', 'level': '1' , 'children': []}]
 
         if (ok):
@@ -116,6 +130,7 @@ class Test:
         targetFile = targetFile.strip(' \n\t')
 
         if self.checkIfParamentersAreValid(targetFile, testToRun):
+            #Directs to the folder containing the saml2test config file an enters the target.json files as a parameter to the test script
             ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J', 'configFiles/'+ targetFile + '.json', testToRun], "./saml2test")
 
             #self.formatOutput(p_out)
@@ -317,15 +332,21 @@ class Test:
 
     def checkIfIncommingTestIsLeagal(self, tmpTest):
         testToRun = None
-        ok, p_out, p_err = self.runScript([self.IDP_TESTDRV, '-l'])
-        tests = json.loads(p_out)
-        for test in tests:
-            if test["id"] == tmpTest:
-                testToRun = test["id"]
-        if testToRun is None:
-            return False
-        else:
+        if "verify_test_dict" not in self.cache:
+            self.cache["verify_test_dict"] = {}
+            if "test_list" not in self.cache:
+                ok, p_out, p_err = self.runScript([self.IDP_TESTDRV, '-l'])
+                if ok:
+                    self.cache["test_list"] = p_out
+            tests = json.loads(self.cache["test_list"])
+            for test in tests:
+                self.cache["verify_test_dict"][test["id"]] = True
+                #if test["id"] == tmpTest:
+                #    testToRun = test["id"]
+        if tmpTest in self.cache["verify_test_dict"] and self.cache["verify_test_dict"][tmpTest] is True:
             return True
+        else:
+            return False
 
 
     def returnJSON(self, text):

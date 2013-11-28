@@ -239,6 +239,16 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }
     }
 
+    $scope.instructionVisible = false;
+
+    $scope.toggleInstructionVisibility = function () {
+        if ($scope.instructionVisible == true){
+            $scope.instructionVisible = false;
+        }else{
+            $scope.instructionVisible = true;
+        }
+    }
+
     var writeResultToTree = function(data) {
         testid = data['testid'];
         var testResultList = [];

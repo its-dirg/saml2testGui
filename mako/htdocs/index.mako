@@ -34,11 +34,33 @@
 
             <br>
 
+            <div ng-click="toggleInstructionVisibility();" ng-show="instructionVisible == true" id="instructions">
+                <img src="static/pitures/arrowDown.png">
+                Hide instructions
+            </div>
+
+            <div ng-click="toggleInstructionVisibility();" ng-show="instructionVisible == false" id="instructions">
+                <img src="static/pitures/arrowRight.png">
+                Show instructions
+            </div>
+
             <!-- The information box -->
-            <div class="informationBox">
+            <div class="informationBox" ng-show="instructionVisible == true">
                 <div class="row" id="no-hover">
 
-                  <div class="col-xs-12 col-md-9">In the table bellow all tests are presented. Test which depend on others are makred with a little black arrow. In order to see the sub tests press the row containing an arrow. Tests could be executed at three levels, first of a single test could be executed. Then a test and it's sub tests could be executed by pressing the button "Run test". Last of all tests could be executed by pressing the button "Run all tests". The result of the tests are presented by color encoding the row containing the test and a written status. In order to get a more detailed version of the test result press the button "Show result"</div>
+                  <div class="col-xs-12 col-md-9">
+                      In the table bellow all tests are presented. Test which depend on others are
+                      makred with a little black arrow. In order to see the sub tests press the row containing an arrow.
+                      <br>
+                      Tests could be executed at three levels. First of a single test could be executed or a test and
+                      it's sub tests could be executed. In order to do this press the button "Run test" and then choose the appropriate alternative.
+                      Then last alternative is to execute all tests by pressing the button "Run all tests".
+                      <br>
+                      The result of the tests are presented by color encoding the row containing the test and a written status.
+                      In order to get a more detailed version of the test result press the button "Show result". The result
+                      of the test could be exported to either excel or a text file, by pressing the button export and choose the appropriate alternative.
+
+                  </div>
 
                     <div class="col-xs-12 col-md-3">
                         <div class="colorExampleBox" id="totalStatusINFORMATION">
