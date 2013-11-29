@@ -161,7 +161,7 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li ng-click="runMultipleTest(data.id, data.testid);"><a>Run test and sub tests</a></li>
-                                <li ng-click="runOneTest(data.id, data.testid, true);"><a>Run this test only</a></li>
+                                <li ng-click="runOneTest(data.id, data.testid, 'singleTest');"><a>Run this test only</a></li>
                             </ul>
                         </div>
 

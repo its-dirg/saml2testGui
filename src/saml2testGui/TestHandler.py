@@ -125,7 +125,11 @@ class Test:
     def handleRunTest(self):
         testToRun = self.parameters['testname']
         targetFile = self.parameters['targetFile']
-        testid = self.parameters['testid']
+
+        if 'testid' in self.parameters:
+            testid = self.parameters['testid']
+        else:
+            testid = None
 
         targetFile = targetFile.strip(' \n\t')
 

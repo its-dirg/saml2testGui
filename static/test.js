@@ -24,6 +24,10 @@ app.factory('runTestFactory', function ($http) {
         getTestResult: function (testname, testid) {
             targetFile = $('#targetIdp').val();
             return $http.get("/run_test", {params: { "testname": testname, "targetFile": targetFile, "testid": testid}});
+        },
+        getAllTestResult: function (testname) {
+            targetFile = $('#targetIdp').val();
+            return $http.get("/run_test", {params: { "testname": testname, "targetFile": targetFile}});
         }
     };
 });
@@ -49,17 +53,13 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     $scope.testResult = "";
     $scope.currentFlattenedTree = "None";
     $scope.currentOriginalTree;
-
     $scope.topDownTree;
     $scope.bottomUpTree;
     $scope.flatBottomUpTree;
-
     $scope.numberOfTestsStarted = 0;
+    var addedIds = []
 
     $scope.resultSummary = {'success': 0, 'failed': 0};
-
-    var testIsOpen = [];
-    var shouldOpen = true;
 
     $scope.items = [
         { type: 'Top down' },
@@ -92,13 +92,20 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         var tests = data['result']['tests'];
         */
 
-        i = writeResultToTree(data);
+        if (data['testid'] == null){
+            writeResultToTreeBasedOnId(data);
+        }else{
+            writeResultToTreeBasedOnTestid(data);
+        }
 
         $scope.numberOfTestsStarted--;
+
         if ($scope.numberOfTestsStarted <= 0){
             $('button').prop('disabled', false);
-            var resultString = "Successful tests: " + $scope.resultSummary.success +"\n"+ " Failed tests: " + $scope.resultSummary.failed
+
+            var resultString = "Successful tests: " + $scope.resultSummary.success + "\n" + " Failed tests: " + $scope.resultSummary.failed
             toaster.pop('note', "Result summary", resultString);
+            addedIds = []
         }
     };
 
@@ -128,28 +135,35 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
             //Uses runOneTest in order to gather all result summay code in one place
             for (var i = 0; i < testsToRun.length; i++){
-                $scope.runOneTest(testsToRun[i].id, testsToRun[i].testid), false;
+                $scope.runOneTest(testsToRun[i].id, testsToRun[i].testid), "multipleTest";
             }
         }
 
         $scope.numberOfTestsStarted = testsToRun.length;
     };
 
-    $scope.runOneTest = function (id, testid, isRunningSingelTest) {
+    $scope.runOneTest = function (id, testid, numberOfTest) {
         //Reset test summary or else the result of multiply runs for the same test will be presented
         $scope.resultSummary = {'success': 0, 'failed': 0};
         $('button').prop('disabled', true);
 
-        runTestFactory.getTestResult(id, testid).success(getTestResultSuccessCallback).error(errorCallback);
 
-        if (isRunningSingelTest){
+        if (numberOfTest == "singleTest"){
             $scope.numberOfTestsStarted = 1;
+            runTestFactory.getTestResult(id, testid).success(getTestResultSuccessCallback).error(errorCallback);
+
+        }else if(numberOfTest == "allTest"){
+            runTestFactory.getAllTestResult(id).success(getTestResultSuccessCallback).error(errorCallback);
+
+        }else{
+            runTestFactory.getTestResult(id, testid).success(getTestResultSuccessCallback).error(errorCallback);
         }
 
     };
 
     $scope.runAllTest = function () {
         var treeSize = $scope.currentFlattenedTree.length;
+        var executedIdList = []
         $scope.resetAll();
 
         for (var i = 0; i < treeSize; i++){
@@ -157,7 +171,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
             var id = $scope.currentFlattenedTree[i].id;
             var testid = $scope.currentFlattenedTree[i].testid;
 
-            $scope.runOneTest(id, testid, false);
+            $scope.runOneTest(id, testid, "allTest");
+
         }
 
         $scope.numberOfTestsStarted = treeSize;
@@ -249,28 +264,42 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }
     }
 
-    var writeResultToTree = function(data) {
-        testid = data['testid'];
+    var enterResultToTree = function (data, i) {
+        testList = data['result']['tests'];
         var testResultList = [];
-        var resultString;
+
+        for (var j = 0; j < testList.length; j++) {
+            testResultList.push(testList[j]);
+            testList[j]['status'] = convertStatusToText(testList[j]['status']);
+        }
+
+        $scope.currentFlattenedTree[i].result = testResultList;
+
+        $scope.currentFlattenedTree[i].status = convertStatusToText(data['result']['status']);
+        countSuccessAndFails(data['result']['status']);
+    }
+
+    var writeResultToTreeBasedOnTestid = function(data) {
+        testid = data['testid'];
 
         for (var i = 0; i < $scope.currentFlattenedTree.length; i++) {
             if ($scope.currentFlattenedTree[i].testid == testid) {
-                testList = data['result']['tests'];
-
-                for (var j = 0; j < testList.length; j++) {
-                    testResultList.push(testList[j]);
-                    testList[j]['status'] = convertStatusToText(testList[j]['status']);
-                }
-
-                $scope.currentFlattenedTree[i].result = testResultList;
-
-                $scope.currentFlattenedTree[i].status = convertStatusToText(data['result']['status']);
-                countSuccessAndFails(data['result']['status']);
-
-                return i;
+                enterResultToTree(data, i);
             }
         }
+    }
+
+    var writeResultToTreeBasedOnId = function(data) {
+        id = data['result']['id'];
+
+        for (var i = 0; i < $scope.currentFlattenedTree.length; i++) {
+            if ($scope.currentFlattenedTree[i].id == id) {
+                if ($.inArray(id, addedIds) == -1){
+                    enterResultToTree(data, i);
+                }
+            }
+        }
+        addedIds.push(id);
     }
 
     var generateExportResultString = function(){
@@ -436,13 +465,14 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }
     };
 
-    var countSuccessAndFails = function (status) {
+    var countSuccessAndFails = function(status){
         if (status == 0 || status == 1){
-            $scope.resultSummary.success += 1;
-            return;
+            $scope.resultSummary.success++;
+        }else{
+            $scope.resultSummary.failed++;
         }
-        $scope.resultSummary.failed += 1;
-    };
+    }
+
 });
 
 
