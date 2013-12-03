@@ -147,7 +147,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         $scope.resultSummary = {'success': 0, 'failed': 0};
         $('button').prop('disabled', true);
 
-
         if (numberOfTest == "singleTest"){
             $scope.numberOfTestsStarted = 1;
             runTestFactory.getTestResult(id, testid).success(getTestResultSuccessCallback).error(errorCallback);
@@ -270,13 +269,76 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         for (var j = 0; j < testList.length; j++) {
             testResultList.push(testList[j]);
-            testList[j]['status'] = convertStatusToText(testList[j]['status']);
+            var statusNumber = testList[j]['status'];
+            testList[j]['status'] = convertStatusToText(statusNumber);
+
+            if (statusNumber == 5){
+                //alert(testList[j].message);
+                //window.open(testList[j].url);
+
+                $('#modalWindow').modal('show');
+                //$('#iframe').attr("src", "https://localhost:4545/list");
+
+                $('#modalWindow').on('hidden.bs.modal', function () {
+                    //window.alert('hidden event fired!');
+                });
+
+                $('#modalContent').empty();
+
+                //$('#modalContent').append(testList[j].message);
+
+                // Change the form action to log_in
+                var html = document.createElement('html');
+                html.innerHTML = testList[j].message;
+                var formtag = html.getElementsByTagName('form')[0];
+                formtag.setAttribute('action', '/login');
+
+                //Create a iframe and present the log in screen inside the iframe
+                var iframe = document.createElement('iframe');
+                iframe.setAttribute('width', '100%');
+                iframe.setAttribute('height', '750px');
+                $('#modalContent').append(iframe);
+                iframe.contentWindow.document.open();
+                iframe.contentWindow.document.write(html.innerHTML);
+                iframe.contentWindow.document.close();
+
+                /*
+                var modal = document.getElementById("modalContent");
+
+                var btn=document.createElement("BUTTON");
+                var t=document.createTextNode("CLICK ME");
+                btn.appendChild(t);
+
+                modal.appendChild(btn);
+                */
+
+                /*
+                var x=window.open();
+                x.document.open();
+                x.document.write("<iframe src='google.se'>Hello!</iframe>");
+                x.document.close();
+
+
+                // Start a new document, erasing any content that was already in frames[0]
+                window.document.open( );
+                // Add some content to the document
+                window.document.write(testList[j].message);
+                // And close the document when we're done
+                window.document.close( );
+                */
+
+            }
         }
 
         $scope.currentFlattenedTree[i].result = testResultList;
 
         $scope.currentFlattenedTree[i].status = convertStatusToText(data['result']['status']);
         countSuccessAndFails(data['result']['status']);
+    }
+
+    window.postBack = function(username, password){
+        $('#modalWindow').modal('hide');
+        alert(username + " : " + password);
     }
 
     var writeResultToTreeBasedOnTestid = function(data) {

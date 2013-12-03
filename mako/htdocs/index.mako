@@ -9,6 +9,7 @@
 
 
 <div ng-controller="IndexCtrl" >
+
     <div class="container">
 
         <div class="headline">
@@ -174,14 +175,24 @@
                         Result:
                         <br>
 
+                        <!--
                         <div ng-repeat="test in data.result">{{test.status}} : {{test.id}} : {{test.name}}</div>
+                        -->
+
+                        <div ng-repeat="test in data.result">{{test}}</div>
 
                     </div>
-
                 </div>
-
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="modalWindow" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" id="modalContent">
+
+        </div>
+    </div>
+</div>

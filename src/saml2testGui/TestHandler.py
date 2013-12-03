@@ -38,7 +38,8 @@ class Test:
             "" : "index.mako",
             "list" : None,
             "config" : None,
-            "run_test" : None
+            "run_test" : None,
+            "login" : None
         }
         self.cache = cache
 
@@ -59,6 +60,8 @@ class Test:
             return self.handleConfigFiles()
         elif path == "run_test":
             return self.handleRunTest()
+        elif path == "login":
+            return self.handleLogin()
 
 
     def handleIndex(self, file):
@@ -120,6 +123,16 @@ class Test:
         self.checkForNewConfigFiles()
         configJSONString = json.dumps(self.config.IDPTESTENVIROMENT)
         return self.returnJSON(configJSONString)
+
+    def handleLogin(self):
+        username = self.parameters['login']
+        password = self.parameters['password']
+
+        htmlString = "<script>parent.postBack(\'" + username[0] + "\',\'" + password[0] + "\');</script>"
+
+        print htmlString
+
+        return self.returnHTML(htmlString)
 
 
     def handleRunTest(self):
@@ -355,6 +368,11 @@ class Test:
 
     def returnJSON(self, text):
         resp = Response(text, headers=[('Content-Type', "application/json")])
+        return resp(self.environ, self.start_response)
+
+
+    def returnHTML(self, text):
+        resp = Response(text, headers=[('Content-Type', "text/html")])
         return resp(self.environ, self.start_response)
 
 
