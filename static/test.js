@@ -32,6 +32,14 @@ app.factory('runTestFactory', function ($http) {
     };
 });
 
+app.factory('enterTargetDataFactory', function ($http) {
+    return {
+        enterTargetData: function (html, username, password) {
+            return $http.post("/enter_target_data", {"html": html, "username": username, "password": password});
+        }
+    };
+});
+
 app.factory('notificationFactory', function () {
 
     return {
@@ -47,7 +55,7 @@ app.factory('notificationFactory', function () {
 });
 
 
-app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, configFactory, runTestFactory, toaster) {
+app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, configFactory, runTestFactory, enterTargetDataFactory, toaster) {
     //alert('controller')
     $scope.configList = [];
     $scope.testResult = "";
@@ -107,6 +115,10 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
             toaster.pop('note', "Result summary", resultString);
             addedIds = []
         }
+    };
+
+    var getEnterTargetDataSuccessCallback = function (data, status, headers, config) {
+        alert('getEnterTargetDataSuccessCallback');
     };
 
     var errorCallback = function (data, status, headers, config) {
@@ -263,6 +275,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }
     }
 
+    var latestExecutedTestid
+
     var enterResultToTree = function (data, i) {
         testList = data['result']['tests'];
         var testResultList = [];
@@ -273,60 +287,25 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
             testList[j]['status'] = convertStatusToText(statusNumber);
 
             if (statusNumber == 5){
-                //alert(testList[j].message);
-                //window.open(testList[j].url);
+                latestExecutedTestid = data['testid'];
 
                 $('#modalWindow').modal('show');
-                //$('#iframe').attr("src", "https://localhost:4545/list");
-
-                $('#modalWindow').on('hidden.bs.modal', function () {
-                    //window.alert('hidden event fired!');
-                });
-
                 $('#modalContent').empty();
 
-                //$('#modalContent').append(testList[j].message);
-
                 // Change the form action to log_in
-                var html = document.createElement('html');
-                html.innerHTML = testList[j].message;
-                var formtag = html.getElementsByTagName('form')[0];
+                var loginForm = document.createElement('html');
+                loginForm.innerHTML = testList[j].message;
+                var formtag = loginForm.getElementsByTagName('form')[0];
                 formtag.setAttribute('action', '/login');
 
-                //Create a iframe and present the log in screen inside the iframe
+                //Create a iframe and present the login screen inside the iframe
                 var iframe = document.createElement('iframe');
                 iframe.setAttribute('width', '100%');
                 iframe.setAttribute('height', '750px');
                 $('#modalContent').append(iframe);
                 iframe.contentWindow.document.open();
-                iframe.contentWindow.document.write(html.innerHTML);
+                iframe.contentWindow.document.write(loginForm.innerHTML);
                 iframe.contentWindow.document.close();
-
-                /*
-                var modal = document.getElementById("modalContent");
-
-                var btn=document.createElement("BUTTON");
-                var t=document.createTextNode("CLICK ME");
-                btn.appendChild(t);
-
-                modal.appendChild(btn);
-                */
-
-                /*
-                var x=window.open();
-                x.document.open();
-                x.document.write("<iframe src='google.se'>Hello!</iframe>");
-                x.document.close();
-
-
-                // Start a new document, erasing any content that was already in frames[0]
-                window.document.open( );
-                // Add some content to the document
-                window.document.write(testList[j].message);
-                // And close the document when we're done
-                window.document.close( );
-                */
-
             }
         }
 
@@ -337,8 +316,20 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     }
 
     window.postBack = function(username, password){
+        var test = findTestInTreeByTestid($scope.currentFlattenedTree, latestExecutedTestid);
+        var subResults = test['result'];
+
+        for (var i = 0; i < subResults.length; i++){
+            if (subResults[i]['status'] == "INTERACTION"){
+                var htmlString = subResults[i]['message'];
+                break;
+            }
+        }
+
+        enterTargetDataFactory.enterTargetData(htmlString, username, password).success(getEnterTargetDataSuccessCallback).error(errorCallback);
+
         $('#modalWindow').modal('hide');
-        alert(username + " : " + password);
+        //alert(username + " : " + password);
     }
 
     var writeResultToTreeBasedOnTestid = function(data) {
@@ -431,41 +422,40 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     }
 
     var findTestInTreeByTestid = function (tree, targetTestid) {
-        var result = null;
+        var matchingTest = null;
 
         for (var i = 0; i < tree.length; i++){
             numberOfChildren = tree[i].children.length
 
-
             if (tree[i].testid == targetTestid){
-                result =  tree[i];
+                matchingTest =  tree[i];
                 break;
             }
-            else if (result == null && numberOfChildren != 0){
-                result =  findTestInTreeByTestid(tree[i].children, targetTestid);
+            else if (matchingTest == null && numberOfChildren != 0){
+                matchingTest =  findTestInTreeByTestid(tree[i].children, targetTestid);
             }
 
         }
-        return result;
+        return matchingTest;
     }
 
     var findTestInTreeByID = function (tree, targetID) {
-        var result = null;
+        var matchingTest = null;
 
         for (var i = 0; i < tree.length; i++){
             numberOfChildren = tree[i].children.length
 
 
             if (tree[i].id == targetID){
-                result =  tree[i];
+                matchingTest =  tree[i];
                 break;
             }
-            else if (result == null && numberOfChildren != 0){
-                result =  findTestInTreeByID(tree[i].children, targetID);
+            else if (matchingTest == null && numberOfChildren != 0){
+                matchingTest =  findTestInTreeByID(tree[i].children, targetID);
             }
 
         }
-        return result;
+        return matchingTest;
     }
 
     var showChildrenInTree = function (children, visible) {

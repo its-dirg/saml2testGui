@@ -113,7 +113,7 @@ class HttpHandler:
                 length = int(environ["CONTENT_LENGTH"])
                 body = environ["wsgi.input"].read(length)
                 environ['wsgi.input'] = StringIO(body)
-                if "CONTENT_TYPE" in environ and environ["CONTENT_TYPE"] == "application/json":
+                if "CONTENT_TYPE" in environ and "application/json" in environ["CONTENT_TYPE"]:
                     return json.loads(body)
                 elif "CONTENT_TYPE" in environ and environ["CONTENT_TYPE"] == "application/x-www-form-urlencoded":
                     return parse_qs(body)

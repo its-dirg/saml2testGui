@@ -39,7 +39,8 @@ class Test:
             "list" : None,
             "config" : None,
             "run_test" : None,
-            "login" : None
+            "login" : None,
+            "enter_target_data" : None
         }
         self.cache = cache
 
@@ -62,6 +63,8 @@ class Test:
             return self.handleRunTest()
         elif path == "login":
             return self.handleLogin()
+        elif path == "enter_target_data":
+            return self.handleEnterTargetData()
 
 
     def handleIndex(self, file):
@@ -130,9 +133,17 @@ class Test:
 
         htmlString = "<script>parent.postBack(\'" + username[0] + "\',\'" + password[0] + "\');</script>"
 
-        print htmlString
-
         return self.returnHTML(htmlString)
+
+    """
+    Parsa den inkommande html-koden och lägg in den i target filen. returnera ett vettigt värde till test.js
+    """
+    def handleEnterTargetData(self):
+        html = self.parameters['html']
+        username = self.parameters['username']
+        password = self.parameters['password']
+
+        return self.returnHTML("<h1> Title! </h1>")
 
 
     def handleRunTest(self):
