@@ -18,6 +18,8 @@
 
         <div id="formContainer" class="jumbotron">
 
+            <button class="btn btn-primary btn-sm" ng-click="click();">Postback</button>
+
             Tree layout:
             <br>
             <select ng-model="selectedItem"

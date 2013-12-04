@@ -11,11 +11,13 @@ from os.path import basename
 import os
 import uuid
 from urllib import quote
+
+import time
+
 __author__ = 'haho0032'
 
 class Test:
     IDP_TESTDRV = '/usr/local/bin/idp_testdrv.py'
-
     #Only used to check to check for new config files this which does nothing useful for the moment
     CONFIG_FILE_PATH = 'saml2test/configFiles/'
 
@@ -139,11 +141,89 @@ class Test:
     Parsa den inkommande html-koden och lägg in den i target filen. returnera ett vettigt värde till test.js
     """
     def handleEnterTargetData(self):
-        html = self.parameters['html']
+        title = self.parameters['title']
         username = self.parameters['username']
         password = self.parameters['password']
+        redirectUri = self.parameters['redirectUri']
+        postUri = redirectUri.replace("redirect", "post");
 
-        return self.returnHTML("<h1> Title! </h1>")
+        targetFile = open(self.CONFIG_FILE_PATH + "target.json", 'r+')
+        content = targetFile.read()
+        targetJson = json.loads(content)
+
+        #create the new interaction object based on the parameters
+        newInteraction = [
+                        {
+                            "matches": {
+                                "url": redirectUri,
+                                "title": title
+                            },
+                            "page-type": "login",
+                            "control": {
+                                "type": "form",
+                                "set": {"login": username, "password": password}
+                            }
+                        },
+                        {
+                            "matches": {
+                                "url": postUri,
+                                "title": title
+                            },
+                            "page-type": "login",
+                            "control": {
+                                "type": "form",
+                                "set": {"login": username, "password": password}
+                            }
+                        },
+                        {
+                            "matches": {
+                                "url": redirectUri,
+                                "title": "SAML 2.0 POST"
+                            },
+                            "page-type": "other",
+                            "control": {
+                                "index": 0,
+                                "type": "form",
+                            }
+                        },
+                        {
+                            "matches": {
+                                "url": postUri,
+                                "title": "SAML 2.0 POST"
+                            },
+                            "page-type": "other",
+                            "control": {
+                                "index": 0,
+                                "type": "form",
+                                "set": {}
+                            }
+                        },
+                        {
+                            "matches": {
+                                "url": postUri,
+                                "title": "SAML 2.0 POST"
+                            },
+                            "page-type": "other",
+                            "control": {
+                                "index": 0,
+                                "type": "form",
+                                "set": {}
+                            }
+                        }
+                    ]
+
+        if(targetJson.get('interaction') == None):
+            targetJson['interaction'] = []
+
+        targetJson['interaction'].extend(newInteraction)
+
+        """
+        targetFile.seek(0)
+        targetFile.write(json.dumps(targetJson))
+        targetFile.truncate()
+        targetFile.close()
+        """
+        return self.returnJSON({"asd": "asd"})
 
 
     def handleRunTest(self):

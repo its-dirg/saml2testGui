@@ -34,8 +34,8 @@ app.factory('runTestFactory', function ($http) {
 
 app.factory('enterTargetDataFactory', function ($http) {
     return {
-        enterTargetData: function (html, username, password) {
-            return $http.post("/enter_target_data", {"html": html, "username": username, "password": password});
+        enterTargetData: function (title, redirectUri, username, password) {
+            return $http.post("/enter_target_data", {"title": title, "redirectUri": redirectUri, "username": username, "password": password});
         }
     };
 });
@@ -315,21 +315,46 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         countSuccessAndFails(data['result']['status']);
     }
 
-    window.postBack = function(username, password){
+    function getHtmlObject() {
         var test = findTestInTreeByTestid($scope.currentFlattenedTree, latestExecutedTestid);
         var subResults = test['result'];
 
-        for (var i = 0; i < subResults.length; i++){
-            if (subResults[i]['status'] == "INTERACTION"){
+        for (var i = 0; i < subResults.length; i++) {
+            if (subResults[i]['status'] == "INTERACTION") {
                 var htmlString = subResults[i]['message'];
                 break;
             }
         }
 
-        enterTargetDataFactory.enterTargetData(htmlString, username, password).success(getEnterTargetDataSuccessCallback).error(errorCallback);
+        var htmlElement = document.createElement('html');
+        htmlElement.innerHTML = htmlString;
+        return htmlElement;
+    }
+
+    $scope.click = function(){
+        window.postBack("roland", "dianakra");
+    }
+
+    window.postBack = function(username, password){
+        alert("postBack");
+
+        var htmlElement = getHtmlObject();
+
+        var title = htmlElement.getElementsByTagName('title')[0].innerHTML;
+
+        var inputElementList = htmlElement.getElementsByTagName('input');
+        for (var j=0; j < inputElementList.length; j++){
+            if (inputElementList[j].getAttribute('name') == 'redirect_uri'){
+                var redirectUri = inputElementList[j].getAttribute('value');
+                break;
+            }
+        }
 
         $('#modalWindow').modal('hide');
-        //alert(username + " : " + password);
+
+        alert("before enterTargetDataFactory");
+        enterTargetDataFactory.enterTargetData(title, redirectUri, username, password).success(getEnterTargetDataSuccessCallback).error(errorCallback);
+        alert("after enterTargetDataFactory");
     }
 
     var writeResultToTreeBasedOnTestid = function(data) {
