@@ -4,7 +4,6 @@ var app = angular.module('main', ['toaster'])
 app.factory('testFactory', function ($http) {
     return {
         getTests: function (treeType) {
-            //alert("getTests");
             return $http.get("/list", {params: { "treeType": treeType}});
         }
     };
@@ -13,7 +12,6 @@ app.factory('testFactory', function ($http) {
 app.factory('configFactory', function ($http) {
     return {
         getConfig: function () {
-           // alert('getConfig');
             return $http.get("/config");
         }
     };
@@ -56,7 +54,6 @@ app.factory('notificationFactory', function () {
 
 
 app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, configFactory, runTestFactory, postBasicTargetDataFactory, toaster) {
-    //alert('controller')
     $scope.configList = [];
     $scope.testResult = "";
     $scope.currentFlattenedTree = "None";
@@ -79,7 +76,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
 
     var getListSuccessCallback = function (data, status, headers, config) {
-        //alert('getListSuccessCallback');
         $scope.topDownTree = data["topDownTree"];
         $scope.bottomUpTree = data["bottomUpTree"];
         $scope.flatBottomUpTree = data["flatBottomUpTree"];
@@ -88,19 +84,21 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     };
 
     var getConfigSuccessCallback = function (data, status, headers, config) {
-        //alert('getConfigSuccessCallback');
         $scope.configList = data;
     };
 
+    var isRunningAllTests = false;
+
     var getTestResultSuccessCallback = function (data, status, headers, config) {
         /*
-        alert(data['errorlog']);
-        alert(data['result']['status']);
-        alert(data['result']['id']);
+        (data['errorlog'];
+        (data['result']['status'];
+        (data['result']['id'];
         var tests = data['result']['tests'];
         */
 
         if (data['testid'] == null){
+            isRunningAllTests = true;
             writeResultToTreeBasedOnId(data);
         }else{
             writeResultToTreeBasedOnTestid(data);
@@ -108,8 +106,12 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         $scope.numberOfTestsStarted--;
 
+        //TODO when it finds a interaction status numberOfTestsStarted never get to 0
+        //alert($scope.numberOfTestsStarted);
+
         if ($scope.numberOfTestsStarted <= 0){
             $('button').prop('disabled', false);
+            isRunningAllTests = false;
 
             var resultString = "Successful tests: " + $scope.resultSummary.success + "\n" + " Failed tests: " + $scope.resultSummary.failed
             toaster.pop('note', "Result summary", resultString);
@@ -118,11 +120,10 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     };
 
     var getPostBasicDataSuccessCallback = function (data, status, headers, config) {
-        //alert('getEnterTargetDataSuccessCallback');
+        //TODO It this nessecerry?
     };
 
     var errorCallback = function (data, status, headers, config) {
-        //alert(data);
         notificationFactory.error(data.ExceptionMessage);
     };
 
@@ -277,37 +278,33 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     }
 
     var latestExecutedTestid;
-    var isShowingModalWindow = false;
 
     var createIframeAndShowInModelWindow = function(data, j) {
 
-        if (isShowingModalWindow == false){
-            isShowingModalWindow = true;
+        $('#modalWindow').modal('show');
+        $('#modalContent').empty();
 
-            alert("here");
+        // Change the form action to log_in
+        var loginForm = document.createElement('html');
+        loginForm.innerHTML = testList[j].message;
+        var formtag = loginForm.getElementsByTagName('form')[0];
+        formtag.setAttribute('action', '/final_target_data');
 
-            $('#modalWindow').modal('show');
-            $('#modalContent').empty();
+        //Create a iframe and present the login screen inside the iframe
+        var iframe = document.createElement('iframe');
+        iframe.setAttribute('width', '100%');
+        iframe.setAttribute('height', '750px');
 
-            // Change the form action to log_in
-            var loginForm = document.createElement('html');
-            loginForm.innerHTML = testList[j].message;
-            var formtag = loginForm.getElementsByTagName('form')[0];
-            formtag.setAttribute('action', '/final_target_data');
+        $('#modalContent').append("<h1>Information</h1><span>In order to use this application you need to log in to the IDP. The information will be stored which means that you only have to do this once  </span>");
+        $('#modalContent').append(iframe);
 
-            //Create a iframe and present the login screen inside the iframe
-            var iframe = document.createElement('iframe');
-            iframe.setAttribute('width', '100%');
-            iframe.setAttribute('height', '750px');
+        iframe.contentWindow.document.open();
+        iframe.contentWindow.document.write(loginForm.innerHTML);
+        iframe.contentWindow.document.close();
 
-            $('#modalContent').append("<h1>Information</h1><span>In order to use this application you need to log in to the IDP. The information will be stored which means that you only have to do this once  </span>");
-            $('#modalContent').append(iframe);
-
-            iframe.contentWindow.document.open();
-            iframe.contentWindow.document.write(loginForm.innerHTML);
-            iframe.contentWindow.document.close();
-        }
     }
+
+    var foundInteractionStatus = false;
 
     var enterResultToTree = function (data, i) {
         testList = data['result']['tests'];
@@ -329,30 +326,41 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         if (statusNumber == 5) {
 
-            latestExecutedTestid = data['testid'];
+            if(foundInteractionStatus == false){
+                foundInteractionStatus = true;
 
-            var htmlElement = getHtmlObject();
-
-            var title = htmlElement.getElementsByTagName('title')[0].innerHTML;
-
-            var inputElementList = htmlElement.getElementsByTagName('input');
-            for (var j=0; j < inputElementList.length; j++){
-                if (inputElementList[j].getAttribute('name') == 'redirect_uri'){
-                    var redirectUri = inputElementList[j].getAttribute('value');
-                    break;
+                if(isRunningAllTests){
+                    latestExecutedTestid = data['result']['id'];
+                }else{
+                    latestExecutedTestid = data['testid'];
                 }
+
+                var htmlElement = getHtmlObject();
+
+                var title = htmlElement.getElementsByTagName('title')[0].innerHTML;
+
+                var inputElementList = htmlElement.getElementsByTagName('input');
+                for (var j=0; j < inputElementList.length; j++){
+                    if (inputElementList[j].getAttribute('name') == 'redirect_uri'){
+                        var redirectUri = inputElementList[j].getAttribute('value');
+                        break;
+                    }
+                }
+
+                postBasicTargetDataFactory.postBasicTargetData(title, redirectUri).success(getPostBasicDataSuccessCallback).error(errorCallback);
+
+                createIframeAndShowInModelWindow(data, j);
             }
-
-            postBasicTargetDataFactory.postBasicTargetData(title, redirectUri).success(getPostBasicDataSuccessCallback).error(errorCallback);
-
-            createIframeAndShowInModelWindow(data, j);
         }
-
-
     }
 
     function getHtmlObject() {
-        var test = findTestInTreeByTestid($scope.currentFlattenedTree, latestExecutedTestid);
+
+        if (isRunningAllTests){
+            var test = findTestInTreeByID($scope.currentFlattenedTree, latestExecutedTestid);
+        }else{
+            var test = findTestInTreeByTestid($scope.currentFlattenedTree, latestExecutedTestid);
+        }
 
         var subResults = test['result'];
 
@@ -370,8 +378,11 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
     window.postBack = function(){
         toaster.pop('success', "Log in", "The data was successfully stored on the server");
+
+        alert("The data was successfully stored on the server");
+
         $('#modalWindow').modal('hide');
-        isShowingModalWindow = false;
+        foundInteractionStatus = false;
     }
 
     var writeResultToTreeBasedOnTestid = function(data) {
