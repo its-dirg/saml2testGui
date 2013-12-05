@@ -224,7 +224,7 @@ class Test:
 
         self.writeToTargetConfig(password, username)
 
-        htmlString = "<script>parent.postBack(\'" + username + "\');</script>"
+        htmlString = "<script>parent.postBack();</script>"
 
         return self.returnHTML(htmlString)
 

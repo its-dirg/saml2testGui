@@ -155,6 +155,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     };
 
     $scope.runOneTest = function (id, testid, numberOfTest) {
+
         //Reset test summary or else the result of multiply runs for the same test will be presented
         $scope.resultSummary = {'success': 0, 'failed': 0};
         $('button').prop('disabled', true);
@@ -275,27 +276,37 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }
     }
 
-    var latestExecutedTestid
+    var latestExecutedTestid;
+    var isShowingModalWindow = false;
 
     var createIframeAndShowInModelWindow = function(data, j) {
 
-        $('#modalWindow').modal('show');
-        $('#modalContent').empty();
+        if (isShowingModalWindow == false){
+            isShowingModalWindow = true;
 
-        // Change the form action to log_in
-        var loginForm = document.createElement('html');
-        loginForm.innerHTML = testList[j].message;
-        var formtag = loginForm.getElementsByTagName('form')[0];
-        formtag.setAttribute('action', '/final_target_data');
+            alert("here");
 
-        //Create a iframe and present the login screen inside the iframe
-        var iframe = document.createElement('iframe');
-        iframe.setAttribute('width', '100%');
-        iframe.setAttribute('height', '750px');
-        $('#modalContent').append(iframe);
-        iframe.contentWindow.document.open();
-        iframe.contentWindow.document.write(loginForm.innerHTML);
-        iframe.contentWindow.document.close();
+            $('#modalWindow').modal('show');
+            $('#modalContent').empty();
+
+            // Change the form action to log_in
+            var loginForm = document.createElement('html');
+            loginForm.innerHTML = testList[j].message;
+            var formtag = loginForm.getElementsByTagName('form')[0];
+            formtag.setAttribute('action', '/final_target_data');
+
+            //Create a iframe and present the login screen inside the iframe
+            var iframe = document.createElement('iframe');
+            iframe.setAttribute('width', '100%');
+            iframe.setAttribute('height', '750px');
+
+            $('#modalContent').append("<h1>Information</h1><span>In order to use this application you need to log in to the IDP. The information will be stored which means that you only have to do this once  </span>");
+            $('#modalContent').append(iframe);
+
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(loginForm.innerHTML);
+            iframe.contentWindow.document.close();
+        }
     }
 
     var enterResultToTree = function (data, i) {
@@ -357,10 +368,10 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         return htmlElement;
     }
 
-    window.postBack = function(testid){
-
+    window.postBack = function(){
+        toaster.pop('success', "Log in", "The data was successfully stored on the server");
         $('#modalWindow').modal('hide');
-
+        isShowingModalWindow = false;
     }
 
     var writeResultToTreeBasedOnTestid = function(data) {
