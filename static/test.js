@@ -32,10 +32,10 @@ app.factory('runTestFactory', function ($http) {
     };
 });
 
-app.factory('enterTargetDataFactory', function ($http) {
+app.factory('postBasicTargetDataFactory', function ($http) {
     return {
-        enterTargetData: function (title, redirectUri, username, password) {
-            return $http.post("/enter_target_data", {"title": title, "redirectUri": redirectUri, "username": username, "password": password});
+        postBasicTargetData: function (title, redirectUri) {
+            return $http.post("/basic_target_data", {"title": title, "redirectUri": redirectUri});
         }
     };
 });
@@ -55,7 +55,7 @@ app.factory('notificationFactory', function () {
 });
 
 
-app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, configFactory, runTestFactory, enterTargetDataFactory, toaster) {
+app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, configFactory, runTestFactory, postBasicTargetDataFactory, toaster) {
     //alert('controller')
     $scope.configList = [];
     $scope.testResult = "";
@@ -117,8 +117,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }
     };
 
-    var getEnterTargetDataSuccessCallback = function (data, status, headers, config) {
-        alert('getEnterTargetDataSuccessCallback');
+    var getPostBasicDataSuccessCallback = function (data, status, headers, config) {
+        //alert('getEnterTargetDataSuccessCallback');
     };
 
     var errorCallback = function (data, status, headers, config) {
@@ -277,46 +277,72 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
     var latestExecutedTestid
 
+    var createIframeAndShowInModelWindow = function(data, j) {
+
+        $('#modalWindow').modal('show');
+        $('#modalContent').empty();
+
+        // Change the form action to log_in
+        var loginForm = document.createElement('html');
+        loginForm.innerHTML = testList[j].message;
+        var formtag = loginForm.getElementsByTagName('form')[0];
+        formtag.setAttribute('action', '/final_target_data');
+
+        //Create a iframe and present the login screen inside the iframe
+        var iframe = document.createElement('iframe');
+        iframe.setAttribute('width', '100%');
+        iframe.setAttribute('height', '750px');
+        $('#modalContent').append(iframe);
+        iframe.contentWindow.document.open();
+        iframe.contentWindow.document.write(loginForm.innerHTML);
+        iframe.contentWindow.document.close();
+    }
+
     var enterResultToTree = function (data, i) {
         testList = data['result']['tests'];
         var testResultList = [];
 
         for (var j = 0; j < testList.length; j++) {
             testResultList.push(testList[j]);
-            var statusNumber = testList[j]['status'];
+            var statusNumber = testList[j].status;
             testList[j]['status'] = convertStatusToText(statusNumber);
-
-            if (statusNumber == 5){
-                latestExecutedTestid = data['testid'];
-
-                $('#modalWindow').modal('show');
-                $('#modalContent').empty();
-
-                // Change the form action to log_in
-                var loginForm = document.createElement('html');
-                loginForm.innerHTML = testList[j].message;
-                var formtag = loginForm.getElementsByTagName('form')[0];
-                formtag.setAttribute('action', '/login');
-
-                //Create a iframe and present the login screen inside the iframe
-                var iframe = document.createElement('iframe');
-                iframe.setAttribute('width', '100%');
-                iframe.setAttribute('height', '750px');
-                $('#modalContent').append(iframe);
-                iframe.contentWindow.document.open();
-                iframe.contentWindow.document.write(loginForm.innerHTML);
-                iframe.contentWindow.document.close();
-            }
         }
 
         $scope.currentFlattenedTree[i].result = testResultList;
 
         $scope.currentFlattenedTree[i].status = convertStatusToText(data['result']['status']);
         countSuccessAndFails(data['result']['status']);
+
+
+        statusNumber = data['result']['status'];
+
+        if (statusNumber == 5) {
+
+            latestExecutedTestid = data['testid'];
+
+            var htmlElement = getHtmlObject();
+
+            var title = htmlElement.getElementsByTagName('title')[0].innerHTML;
+
+            var inputElementList = htmlElement.getElementsByTagName('input');
+            for (var j=0; j < inputElementList.length; j++){
+                if (inputElementList[j].getAttribute('name') == 'redirect_uri'){
+                    var redirectUri = inputElementList[j].getAttribute('value');
+                    break;
+                }
+            }
+
+            postBasicTargetDataFactory.postBasicTargetData(title, redirectUri).success(getPostBasicDataSuccessCallback).error(errorCallback);
+
+            createIframeAndShowInModelWindow(data, j);
+        }
+
+
     }
 
     function getHtmlObject() {
         var test = findTestInTreeByTestid($scope.currentFlattenedTree, latestExecutedTestid);
+
         var subResults = test['result'];
 
         for (var i = 0; i < subResults.length; i++) {
@@ -331,30 +357,10 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         return htmlElement;
     }
 
-    $scope.click = function(){
-        window.postBack("roland", "dianakra");
-    }
-
-    window.postBack = function(username, password){
-        alert("postBack");
-
-        var htmlElement = getHtmlObject();
-
-        var title = htmlElement.getElementsByTagName('title')[0].innerHTML;
-
-        var inputElementList = htmlElement.getElementsByTagName('input');
-        for (var j=0; j < inputElementList.length; j++){
-            if (inputElementList[j].getAttribute('name') == 'redirect_uri'){
-                var redirectUri = inputElementList[j].getAttribute('value');
-                break;
-            }
-        }
+    window.postBack = function(testid){
 
         $('#modalWindow').modal('hide');
 
-        alert("before enterTargetDataFactory");
-        enterTargetDataFactory.enterTargetData(title, redirectUri, username, password).success(getEnterTargetDataSuccessCallback).error(errorCallback);
-        alert("after enterTargetDataFactory");
     }
 
     var writeResultToTreeBasedOnTestid = function(data) {

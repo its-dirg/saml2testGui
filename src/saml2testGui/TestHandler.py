@@ -3,6 +3,7 @@ import cgi
 import copy
 
 import json
+import shutil
 import subprocess
 from saml2.httputil import Response, ServiceError
 
@@ -41,8 +42,8 @@ class Test:
             "list" : None,
             "config" : None,
             "run_test" : None,
-            "login" : None,
-            "enter_target_data" : None
+            "final_target_data" : None,
+            "basic_target_data" : None
         }
         self.cache = cache
 
@@ -63,10 +64,10 @@ class Test:
             return self.handleConfigFiles()
         elif path == "run_test":
             return self.handleRunTest()
-        elif path == "login":
-            return self.handleLogin()
-        elif path == "enter_target_data":
-            return self.handleEnterTargetData()
+        elif path == "final_target_data":
+            return self.handleFinalTargetData()
+        elif path == "basic_target_data":
+            return self.handleBasicTargetData()
 
 
     def handleIndex(self, file):
@@ -76,6 +77,10 @@ class Test:
         argv = {
             "a_value": "Hello world"
         }
+
+        #TODO this should be removed since the target file shouldn't be replaced ever time the site is loaded
+        shutil.copyfile(self.CONFIG_FILE_PATH + "/backup/target.json", self.CONFIG_FILE_PATH + "target.json")
+
         return resp(self.environ, self.start_response, **argv)
 
 
@@ -129,23 +134,13 @@ class Test:
         configJSONString = json.dumps(self.config.IDPTESTENVIROMENT)
         return self.returnJSON(configJSONString)
 
-    def handleLogin(self):
-        username = self.parameters['login']
-        password = self.parameters['password']
+    def writeToTargetConfig(self, password, username):
 
-        htmlString = "<script>parent.postBack(\'" + username[0] + "\',\'" + password[0] + "\');</script>"
+        interactionParameters = self.session['interactionParameters']
 
-        return self.returnHTML(htmlString)
-
-    """
-    Parsa den inkommande html-koden och lägg in den i target filen. returnera ett vettigt värde till test.js
-    """
-    def handleEnterTargetData(self):
-        title = self.parameters['title']
-        username = self.parameters['username']
-        password = self.parameters['password']
-        redirectUri = self.parameters['redirectUri']
-        postUri = redirectUri.replace("redirect", "post");
+        title = interactionParameters['title']
+        redirectUri = interactionParameters['redirectUri']
+        postUri = interactionParameters['postUri']
 
         targetFile = open(self.CONFIG_FILE_PATH + "target.json", 'r+')
         content = targetFile.read()
@@ -153,76 +148,93 @@ class Test:
 
         #create the new interaction object based on the parameters
         newInteraction = [
-                        {
-                            "matches": {
-                                "url": redirectUri,
-                                "title": title
-                            },
-                            "page-type": "login",
-                            "control": {
-                                "type": "form",
-                                "set": {"login": username, "password": password}
-                            }
-                        },
-                        {
-                            "matches": {
-                                "url": postUri,
-                                "title": title
-                            },
-                            "page-type": "login",
-                            "control": {
-                                "type": "form",
-                                "set": {"login": username, "password": password}
-                            }
-                        },
-                        {
-                            "matches": {
-                                "url": redirectUri,
-                                "title": "SAML 2.0 POST"
-                            },
-                            "page-type": "other",
-                            "control": {
-                                "index": 0,
-                                "type": "form",
-                            }
-                        },
-                        {
-                            "matches": {
-                                "url": postUri,
-                                "title": "SAML 2.0 POST"
-                            },
-                            "page-type": "other",
-                            "control": {
-                                "index": 0,
-                                "type": "form",
-                                "set": {}
-                            }
-                        },
-                        {
-                            "matches": {
-                                "url": postUri,
-                                "title": "SAML 2.0 POST"
-                            },
-                            "page-type": "other",
-                            "control": {
-                                "index": 0,
-                                "type": "form",
-                                "set": {}
-                            }
-                        }
-                    ]
+            {
+                "matches": {
+                    "url": redirectUri,
+                    "title": title
+                },
+                "page-type": "login",
+                "control": {
+                    "type": "form",
+                    "set": {"login": username, "password": password}
+                }
+            },
+            {
+                "matches": {
+                    "url": postUri,
+                    "title": title
+                },
+                "page-type": "login",
+                "control": {
+                    "type": "form",
+                    "set": {"login": username, "password": password}
+                }
+            },
+            {
+                "matches": {
+                    "url": redirectUri,
+                    "title": "SAML 2.0 POST"
+                },
+                "page-type": "other",
+                "control": {
+                    "index": 0,
+                    "type": "form",
+                }
+            },
+            {
+                "matches": {
+                    "url": postUri,
+                    "title": "SAML 2.0 POST"
+                },
+                "page-type": "other",
+                "control": {
+                    "index": 0,
+                    "type": "form",
+                    "set": {}
+                }
+            },
+            {
+                "matches": {
+                    "url": postUri,
+                    "title": "SAML 2.0 POST"
+                },
+                "page-type": "other",
+                "control": {
+                    "index": 0,
+                    "type": "form",
+                    "set": {}
+                }
+            }
+        ]
 
-        if(targetJson.get('interaction') == None):
+        if (targetJson.get('interaction') == None):
             targetJson['interaction'] = []
 
         targetJson['interaction'].extend(newInteraction)
 
-        """
         targetFile.seek(0)
         targetFile.write(json.dumps(targetJson))
         targetFile.truncate()
         targetFile.close()
-        """
+
+
+    def handleFinalTargetData(self):
+        username = self.parameters['login'][0]
+        password = self.parameters['password'][0]
+
+        self.writeToTargetConfig(password, username)
+
+        htmlString = "<script>parent.postBack(\'" + username + "\');</script>"
+
+        return self.returnHTML(htmlString)
+
+    def handleBasicTargetData(self):
+        title = self.parameters['title']
+        redirectUri = self.parameters['redirectUri']
+        postUri = redirectUri.replace("redirect", "post");
+
+        self.session['interactionParameters'] = {"title": title, "redirectUri": redirectUri, "postUri": postUri}
+
         return self.returnJSON({"asd": "asd"})
 
 
