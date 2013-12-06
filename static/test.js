@@ -38,6 +38,14 @@ app.factory('postBasicTargetDataFactory', function ($http) {
     };
 });
 
+app.factory('postResetTargetDataFactory', function ($http) {
+    return {
+        postResetTargetData: function () {
+            return $http.post("/reset_target_data");
+        }
+    };
+});
+
 app.factory('notificationFactory', function () {
 
     return {
@@ -53,7 +61,7 @@ app.factory('notificationFactory', function () {
 });
 
 
-app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, configFactory, runTestFactory, postBasicTargetDataFactory, toaster) {
+app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, configFactory, runTestFactory, postBasicTargetDataFactory, postResetTargetDataFactory, toaster) {
     $scope.configList = [];
     $scope.testResult = "";
     $scope.currentFlattenedTree = "None";
@@ -120,6 +128,10 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     };
 
     var getPostBasicDataSuccessCallback = function (data, status, headers, config) {
+        //TODO It this nessecerry?
+    };
+
+    var getPostResetDataSuccessCallback = function (data, status, headers, config) {
         //TODO It this nessecerry?
     };
 
@@ -306,6 +318,34 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
     var foundInteractionStatus = false;
 
+    var handleInteraction = function (data) {
+        if (foundInteractionStatus == false) {
+            foundInteractionStatus = true;
+
+            if (isRunningAllTests) {
+                latestExecutedTestid = data['result']['id'];
+            } else {
+                latestExecutedTestid = data['testid'];
+            }
+
+            var htmlElement = getHtmlObject();
+
+            var title = htmlElement.getElementsByTagName('title')[0].innerHTML;
+
+            var inputElementList = htmlElement.getElementsByTagName('input');
+            for (var j = 0; j < inputElementList.length; j++) {
+                if (inputElementList[j].getAttribute('name') == 'redirect_uri') {
+                    var redirectUri = inputElementList[j].getAttribute('value');
+                    break;
+                }
+            }
+
+            postBasicTargetDataFactory.postBasicTargetData(title, redirectUri).success(getPostBasicDataSuccessCallback).error(errorCallback);
+
+            createIframeAndShowInModelWindow(data, j);
+        }
+    }
+
     var enterResultToTree = function (data, i) {
         testList = data['result']['tests'];
         var testResultList = [];
@@ -325,36 +365,37 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         statusNumber = data['result']['status'];
 
         if (statusNumber == 5) {
+            handleInteraction(data);
+        }
+        else if (statusNumber == 3) {
+            var lastElement = testList.length-1;
 
-            if(foundInteractionStatus == false){
-                foundInteractionStatus = true;
+            var errorMessage = testList[lastElement].message
 
-                if(isRunningAllTests){
-                    latestExecutedTestid = data['result']['id'];
-                }else{
-                    latestExecutedTestid = data['testid'];
-                }
-
-                var htmlElement = getHtmlObject();
-
-                var title = htmlElement.getElementsByTagName('title')[0].innerHTML;
-
-                var inputElementList = htmlElement.getElementsByTagName('input');
-                for (var j=0; j < inputElementList.length; j++){
-                    if (inputElementList[j].getAttribute('name') == 'redirect_uri'){
-                        var redirectUri = inputElementList[j].getAttribute('value');
-                        break;
-                    }
-                }
-
-                postBasicTargetDataFactory.postBasicTargetData(title, redirectUri).success(getPostBasicDataSuccessCallback).error(errorCallback);
-
-                createIframeAndShowInModelWindow(data, j);
+            if (errorMessage.indexOf("Unknown user or wrong password") != -1){
+                bootbox.dialog({
+                    message: "Unknown user or wrong password. Do you want to reset interaction configurations?",
+                    title: "Error occured",
+                    buttons: {
+                        danger: {
+                            label: "No",
+                            className: "btn-danger"
+                        },
+                        success: {
+                        label: "Yes",
+                        className: "btn-success",
+                            callback: function() {
+                                  postResetTargetDataFactory.postResetTargetData().success(getPostResetDataSuccessCallback).error(errorCallback);
+                            }
+                        }
+                      }
+                });
+                //alert("Unknown user or wrong password. Do you want to reset interaction configurations?");
             }
         }
     }
 
-    function getHtmlObject() {
+    var getHtmlObject = function () {
 
         if (isRunningAllTests){
             var test = findTestInTreeByID($scope.currentFlattenedTree, latestExecutedTestid);
@@ -377,12 +418,13 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     }
 
     window.postBack = function(){
-        toaster.pop('success', "Log in", "The data was successfully stored on the server");
-
-        alert("The data was successfully stored on the server");
-
         $('#modalWindow').modal('hide');
         foundInteractionStatus = false;
+
+        var infoString = "The data was successfully stored on the server. Please rerun the tests in order to get a accurate result"
+
+        toaster.pop('success', "Log in", infoString);
+        bootbox.alert(infoString);
     }
 
     var writeResultToTreeBasedOnTestid = function(data) {

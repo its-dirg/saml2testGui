@@ -43,7 +43,8 @@ class Test:
             "config" : None,
             "run_test" : None,
             "final_target_data" : None,
-            "basic_target_data" : None
+            "basic_target_data" : None,
+            "reset_target_data" : None
         }
         self.cache = cache
 
@@ -68,6 +69,8 @@ class Test:
             return self.handleFinalTargetData()
         elif path == "basic_target_data":
             return self.handleBasicTargetData()
+        elif path == "reset_target_data":
+            return self.handleResetTargetData()
 
 
     def handleIndex(self, file):
@@ -79,7 +82,7 @@ class Test:
         }
 
         #TODO this should be removed since the target file shouldn't be replaced ever time the site is loaded
-        shutil.copyfile(self.CONFIG_FILE_PATH + "/backup/target.json", self.CONFIG_FILE_PATH + "target.json")
+        #shutil.copyfile(self.CONFIG_FILE_PATH + "/backup/target.json", self.CONFIG_FILE_PATH + "target.json")
 
         return resp(self.environ, self.start_response, **argv)
 
@@ -237,6 +240,9 @@ class Test:
 
         return self.returnJSON({"asd": "asd"})
 
+    def handleResetTargetData(self):
+        shutil.copyfile(self.CONFIG_FILE_PATH + "/backup/target.json", self.CONFIG_FILE_PATH + "target.json")
+        return self.returnHTML("<h1>Data</h1>")
 
     def handleRunTest(self):
         testToRun = self.parameters['testname']
