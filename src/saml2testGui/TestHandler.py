@@ -82,7 +82,7 @@ class Test:
         }
 
         #TODO this should be removed since the target file shouldn't be replaced ever time the site is loaded
-        #shutil.copyfile(self.CONFIG_FILE_PATH + "/backup/target.json", self.CONFIG_FILE_PATH + "target.json")
+        shutil.copyfile(self.CONFIG_FILE_PATH + "/backup/target.json", self.CONFIG_FILE_PATH + "target.json")
 
         return resp(self.environ, self.start_response, **argv)
 
@@ -137,75 +137,36 @@ class Test:
         configJSONString = json.dumps(self.config.IDPTESTENVIROMENT)
         return self.returnJSON(configJSONString)
 
-    def writeToTargetConfig(self, password, username):
+    def writeToTargetConfig(self, password=None, username=None):
 
         interactionParameters = self.session['interactionParameters']
 
         title = interactionParameters['title']
         redirectUri = interactionParameters['redirectUri']
-        postUri = interactionParameters['postUri']
+        pageType = interactionParameters['pageType']
+        controlType = interactionParameters['controlType']
 
         targetFile = open(self.CONFIG_FILE_PATH + "target.json", 'r+')
         content = targetFile.read()
         targetJson = json.loads(content)
 
         #create the new interaction object based on the parameters
+        if password == None and username == None:
+            set = {}
+        else:
+            set = {"login": username, "password": password}
+
         newInteraction = [
             {
                 "matches": {
                     "url": redirectUri,
                     "title": title
                 },
-                "page-type": "login",
-                "control": {
-                    "type": "form",
-                    "set": {"login": username, "password": password}
-                }
-            },
-            {
-                "matches": {
-                    "url": postUri,
-                    "title": title
-                },
-                "page-type": "login",
-                "control": {
-                    "type": "form",
-                    "set": {"login": username, "password": password}
-                }
-            },
-            {
-                "matches": {
-                    "url": redirectUri,
-                    "title": "SAML 2.0 POST"
-                },
-                "page-type": "other",
+                "page-type": pageType,
                 "control": {
                     "index": 0,
-                    "type": "form",
-                }
-            },
-            {
-                "matches": {
-                    "url": postUri,
-                    "title": "SAML 2.0 POST"
-                },
-                "page-type": "other",
-                "control": {
-                    "index": 0,
-                    "type": "form",
-                    "set": {}
-                }
-            },
-            {
-                "matches": {
-                    "url": postUri,
-                    "title": "SAML 2.0 POST"
-                },
-                "page-type": "other",
-                "control": {
-                    "index": 0,
-                    "type": "form",
-                    "set": {}
+                    "type": controlType,
+                    "set": set
                 }
             }
         ]
@@ -222,10 +183,14 @@ class Test:
 
 
     def handleFinalTargetData(self):
-        username = self.parameters['login'][0]
-        password = self.parameters['password'][0]
 
-        self.writeToTargetConfig(password, username)
+        try:
+            username = self.parameters['login'][0]
+            password = self.parameters['password'][0]
+
+            self.writeToTargetConfig(password, username)
+        except KeyError:
+            self.writeToTargetConfig()
 
         htmlString = "<script>parent.postBack();</script>"
 
@@ -234,9 +199,10 @@ class Test:
     def handleBasicTargetData(self):
         title = self.parameters['title']
         redirectUri = self.parameters['redirectUri']
-        postUri = redirectUri.replace("redirect", "post");
+        pageType = self.parameters['pageType']
+        controlType = self.parameters['controlType']
 
-        self.session['interactionParameters'] = {"title": title, "redirectUri": redirectUri, "postUri": postUri}
+        self.session['interactionParameters'] = {"title": title, "redirectUri": redirectUri, "pageType": pageType, "controlType": controlType}
 
         return self.returnJSON({"asd": "asd"})
 

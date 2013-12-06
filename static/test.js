@@ -32,8 +32,8 @@ app.factory('runTestFactory', function ($http) {
 
 app.factory('postBasicTargetDataFactory', function ($http) {
     return {
-        postBasicTargetData: function (title, redirectUri) {
-            return $http.post("/basic_target_data", {"title": title, "redirectUri": redirectUri});
+        postBasicTargetData: function (title, redirectUri, pageType, controlType) {
+            return $http.post("/basic_target_data", {"title": title, "redirectUri": redirectUri, "pageType": pageType, "controlType": controlType});
         }
     };
 });
@@ -114,12 +114,10 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         $scope.numberOfTestsStarted--;
 
-        //TODO when it finds a interaction status numberOfTestsStarted never get to 0
-        //alert($scope.numberOfTestsStarted);
-
         if ($scope.numberOfTestsStarted <= 0){
             $('button').prop('disabled', false);
             isRunningAllTests = false;
+            hasShownDialogBox = false;
 
             var resultString = "Successful tests: " + $scope.resultSummary.success + "\n" + " Failed tests: " + $scope.resultSummary.failed
             toaster.pop('note', "Result summary", resultString);
@@ -168,7 +166,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     };
 
     $scope.runOneTest = function (id, testid, numberOfTest) {
-
         //Reset test summary or else the result of multiply runs for the same test will be presented
         $scope.resultSummary = {'success': 0, 'failed': 0};
         $('button').prop('disabled', true);
@@ -183,7 +180,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }else{
             runTestFactory.getTestResult(id, testid).success(getTestResultSuccessCallback).error(errorCallback);
         }
-
     };
 
     $scope.runAllTest = function () {
@@ -192,10 +188,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         $scope.resetAll();
 
         for (var i = 0; i < treeSize; i++){
-
             var id = $scope.currentFlattenedTree[i].id;
             var testid = $scope.currentFlattenedTree[i].testid;
-
             $scope.runOneTest(id, testid, "allTest");
 
         }
@@ -291,14 +285,22 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
     var latestExecutedTestid;
 
-    var createIframeAndShowInModelWindow = function(data, j) {
+    var createIframeAndShowInModelWindow = function(data) {
+
+        lastElement = testList.length -1;
+        testList = data['result']['tests'];
 
         $('#modalWindow').modal('show');
         $('#modalContent').empty();
 
+        //Resets the foundInteractionStatus to false if the user exit the log in window
+        $('#modalWindow').on('hidden.bs.modal', function (e) {
+            foundInteractionStatus = false;
+        });
+
         // Change the form action to log_in
         var loginForm = document.createElement('html');
-        loginForm.innerHTML = testList[j].message;
+        loginForm.innerHTML = testList[lastElement].message;
         var formtag = loginForm.getElementsByTagName('form')[0];
         formtag.setAttribute('action', '/final_target_data');
 
@@ -317,36 +319,75 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     }
 
     var foundInteractionStatus = false;
+    var hasShownDialogBox = false;
 
     var handleInteraction = function (data) {
         if (foundInteractionStatus == false) {
             foundInteractionStatus = true;
 
-            if (isRunningAllTests) {
-                latestExecutedTestid = data['result']['id'];
-            } else {
-                latestExecutedTestid = data['testid'];
+            if (isRunningAllTests){
+                var test = findTestInTreeByID($scope.currentFlattenedTree, data['result']['id']);
+            }else{
+                var test = findTestInTreeByTestid($scope.currentFlattenedTree, data['testid']);
             }
 
-            var htmlElement = getHtmlObject();
+            var subResults = test['result'];
 
-            var title = htmlElement.getElementsByTagName('title')[0].innerHTML;
+            for (var i = 0; i < subResults.length; i++) {
+                if (subResults[i]['status'] == "INTERACTION") {
+                    var htmlString = subResults[i]['message'];
 
-            var inputElementList = htmlElement.getElementsByTagName('input');
-            for (var j = 0; j < inputElementList.length; j++) {
-                if (inputElementList[j].getAttribute('name') == 'redirect_uri') {
-                    var redirectUri = inputElementList[j].getAttribute('value');
+                    var unFormatedUrl = subResults[i]['url']
+                    var url= unFormatedUrl.substr(0, unFormatedUrl.indexOf('?'));
+
                     break;
                 }
             }
 
-            postBasicTargetDataFactory.postBasicTargetData(title, redirectUri).success(getPostBasicDataSuccessCallback).error(errorCallback);
+            var htmlElement = document.createElement('html');
+            htmlElement.innerHTML = htmlString;
 
-            createIframeAndShowInModelWindow(data, j);
+
+            var title = htmlElement.getElementsByTagName('title')[0].innerHTML;
+
+            //TODO I don't know how to identify the property
+            var pageType = "login";
+
+            var formTags = htmlElement.getElementsByTagName('form');
+            if (formTags.length > 0){
+                var controlType = "form"
+            }
+
+
+            postBasicTargetDataFactory.postBasicTargetData(title, url, pageType, controlType).success(getPostBasicDataSuccessCallback).error(errorCallback);
+
+            //TODO aks user if the data should be put into the database
+            if (!hasShownDialogBox){
+                hasShownDialogBox = true;
+
+                bootbox.dialog({
+                    message: "The server are missing some interaction configurations. Do you want the system to try insert the interaction configuration?",
+                    title: "Interaction information required",
+                    buttons: {
+                        danger: {
+                            label: "No",
+                            className: "btn-default"
+                        },
+                        success: {
+                            label: "Yes",
+                            className: "btn-primary",
+                                callback: function() {
+                                    createIframeAndShowInModelWindow(data);
+                                }
+                        }
+                      }
+                });
+            }
         }
     }
 
     var enterResultToTree = function (data, i) {
+
         testList = data['result']['tests'];
         var testResultList = [];
 
@@ -379,11 +420,11 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
                     buttons: {
                         danger: {
                             label: "No",
-                            className: "btn-danger"
+                            className: "btn-default"
                         },
                         success: {
                         label: "Yes",
-                        className: "btn-success",
+                        className: "btn-primary",
                             callback: function() {
                                   postResetTargetDataFactory.postResetTargetData().success(getPostResetDataSuccessCallback).error(errorCallback);
                             }
@@ -395,36 +436,16 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }
     }
 
-    var getHtmlObject = function () {
-
-        if (isRunningAllTests){
-            var test = findTestInTreeByID($scope.currentFlattenedTree, latestExecutedTestid);
-        }else{
-            var test = findTestInTreeByTestid($scope.currentFlattenedTree, latestExecutedTestid);
-        }
-
-        var subResults = test['result'];
-
-        for (var i = 0; i < subResults.length; i++) {
-            if (subResults[i]['status'] == "INTERACTION") {
-                var htmlString = subResults[i]['message'];
-                break;
-            }
-        }
-
-        var htmlElement = document.createElement('html');
-        htmlElement.innerHTML = htmlString;
-        return htmlElement;
-    }
-
     window.postBack = function(){
-        $('#modalWindow').modal('hide');
-        foundInteractionStatus = false;
+        //A bug appers when interactions without login screen
+        setTimeout(function() {
+            $('#modalWindow').modal('hide');
+            foundInteractionStatus = false;
+            var infoString = "The interaction data was successfully stored on the server. Please rerun the tests, it's possible that more interaction data has to be collected and stored on the server"
 
-        var infoString = "The data was successfully stored on the server. Please rerun the tests in order to get a accurate result"
-
-        toaster.pop('success', "Log in", infoString);
-        bootbox.alert(infoString);
+            //toaster.pop('success', "Log in", infoString);
+            bootbox.alert(infoString);
+        }, 200);
     }
 
     var writeResultToTreeBasedOnTestid = function(data) {
