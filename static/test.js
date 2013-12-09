@@ -69,7 +69,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     $scope.topDownTree;
     $scope.bottomUpTree;
     $scope.flatBottomUpTree;
-    $scope.numberOfTestsStarted = 0;
+    $scope.numberOfTestsRunning = 0;
     var addedIds = []
 
     $scope.resultSummary = {'success': 0, 'failed': 0};
@@ -112,12 +112,13 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
             writeResultToTreeBasedOnTestid(data);
         }
 
-        $scope.numberOfTestsStarted--;
+        $scope.numberOfTestsRunning--;
 
-        if ($scope.numberOfTestsStarted <= 0){
+        if ($scope.numberOfTestsRunning <= 0){
             $('button').prop('disabled', false);
             isRunningAllTests = false;
-            hasShownDialogBox = false;
+            hasShownInteractionConfigDialog = false;
+            hasShownWrongPasswordDialog = false;
 
             var resultString = "Successful tests: " + $scope.resultSummary.success + "\n" + " Failed tests: " + $scope.resultSummary.failed
             toaster.pop('note', "Result summary", resultString);
@@ -162,7 +163,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
             }
         }
 
-        $scope.numberOfTestsStarted = testsToRun.length;
+        $scope.numberOfTestsRunning = testsToRun.length;
     };
 
     $scope.runOneTest = function (id, testid, numberOfTest) {
@@ -171,7 +172,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         $('button').prop('disabled', true);
 
         if (numberOfTest == "singleTest"){
-            $scope.numberOfTestsStarted = 1;
+            $scope.numberOfTestsRunning = 1;
             runTestFactory.getTestResult(id, testid).success(getTestResultSuccessCallback).error(errorCallback);
 
         }else if(numberOfTest == "allTest"){
@@ -194,7 +195,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         }
 
-        $scope.numberOfTestsStarted = treeSize;
+        $scope.numberOfTestsRunning = treeSize;
     };
 
     $scope.updateTree = function () {
@@ -319,7 +320,27 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     }
 
     var foundInteractionStatus = false;
-    var hasShownDialogBox = false;
+    var hasShownInteractionConfigDialog = false;
+
+    function createInteractionConfigDialog(data) {
+        bootbox.dialog({
+            message: "The server are missing some interaction configurations. Do you want the system to try insert the interaction configuration?",
+            title: "Interaction information required",
+            buttons: {
+                danger: {
+                    label: "No",
+                    className: "btn-default"
+                },
+                success: {
+                    label: "Yes",
+                    className: "btn-primary",
+                    callback: function () {
+                        createIframeAndShowInModelWindow(data);
+                    }
+                }
+            }
+        });
+    }
 
     var handleInteraction = function (data) {
         if (foundInteractionStatus == false) {
@@ -361,27 +382,48 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
             postBasicTargetDataFactory.postBasicTargetData(title, url, pageType, controlType).success(getPostBasicDataSuccessCallback).error(errorCallback);
 
-            //TODO aks user if the data should be put into the database
-            if (!hasShownDialogBox){
-                hasShownDialogBox = true;
+            if (!hasShownInteractionConfigDialog){
 
-                bootbox.dialog({
-                    message: "The server are missing some interaction configurations. Do you want the system to try insert the interaction configuration?",
-                    title: "Interaction information required",
-                    buttons: {
-                        danger: {
-                            label: "No",
-                            className: "btn-default"
-                        },
-                        success: {
-                            label: "Yes",
-                            className: "btn-primary",
-                                callback: function() {
-                                    createIframeAndShowInModelWindow(data);
-                                }
-                        }
-                      }
-                });
+                hasShownInteractionConfigDialog = true;
+                createInteractionConfigDialog(data);
+            }
+        }
+    }
+
+    var hasShownWrongPasswordDialog = false;
+
+    function createWrongPasswordDialog() {
+        bootbox.dialog({
+            message: "Unknown user or wrong password. Do you want to reset interaction configurations?",
+            title: "Error occured",
+            buttons: {
+                danger: {
+                    label: "No",
+                    className: "btn-default"
+                },
+                success: {
+                    label: "Yes",
+                    className: "btn-primary",
+                    callback: function () {
+                        postResetTargetDataFactory.postResetTargetData().success(getPostResetDataSuccessCallback).error(errorCallback);
+                    }
+                }
+            }
+        });
+    }
+
+    function handleError() {
+        var lastElement = testList.length - 1;
+
+        var errorMessage = testList[lastElement].message
+
+        if (errorMessage.indexOf("Unknown user or wrong password") != -1) {
+
+            if (!hasShownWrongPasswordDialog) {
+                hasShownWrongPasswordDialog = true;
+                createWrongPasswordDialog();
+                //alert("Unknown user or wrong password. Do you want to reset interaction configurations?");
+
             }
         }
     }
@@ -409,30 +451,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
             handleInteraction(data);
         }
         else if (statusNumber == 3) {
-            var lastElement = testList.length-1;
-
-            var errorMessage = testList[lastElement].message
-
-            if (errorMessage.indexOf("Unknown user or wrong password") != -1){
-                bootbox.dialog({
-                    message: "Unknown user or wrong password. Do you want to reset interaction configurations?",
-                    title: "Error occured",
-                    buttons: {
-                        danger: {
-                            label: "No",
-                            className: "btn-default"
-                        },
-                        success: {
-                        label: "Yes",
-                        className: "btn-primary",
-                            callback: function() {
-                                  postResetTargetDataFactory.postResetTargetData().success(getPostResetDataSuccessCallback).error(errorCallback);
-                            }
-                        }
-                      }
-                });
-                //alert("Unknown user or wrong password. Do you want to reset interaction configurations?");
-            }
+            handleError();
         }
     }
 
