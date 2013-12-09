@@ -368,7 +368,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
             var htmlElement = document.createElement('html');
             htmlElement.innerHTML = htmlString;
 
-
             var title = htmlElement.getElementsByTagName('title')[0].innerHTML;
 
             //TODO I don't know how to identify the property
@@ -378,7 +377,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
             if (formTags.length > 0){
                 var controlType = "form"
             }
-
 
             postBasicTargetDataFactory.postBasicTargetData(title, url, pageType, controlType).success(getPostBasicDataSuccessCallback).error(errorCallback);
 

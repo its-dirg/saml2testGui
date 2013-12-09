@@ -11,7 +11,7 @@ import glob
 from os.path import basename
 import os
 import uuid
-from urllib import quote
+import ast
 
 import time
 
