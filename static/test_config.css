@@ -1,0 +1,46 @@
+hr {
+    -moz-border-bottom-colors: none;
+    -moz-border-image: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    border-color: #D2D2D2;
+    border-style: solid none;
+    border-width: 1px;
+}
+
+#content{
+    margin: 20px;
+}
+
+form{
+    font-size: 15px;
+}
+
+input {
+    width: 100%;
+    height: 30px;
+}
+
+#label {
+    text-align: right;
+}
+
+.block {
+    margin-right: 30%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 30px;
+    border:2px solid;
+    border-color: #919191;
+    background-color: #fcfcfc;
+    border-radius:5px;
+    position: relative;
+}
+
+.block .close{
+    opacity: 1;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}

@@ -12,6 +12,7 @@ from os.path import basename
 import os
 import uuid
 import ast
+import re
 
 import time
 
@@ -44,7 +45,10 @@ class Test:
             "run_test" : None,
             "final_target_data" : None,
             "basic_target_data" : None,
-            "reset_target_data" : None
+            "reset_target_data" : None,
+            "test_config" : "config.mako",
+            "basic_config" : None,
+            "interaction_config" : None
         }
         self.cache = cache
 
@@ -71,6 +75,12 @@ class Test:
             return self.handleBasicTargetData()
         elif path == "reset_target_data":
             return self.handleResetTargetData()
+        elif path == "test_config":
+            return self.handleTestConfig(self.urls[path])
+        elif path == "basic_config":
+            return self.handleBasicConfig()
+        elif path == "interaction_config":
+            return self.handleInteractionConfig()
 
 
     def handleIndex(self, file):
@@ -83,6 +93,17 @@ class Test:
 
         #TODO this should be removed since the target file shouldn't be replaced ever time the site is loaded
         shutil.copyfile(self.CONFIG_FILE_PATH + "/backup/target.json", self.CONFIG_FILE_PATH + "target.json")
+
+        return resp(self.environ, self.start_response, **argv)
+
+    def handleTestConfig(self, file):
+
+        resp = Response(mako_template=file,
+                        template_lookup=self.lookup,
+                        headers=[])
+        argv = {
+            "a_value": "Hello world"
+        }
 
         return resp(self.environ, self.start_response, **argv)
 
@@ -245,7 +266,82 @@ class Test:
         #for test in p_out:
            #print test.status
 
+    def handleBasicConfig(self):
+        try:
+            f = open(self.CONFIG_FILE_PATH + "target.json", "r")
+            try:
+                # Read the entire contents of a file at once.
+                targetStringContent = f.read()
+                targetDict = ast.literal_eval(targetStringContent)
+                entityIDUrl = targetDict['entity_id']
 
+                splitResult = re.split('((.+)(:+)[0-9]+)',entityIDUrl)
+
+                base = splitResult[1]
+                entityID = splitResult[4]
+                metadata = "Find a way to handle metadata!!"
+
+                basicConfig = json.dumps([{"label": "IDP url", "value": base},
+                                            {"label": "Metadata", "value": metadata},
+                                            {"label": "Entity id", "value": base+entityID}
+                                          ]);
+
+            finally:
+                f.close()
+        except IOError:
+            pass
+
+        return self.returnJSON(basicConfig)
+
+    #TODO parse the important stuff
+    def handleInteractionConfig(self):
+        try:
+            f = open(self.CONFIG_FILE_PATH + "target.json", "r")
+            try:
+                # Read the entire contents of a file at once.
+                targetStringContent = f.read()
+                targetDict = ast.literal_eval(targetStringContent)
+                interactionElemetList = targetDict['interaction']
+                interactionConfigList = []
+                i = 0;
+
+                for element in interactionElemetList:
+
+                    matches = element['matches']
+                    url = matches['url']
+                    title = matches['title']
+
+                    pageType = element['page-type']
+
+                    control = element['control']
+                    type = control['type']
+                    index = self.setDefaultValueToDictionary("index", control)
+                    set = self.setDefaultValueToDictionary("set", control)
+
+                    entry = [{"id": index,
+                             "rows": [{"label": "url", "value": url},
+                                        {"label": "Title", "value": title},
+                                        {"label": "page-type", "value": pageType},
+                                        {"label": "type", "value": type},
+                                        {"label": "index", "value": index},
+                                        { "label": "set", "value": set}
+                                     ]
+                             }]
+                    interactionConfigList.append(entry)
+                    i += 1
+
+            finally:
+                f.close()
+        except IOError:
+            pass
+
+        return self.returnJSON(json.dumps(interactionConfigList))
+
+    def setDefaultValueToDictionary(self, key, dictionary):
+        if key in dictionary.keys():
+            return dictionary[key]
+        else:
+            return ""
 
     def createNewTestDict(self, item, level=1):
         newDict = {}

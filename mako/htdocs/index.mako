@@ -192,7 +192,6 @@
             </div>
         </div>
     </div>
-
 </%block>
 
 <%block name="footer">
@@ -207,8 +206,7 @@
         </div>
     </div>
 
-
-    <script type="text/javascript" src="/static/test.js"></script>
+    <script type="text/javascript" src="/static/saml2test.js"></script>
 
     ${parent.footer()}
 </%block>
