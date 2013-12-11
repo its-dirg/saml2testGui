@@ -3,6 +3,7 @@
 
 <%block name="script">
     <!-- Add more script imports here! -->
+    <script src="/static/bootbox.min.js" xmlns="http://www.w3.org/1999/html"></script>
 </%block>
 
 <%block name="css">
@@ -34,7 +35,7 @@
 
         <hr>
 
-        <form>
+        <form action="/post_basic_config" method="post">
             <div class="row" ng-repeat="entry in basicConfig">
 
                 <div class="col-lg-1" id="label">
@@ -42,14 +43,18 @@
                 </div>
 
                 <div class="col-lg-11">
-                    <input type="text" name="firstname" value="{{entry.value}}">
+                    <input type="text" name="{{entry.label}}" value="{{entry.value}}">
                 </div>
 
                 <br>
 
             </div>
+            <input class="submit" type="submit" name="form.submitted" value="Save config">
         </form>
 
+        <!--
+        <button class="btn btn-primary btn-sm" ng-click="saveInteraction();">Save configurations</button>
+        -->
         <hr>
 
         Interaction: <button class="btn btn-default btn-sm" ng-click="addInteraction();">+</button>
@@ -60,8 +65,8 @@
 
         <div class="block" ng-repeat="entry in interactionConfigList">
             <form>
-                <div class="row" ng-repeat="row in entry[0].rows">
-
+                {{entry.id}}
+                <div class="row" ng-repeat="row in entry.rows">
                     <div class="col-lg-2" id="label">
                         {{row.label}}
                     </div>
@@ -73,11 +78,10 @@
                     <br>
 
                 </div>
-
             </form>
 
             <div class="close">
-                <button class="btn btn-danger btn-sm" ng-click="test();">X</button>
+                <button class="btn btn-danger btn-sm" ng-click="tryToRemoveInteraction(entry.id);">X</button>
             </div>
         </div>
 
