@@ -35,7 +35,7 @@
 
         <hr>
 
-        <form action="/post_basic_config" method="post">
+        <form action="/post_basic_config" method="post" >
             <div class="row" ng-repeat="entry in basicConfig">
 
                 <div class="col-lg-1" id="label">
@@ -43,36 +43,30 @@
                 </div>
 
                 <div class="col-lg-11">
-                    <input type="text" name="{{entry.label}}" value="{{entry.value}}">
+                    <input type="text" name="{{entry.label}}" value="{{entry.value}}" id="{{entry.label}}">
                 </div>
 
                 <br>
 
             </div>
-            <input class="submit" type="submit" name="form.submitted" value="Save config">
         </form>
 
-        <!--
-        <button class="btn btn-primary btn-sm" ng-click="saveInteraction();">Save configurations</button>
-        -->
+        <button class="btn btn-primary btn-sm" ng-click="saveBasicConfig();">Save configurations</button>
+
         <hr>
 
         Interaction: <button class="btn btn-default btn-sm" ng-click="addInteraction();">+</button>
 
-        <!--
-        Each block has to contain a index so it will be possible to remove them dosen't looks like it's working right now
-        -->
-
-        <div class="block" ng-repeat="entry in interactionConfigList">
+        <div class="block" ng-repeat="entry in interactionConfigList" id="{{entry.id}}">
             <form>
-                {{entry.id}}
+                id:{{entry.id}}
                 <div class="row" ng-repeat="row in entry.rows">
                     <div class="col-lg-2" id="label">
                         {{row.label}}
                     </div>
 
                     <div class="col-lg-10">
-                        <input type="text" name="firstname" value="{{row.value}}">
+                        <input type="text" name="firstname" value="{{row.value}}" id="{{row.label}}">
                     </div>
 
                     <br>
@@ -85,7 +79,7 @@
             </div>
         </div>
 
-        <button class="btn btn-primary btn-sm" ng-click="test();">Save configurations</button>
+        <button class="btn btn-primary btn-sm" ng-click="saveInteractionConfig();">Save configurations</button>
 
     </div>
 </%block>

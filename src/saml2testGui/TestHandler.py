@@ -49,7 +49,8 @@ class Test:
             "test_config" : "config.mako",
             "get_basic_config" : None,
             "post_basic_config" : None,
-            "interaction_config" : None
+            "get_interaction_config" : None,
+            "post_interaction_config" : None
         }
         self.cache = cache
 
@@ -82,8 +83,10 @@ class Test:
             return self.handleGetBasicConfig()
         elif path == "post_basic_config":
             return self.handlePostBasicConfig()
-        elif path == "interaction_config":
-            return self.handleInteractionConfig()
+        elif path == "get_interaction_config":
+            return self.handleGetInteractionConfig()
+        elif path == "post_interaction_config":
+            return self.handlePostInteractionConfig()
 
 
     def handleIndex(self, file):
@@ -287,10 +290,9 @@ class Test:
                 entityID = splitResult[4]
                 metadata = "Find a way to handle metadata!!"
 
-                basicConfig = json.dumps([{"label": "IDP url", "value": base},
-                                            {"label": "Metadata", "value": metadata},
-                                            {"label": "Entity id", "value": base+entityID}
-                                          ]);
+                basicConfig = json.dumps([{"label": "Metadata", "value": metadata},
+                                          {"label": "Entity_id", "value": base+entityID}
+                                         ]);
 
             finally:
                 f.close()
@@ -299,10 +301,7 @@ class Test:
 
         return self.returnJSON(basicConfig)
 
-    #TODO add content
     def handlePostBasicConfig(self):
-
-        entityID = self.parameters['Entity id']
 
         try:
             # This will create a new file or **overwrite an existing file**.
@@ -319,7 +318,9 @@ class Test:
             # This will create a new file or **overwrite an existing file**.
             f = open(self.CONFIG_FILE_PATH + "target.json", "w")
             try:
-                targetDict["entity_id"] = entityID[0]
+                targetDict["Metadata"] = self.parameters['metadata']
+                targetDict["entity_id"] = self.parameters['entityID']
+
                 targetAsString = str(targetDict)
                 f.write(targetAsString)
             finally:
@@ -330,7 +331,7 @@ class Test:
         return self.returnJSON({"asd": 1})
 
 
-    def handleInteractionConfig(self):
+    def handleGetInteractionConfig(self):
         try:
             f = open(self.CONFIG_FILE_PATH + "target.json", "r")
             try:
@@ -347,6 +348,43 @@ class Test:
 
         return self.returnJSON(json.dumps(interactionConfigList))
 
+    #TODO Add code
+    def handlePostInteractionConfig(self):
+        interactionConfigList = self.parameters['interactionConfigList']
+
+        #for entry in interactionConfigList:
+
+        """
+        try:
+            # This will create a new file or **overwrite an existing file**.
+            f = open(self.CONFIG_FILE_PATH + "target.json", "r")
+            try:
+                targetAsString = f.read()
+                targetDict = ast.literal_eval(targetAsString)
+            finally:
+                f.close()
+        except IOError:
+            pass
+
+        try:
+            # This will create a new file or **overwrite an existing file**.
+            f = open(self.CONFIG_FILE_PATH + "target.json", "w")
+            try:
+                targetDict["Metadata"] = self.parameters['metadata']
+                targetDict["entity_id"] = self.parameters['entityID']
+
+                targetAsString = str(targetDict)
+                f.write(targetAsString)
+            finally:
+                f.close()
+        except IOError:
+            pass
+
+        """
+
+        return self.returnJSON({"asd": 1})
+
+    #TODO Add code
     def createInteractionConfigList(self, targetDict):
         interactionElemetList = targetDict['interaction']
         interactionConfigList = []

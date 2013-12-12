@@ -6,8 +6,9 @@ app.factory('basicConfigFactory', function ($http) {
         getBasicConfig: function () {
             return $http.get("/get_basic_config");
         },
-        postBasicConfig: function (basicConfig) {
-            return $http.post("/post_basic_config", {"basicConfig": basicConfig});
+        postBasicConfig: function (metadata, entityID) {
+
+            return $http.post("/post_basic_config", {"metadata": metadata, "entityID": entityID});
         }
     };
 });
@@ -15,7 +16,10 @@ app.factory('basicConfigFactory', function ($http) {
 app.factory('interactionConfigFactory', function ($http) {
     return {
         getInteractionConfig: function () {
-            return $http.get("/interaction_config");
+            return $http.get("/get_interaction_config");
+        },
+        postInteractionConfig: function (interactionConfigList) {
+            return $http.post("/post_interaction_config", {"interactionConfigList": interactionConfigList});
         }
     };
 });
@@ -36,6 +40,10 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
 
     var getInteractionConfigSuccessCallback = function (data, status, headers, config) {
         $scope.interactionConfigList = data;
+    };
+
+    var postInteractionConfigSuccessCallback = function (data, status, headers, config) {
+        alert("postInteractionConfigSuccessCallback");
     };
 
     var errorCallback = function (data, status, headers, config) {
@@ -102,12 +110,41 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         $scope.$apply();
     }
 
-    $scope.saveInteraction = function(){
-        /*
-            Extract the updated information from the input form informarion (the form show have an action, see html return by interaction)
-         */
-        basicConfigFactory.postBasicConfig($scope.basicConfig).success(postBasicConfigSuccessCallback).error(errorCallback);
+    $scope.saveBasicConfig = function(){
+        var metadata = $('#Metadata').val();
+        var entityID = $('#Entity_id').val();
+
+        basicConfigFactory.postBasicConfig(metadata, entityID).success(postBasicConfigSuccessCallback).error(errorCallback);
     }
+
+    $scope.saveInteractionConfig = function(){
+        $( ".block" ).each(function() {
+            var thisBlockId = $(this).attr('id');
+
+            var newUrl = $(this).find("#url").val();
+            var newTitle = $(this).find("#Title").val();
+            var newPageType = $(this).find("#page-type").val();
+            var newType = $(this).find("#type").val();
+            var newIndex = $(this).find("#index").val();
+            var newSet = $(this).find("#set").val();
+
+            for (var i = 0; i < $scope.interactionConfigList.length; i++){
+                if ($scope.interactionConfigList[i].id == thisBlockId){
+
+                    $scope.interactionConfigList[i].rows[0].value = newUrl;
+                    $scope.interactionConfigList[i].rows[1].value = newTitle;
+                    $scope.interactionConfigList[i].rows[2].value = newPageType;
+                    $scope.interactionConfigList[i].rows[3].value = newType;
+                    $scope.interactionConfigList[i].rows[4].value = newIndex;
+                    $scope.interactionConfigList[i].rows[5].value = newSet;
+                }
+            }
+        });
+
+        //Update $scope.interactionConfigList with the data from the block and send this to the testHandler for insertion
+        interactionConfigFactory.postInteractionConfig($scope.interactionConfigList).success(postInteractionConfigSuccessCallback).error(errorCallback);
+    }
+
 
 });
 
