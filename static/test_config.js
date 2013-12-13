@@ -7,7 +7,6 @@ app.factory('basicConfigFactory', function ($http) {
             return $http.get("/get_basic_config");
         },
         postBasicConfig: function (metadata, entityID) {
-
             return $http.post("/post_basic_config", {"metadata": metadata, "entityID": entityID});
         }
     };
@@ -19,15 +18,31 @@ app.factory('interactionConfigFactory', function ($http) {
             return $http.get("/get_interaction_config");
         },
         postInteractionConfig: function (interactionConfigList) {
-            return $http.post("/post_interaction_config", {"interactionConfigList": interactionConfigList});
+            return $http.post("/post_interaction_config", {"convertedInteractionList": interactionConfigList});
         }
     };
 });
 
-app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionConfigFactory, toaster) {
+app.factory('uploadMetadataFactory', function ($http) {
+    return {
+        postMetadata: function (metadata) {
+            return $http.post("/post_metadata", {"metadata": metadata});
+        }
+    };
+});
+
+app.factory('resetTargetJsonFactory', function ($http) {
+    return {
+        postResetTargetJson: function () {
+            return $http.post("/temp_reset_target_json");
+        }
+    };
+});
+
+app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionConfigFactory, uploadMetadataFactory, resetTargetJsonFactory, toaster) {
 
     $scope.basicConfig;
-    $scope.interactionConfigList;
+    $scope.convertedInteractionList;
 
     var getBasicConfigSuccessCallback = function (data, status, headers, config) {
         $scope.basicConfig = data;
@@ -37,9 +52,21 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         alert("postBasicConfigSuccessCallback");
     };
 
+    var postMetadataSuccessCallback = function (data, status, headers, config) {
+        alert("postMetadataSuccessCallback");
+    };
+
+    var postResetTargetJsonSuccessCallback = function (data, status, headers, config) {
+        alert("postResetTargetJsonSuccessCallback");
+    };
 
     var getInteractionConfigSuccessCallback = function (data, status, headers, config) {
-        $scope.interactionConfigList = data;
+        $scope.convertedInteractionList = data;
+        $scope.originalInteractionList = angular.copy(data);
+
+        for (var i = 0; i < data.length; i++){
+           $scope.convertedInteractionList[i]['entry']['pagetype'] = data[i]['entry']['page-type']
+        }
     };
 
     var postInteractionConfigSuccessCallback = function (data, status, headers, config) {
@@ -47,7 +74,7 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
     };
 
     var errorCallback = function (data, status, headers, config) {
-        notificationFactory.error(data.ExceptionMessage);
+        alert("errorCallback");
     };
 
     basicConfigFactory.getBasicConfig().success(getBasicConfigSuccessCallback).error(errorCallback);
@@ -59,19 +86,24 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
 
     $scope.addInteraction = function () {
 
-        nextIndex = $scope.interactionConfigList.length
+        nextIndex = $scope.convertedInteractionList.length
 
         entry = {"id": nextIndex,
-                 "rows": [{"label": "url", "value": ""},
-                            {"label": "Title", "value": ""},
-                            {"label": "page-type", "value": ""},
-                            {"label": "type", "value": ""},
-                            {"label": "index", "value": ""},
-                            { "label": "set", "value": ""}
-                         ]
+                 "entry": {
+                            "matches": {
+                                "url": "",
+                                "title": ""
+                            },
+                            "pagetype": "",
+                            "control": {
+                                "type": "",
+                                "set": {}
+                            }
+                        }
                 }
 
-        $scope.interactionConfigList.push(entry);
+        $scope.convertedInteractionList.push(entry);
+        $scope.originalInteractionList.push(entry);
     };
 
     $scope.tryToRemoveInteraction = function (index) {
@@ -95,7 +127,7 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
     }
 
     var removeInteraction = function (index) {
-        var interactionList = $scope.interactionConfigList
+        var interactionList = $scope.convertedInteractionList
         var indexToRemove;
 
         for (var i = 0; i < interactionList.length; i++){
@@ -105,14 +137,15 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
             }
         }
 
-        $scope.interactionConfigList.splice(indexToRemove, 1);
+        $scope.convertedInteractionList.splice(indexToRemove, 1);
+        $scope.originalInteractionList.splice(indexToRemove, 1);
         //Manually updating the view since it's the code is executed in a callback function
         $scope.$apply();
     }
 
     $scope.saveBasicConfig = function(){
-        var metadata = $('#Metadata').val();
-        var entityID = $('#Entity_id').val();
+        var metadata = $('#metadata').val();
+        var entityID = $('#entity_id').val();
 
         basicConfigFactory.postBasicConfig(metadata, entityID).success(postBasicConfigSuccessCallback).error(errorCallback);
     }
@@ -122,30 +155,51 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
             var thisBlockId = $(this).attr('id');
 
             var newUrl = $(this).find("#url").val();
-            var newTitle = $(this).find("#Title").val();
-            var newPageType = $(this).find("#page-type").val();
+            var newTitle = $(this).find("#title").val();
+            var newPageType = $(this).find("#pagetype").val();
             var newType = $(this).find("#type").val();
             var newIndex = $(this).find("#index").val();
             var newSet = $(this).find("#set").val();
 
-            for (var i = 0; i < $scope.interactionConfigList.length; i++){
-                if ($scope.interactionConfigList[i].id == thisBlockId){
+            for (var i = 0; i < $scope.originalInteractionList.length; i++){
+                if ($scope.originalInteractionList[i].id == thisBlockId){
 
-                    $scope.interactionConfigList[i].rows[0].value = newUrl;
-                    $scope.interactionConfigList[i].rows[1].value = newTitle;
-                    $scope.interactionConfigList[i].rows[2].value = newPageType;
-                    $scope.interactionConfigList[i].rows[3].value = newType;
-                    $scope.interactionConfigList[i].rows[4].value = newIndex;
-                    $scope.interactionConfigList[i].rows[5].value = newSet;
+                    $scope.originalInteractionList[i]['entry']['matches']['url'] = newUrl;
+                    $scope.originalInteractionList[i]['entry']['matches']['title'] = newTitle;
+                    $scope.originalInteractionList[i]['entry']['page-type'] = newPageType;
+                    $scope.originalInteractionList[i]['entry']['control']['type'] = newType;
+                    $scope.originalInteractionList[i]['entry']['control']['index'] = newIndex;
+                    $scope.originalInteractionList[i]['entry']['control']['set'] = JSON.parse(newSet);
                 }
             }
+
         });
 
-        //Update $scope.interactionConfigList with the data from the block and send this to the testHandler for insertion
-        interactionConfigFactory.postInteractionConfig($scope.interactionConfigList).success(postInteractionConfigSuccessCallback).error(errorCallback);
+        interactionConfigFactory.postInteractionConfig($scope.originalInteractionList).success(postInteractionConfigSuccessCallback).error(errorCallback);
     }
 
+    $scope.uploadFileContent = function(){
+        var file = document.getElementById("file").files[0];
+
+        if (file) {
+            var reader = new FileReader();
+            reader.readAsText(file, "UTF-8");
+            reader.onload = function (evt) {
+
+                uploadMetadataFactory.postMetadata(evt.target.result).success(postMetadataSuccessCallback).error(errorCallback);
+                //Has to be done since this code is executed outside of
+                $scope.$apply();
+
+                //alert(evt.target.result);
+            }
+            reader.onerror = function (evt) {
+                alert("error reading file");
+            }
+        }
+    }
+
+    $scope.resetTargetJson = function(){
+        resetTargetJsonFactory.postResetTargetJson().success(postResetTargetJsonSuccessCallback).error(errorCallback);
+    }
 
 });
-
-

@@ -12,9 +12,7 @@ from os.path import basename
 import os
 import uuid
 import ast
-import re
-
-import time
+from xml.etree import ElementTree
 
 __author__ = 'haho0032'
 
@@ -50,7 +48,9 @@ class Test:
             "get_basic_config" : None,
             "post_basic_config" : None,
             "get_interaction_config" : None,
-            "post_interaction_config" : None
+            "post_interaction_config" : None,
+            "post_metadata" : None,
+            "temp_reset_target_json" : None
         }
         self.cache = cache
 
@@ -87,6 +87,39 @@ class Test:
             return self.handleGetInteractionConfig()
         elif path == "post_interaction_config":
             return self.handlePostInteractionConfig()
+        elif path == "post_metadata":
+            return self.handlePostMetadata()
+        elif path == "temp_reset_target_json":
+            return self.handleResetTargetJson()
+
+    def handleResetTargetJson(self):
+        shutil.copyfile(self.CONFIG_FILE_PATH + "/config_backup/target.json", self.CONFIG_FILE_PATH + "target.json")
+        return self.returnJSON({"asd": 1})
+
+    #TODO Enter code
+    def handlePostMetadata(self):
+
+        metadata = str(self.parameters['metadata'])
+
+        #Checking if the incoming data is valid xml
+        tree = ElementTree.ElementTree(ElementTree.fromstring(metadata))
+
+        f = open(self.CONFIG_FILE_PATH + "target.json", "r")
+        try:
+            targetStringContent = f.read()
+            targetDict = ast.literal_eval(targetStringContent)
+        finally:
+            f.close()
+
+        f = open(self.CONFIG_FILE_PATH + "target.json", "w")
+        try:
+            targetDict["metadata"] = metadata
+
+            f.write(json.dumps(targetDict))
+        finally:
+            f.close()
+
+        return self.returnJSON({"asd": 1})
 
 
     def handleIndex(self, file):
@@ -98,7 +131,7 @@ class Test:
         }
 
         #TODO this should be removed since the target file shouldn't be replaced ever time the site is loaded
-        shutil.copyfile(self.CONFIG_FILE_PATH + "/backup/target.json", self.CONFIG_FILE_PATH + "target.json")
+        #shutil.copyfile(self.CONFIG_FILE_PATH + "/backup/target.json", self.CONFIG_FILE_PATH + "target.json")
 
         return resp(self.environ, self.start_response, **argv)
 
@@ -279,27 +312,16 @@ class Test:
         try:
             f = open(self.CONFIG_FILE_PATH + "target.json", "r")
             try:
-                # Read the entire contents of a file at once.
                 targetStringContent = f.read()
                 targetDict = ast.literal_eval(targetStringContent)
-                entityIDUrl = targetDict['entity_id']
 
-                splitResult = re.split('((.+)(:+)[0-9]+)',entityIDUrl)
-
-                base = splitResult[1]
-                entityID = splitResult[4]
-                metadata = "Find a way to handle metadata!!"
-
-                basicConfig = json.dumps([{"label": "Metadata", "value": metadata},
-                                          {"label": "Entity_id", "value": base+entityID}
-                                         ]);
-
+                basicConfig = {"metadata": "Find a way to handle metadata!!", "entity_id": targetDict['entity_id']}
             finally:
                 f.close()
         except IOError:
             pass
 
-        return self.returnJSON(basicConfig)
+        return self.returnJSON(json.dumps(basicConfig))
 
     def handlePostBasicConfig(self):
 
@@ -318,7 +340,8 @@ class Test:
             # This will create a new file or **overwrite an existing file**.
             f = open(self.CONFIG_FILE_PATH + "target.json", "w")
             try:
-                targetDict["Metadata"] = self.parameters['metadata']
+                #This has to be handled in some other way
+                #targetDict["metadata"] = self.parameters['metadata']
                 targetDict["entity_id"] = self.parameters['entityID']
 
                 targetAsString = str(targetDict)
@@ -344,19 +367,17 @@ class Test:
         except IOError:
             pass
 
-
-
         return self.returnJSON(json.dumps(interactionConfigList))
 
-    #TODO Add code
     def handlePostInteractionConfig(self):
-        interactionConfigList = self.parameters['interactionConfigList']
 
-        #for entry in interactionConfigList:
+        entryList = self.parameters['convertedInteractionList']
+        interactionConfigList = []
 
-        """
+        for entry in entryList:
+            interactionConfigList.append(entry['entry'])
+
         try:
-            # This will create a new file or **overwrite an existing file**.
             f = open(self.CONFIG_FILE_PATH + "target.json", "r")
             try:
                 targetAsString = f.read()
@@ -367,48 +388,28 @@ class Test:
             pass
 
         try:
-            # This will create a new file or **overwrite an existing file**.
             f = open(self.CONFIG_FILE_PATH + "target.json", "w")
             try:
-                targetDict["Metadata"] = self.parameters['metadata']
-                targetDict["entity_id"] = self.parameters['entityID']
+                targetDict["interaction"] = interactionConfigList
 
-                targetAsString = str(targetDict)
-                f.write(targetAsString)
+                newTargetAsString = json.dumps(targetDict)
+
+                f.write(json.dumps(targetDict))
             finally:
                 f.close()
         except IOError:
             pass
 
-        """
-
         return self.returnJSON({"asd": 1})
 
-    #TODO Add code
     def createInteractionConfigList(self, targetDict):
         interactionElemetList = targetDict['interaction']
         interactionConfigList = []
         loopIndex = 0;
-        for element in interactionElemetList:
-            matches = element['matches']
-            url = matches['url']
-            title = matches['title']
-
-            pageType = element['page-type']
-
-            control = element['control']
-            type = control['type']
-            index = self.setDefaultValueToDictionary("index", control)
-            set = self.setDefaultValueToDictionary("set", control)
+        for entry in interactionElemetList:
 
             entry = {"id": loopIndex,
-                     "rows": [{"label": "url", "value": url},
-                              {"label": "Title", "value": title},
-                              {"label": "page-type", "value": pageType},
-                              {"label": "type", "value": type},
-                              {"label": "index", "value": index},
-                              {"label": "set", "value": set}
-                     ]
+                     "entry": entry
             }
             interactionConfigList.append(entry)
             loopIndex += 1
