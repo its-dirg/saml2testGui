@@ -30,14 +30,37 @@
 
         <button class="btn btn-primary btn-sm" ng-click="resetTargetJson();">Reset Target.json</button>
 
+        <hr>
+
         <h2>Configurations</h2>
 
         <form>
-        <input type="file" name="file" id="targetFile">
-        <button class="btn btn-primary btn-sm" ng-click="uploadTargetJson();">Upload configurations</button>
-        </form>
+             <div class="row">
 
-        <button class="btn btn-primary btn-sm" ng-click="downloadTargetJson();">Download configurations</button>
+                <div class="col-lg-2">
+                    Upload config file:
+                </div>
+
+                <div class="col-lg-10">
+
+                    <input type="file" name="file" id="targetFile">
+                    <button class="btn btn-primary btn-sm" ng-click="uploadTargetJson();">Upload configurations</button>
+                    <br>
+                    <br>
+                </div>
+            </div>
+
+             <div class="row">
+
+                <div class="col-lg-2">
+                    Download config file:
+                </div>
+
+                <div class="col-lg-10">
+                    <button class="btn btn-primary btn-sm" ng-click="downloadTargetJson();">Download configurations</button>
+                </div>
+            </div>
+        </form>
 
         <hr>
 
