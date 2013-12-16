@@ -32,7 +32,11 @@
 
         <hr>
 
-        <h2>Configurations</h2>
+        <h2>Configurations
+            <button class="btn btn-primary btn-sm" ng-click="reloadTargetJson();">
+                <span class="glyphicon glyphicon-refresh"></span>
+            </button>
+        </h2>
 
         <form>
              <div class="row">
@@ -79,6 +83,7 @@
                 </div>
             </div>
 
+<!--
             <div class="row">
                 <div class="col-lg-2" id="label">
                     Upload metadata by url:
@@ -88,6 +93,7 @@
                     <input type="text" value="" id="entity_id">
                 </div>
             </div>
+-->
 
             <div class="row">
                 <div class="col-lg-2" id="label">
@@ -178,6 +184,8 @@
                 <button class="btn btn-danger btn-sm" ng-click="tryToRemoveInteraction(entry.id);">X</button>
             </div>
         </div>
+
+        <br>
 
         <button class="btn btn-primary btn-sm" ng-click="saveInteractionConfig();">Save configurations</button>
 

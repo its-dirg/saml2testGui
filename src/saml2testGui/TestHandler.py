@@ -20,6 +20,7 @@ class Test:
     IDP_TESTDRV = '/usr/local/bin/idp_testdrv.py'
     #Only used to check to check for new config files this which does nothing useful for the moment
     CONFIG_FILE_PATH = 'saml2test/configFiles/'
+    TARGET_KEY = "target"
 
     def __init__(self, environ, start_response, session, logger, lookup, config, parameters, cache):
         """
@@ -99,21 +100,38 @@ class Test:
             return self.handleUploadTargetJson()
 
     def handleResetTargetJson(self):
-        shutil.copyfile(self.CONFIG_FILE_PATH + "/config_backup/target.json", self.CONFIG_FILE_PATH + "target.json")
-        return self.returnJSON({"asd": 1})
 
-    #TODO Enter code
-    def handleUploadTargetJson(self):
-
-        f = open(self.CONFIG_FILE_PATH + "target.json", "w")
-
+        f = open(self.CONFIG_FILE_PATH + "/config_backup/target.json", "r")
         try:
-            f.write(self.parameters['targetFileContent'])
+            targetStringContent = f.read()
+            targetDict = ast.literal_eval(targetStringContent)
+            self.session[self.TARGET_KEY] = str(targetDict)
         finally:
             f.close()
 
+        print "Reset: " + self.session[self.TARGET_KEY]
+        return self.returnJSON({"asd": 1})
+
+    def handleUploadTargetJson(self):
+
+        self.session[self.TARGET_KEY] = str(self.parameters['targetFileContent'])
+
+        print "Upload target: " + self.session[self.TARGET_KEY]
         return self.returnJSON({"target": "asd"})
 
+
+    def handleDownloadTargetJson(self):
+
+        if self.session[self.TARGET_KEY] != None:
+
+            targetStringContent = self.session[self.TARGET_KEY]
+            targetDict = ast.literal_eval(targetStringContent)
+            fileDict = json.dumps({"target": targetDict})
+
+            print "Download target: " + self.session[self.TARGET_KEY]
+            return self.returnJSON(fileDict)
+
+        return self.serviceError("No target configurations stored in the session")
 
     def handleIndex(self, file):
         resp = Response(mako_template=file,
@@ -133,6 +151,7 @@ class Test:
         resp = Response(mako_template=file,
                         template_lookup=self.lookup,
                         headers=[])
+
         argv = {
             "a_value": "Hello world"
         }
@@ -199,9 +218,8 @@ class Test:
         pageType = interactionParameters['pageType']
         controlType = interactionParameters['controlType']
 
-        targetFile = open(self.CONFIG_FILE_PATH + "target.json", 'r+')
-        content = targetFile.read()
-        targetJson = json.loads(content)
+        targetContent = self.session[self.TARGET_KEY]
+        targetJson = json.loads(targetContent)
 
         #create the new interaction object based on the parameters
         if password == None and username == None:
@@ -229,10 +247,8 @@ class Test:
 
         targetJson['interaction'].extend(newInteraction)
 
-        targetFile.seek(0)
-        targetFile.write(json.dumps(targetJson))
-        targetFile.truncate()
-        targetFile.close()
+        self.session[self.TARGET_KEY] = str(json.dumps(targetJson))
+
 
 
     def handleFinalTargetData(self):
@@ -259,6 +275,7 @@ class Test:
 
         return self.returnJSON({"asd": "asd"})
 
+    #TODO Rmove this method it should not be nesseccery
     def handleResetTargetData(self):
         shutil.copyfile(self.CONFIG_FILE_PATH + "/backup/target.json", self.CONFIG_FILE_PATH + "target.json")
         return self.returnHTML("<h1>Data</h1>")
@@ -276,6 +293,7 @@ class Test:
 
         if self.checkIfParamentersAreValid(targetFile, testToRun):
             #Directs to the folder containing the saml2test config file an enters the target.json files as a parameter to the test script
+            #TODO Create a temp file which could be sent into the IDP_TESTDRV
             ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J', 'configFiles/'+ targetFile + '.json', testToRun], "./saml2test")
 
             #self.formatOutput(p_out)
@@ -302,65 +320,43 @@ class Test:
            #print test.status
 
     def handleGetBasicConfig(self):
-        try:
-            f = open(self.CONFIG_FILE_PATH + "target.json", "r")
-            try:
-                targetStringContent = f.read()
-                targetDict = ast.literal_eval(targetStringContent)
 
-                basicConfig = {"metadata": "Find a way to handle metadata!!", "entity_id": targetDict['entity_id']}
-            finally:
-                f.close()
-        except IOError:
-            pass
 
-        return self.returnJSON(json.dumps(basicConfig))
+        if self.session[self.TARGET_KEY] != None:
+            targetStringContent = self.session[self.TARGET_KEY]
+            targetDict = ast.literal_eval(targetStringContent)
+
+            basicConfig = {"metadata": "Find a way to handle metadata!!", "entity_id": targetDict['entity_id']}
+
+            return self.returnJSON(json.dumps(basicConfig))
+
+        return self.serviceError("No target configurations stored in the session")
 
     def handlePostBasicConfig(self):
 
-        try:
-            # This will create a new file or **overwrite an existing file**.
-            f = open(self.CONFIG_FILE_PATH + "target.json", "r")
-            try:
-                targetAsString = f.read()
-                targetDict = ast.literal_eval(targetAsString)
-            finally:
-                f.close()
-        except IOError:
-            pass
+        targetStringContent = self.session[self.TARGET_KEY]
+        targetDict = ast.literal_eval(targetStringContent)
 
-        try:
-            # This will create a new file or **overwrite an existing file**.
-            f = open(self.CONFIG_FILE_PATH + "target.json", "w")
-            try:
-                #This has to be handled in some other way
-                #targetDict["metadata"] = self.parameters['metadata']
-                targetDict["entity_id"] = self.parameters['entityID']
+        targetDict["entity_id"] = self.parameters['entityID']
+        targetAsString = str(targetDict)
 
-                targetAsString = str(targetDict)
-                f.write(targetAsString)
-            finally:
-                f.close()
-        except IOError:
-            pass
+        self.session[self.TARGET_KEY] = targetAsString
 
+        print "Post basic config: " + self.session[self.TARGET_KEY]
         return self.returnJSON({"asd": 1})
 
 
     def handleGetInteractionConfig(self):
-        try:
-            f = open(self.CONFIG_FILE_PATH + "target.json", "r")
-            try:
-                # Read the entire contents of a file at once.
-                targetStringContent = f.read()
-                targetDict = ast.literal_eval(targetStringContent)
-                interactionConfigList = self.createInteractionConfigList(targetDict)
-            finally:
-                f.close()
-        except IOError:
-            pass
 
-        return self.returnJSON(json.dumps(interactionConfigList))
+        if self.session[self.TARGET_KEY] != None:
+
+            targetStringContent = self.session[self.TARGET_KEY]
+            targetDict = ast.literal_eval(targetStringContent)
+
+            interactionConfigList = self.createInteractionConfigList(targetDict)
+
+            return self.returnJSON(json.dumps(interactionConfigList))
+
 
     def handlePostInteractionConfig(self):
 
@@ -370,70 +366,34 @@ class Test:
         for entry in entryList:
             interactionConfigList.append(entry['entry'])
 
-        try:
-            f = open(self.CONFIG_FILE_PATH + "target.json", "r")
-            try:
-                targetAsString = f.read()
-                targetDict = ast.literal_eval(targetAsString)
-            finally:
-                f.close()
-        except IOError:
-            pass
+        targetStringContent = self.session[self.TARGET_KEY]
+        targetDict = ast.literal_eval(targetStringContent)
 
-        try:
-            f = open(self.CONFIG_FILE_PATH + "target.json", "w")
-            try:
-                targetDict["interaction"] = interactionConfigList
+        targetDict["interaction"] = interactionConfigList
+        newTargetAsString = json.dumps(targetDict)
+        self.session[self.TARGET_KEY] = newTargetAsString
 
-                newTargetAsString = json.dumps(targetDict)
-
-                f.write(json.dumps(targetDict))
-            finally:
-                f.close()
-        except IOError:
-            pass
-
+        print "Post interaction config: " + self.session[self.TARGET_KEY]
         return self.returnJSON({"asd": 1})
 
     def handlePostMetadata(self):
 
         metadata = str(self.parameters['metadata'])
 
-        #Checking if the incoming data is valid xml
-        #tree = ElementTree.ElementTree(ElementTree.fromstring(metadata))
-
         if(metadata.startswith( '<?xml' )):
-            f = open(self.CONFIG_FILE_PATH + "target.json", "r")
-            try:
-                targetStringContent = f.read()
-                targetDict = ast.literal_eval(targetStringContent)
-            finally:
-                f.close()
 
-            f = open(self.CONFIG_FILE_PATH + "target.json", "w")
-            try:
-                targetDict["metadata"] = ""
-
-                targetString = json.dumps(targetDict)
-                targetString =  targetString.replace("\"metadata\": \"\"", "\"metadata\": \"" + metadata + "\"")
-
-                f.write(targetString)
-            finally:
-                f.close()
-
-        return self.returnJSON({"asd": 1})
-
-    def handleDownloadTargetJson(self):
-        f = open(self.CONFIG_FILE_PATH + "target.json", "r")
-
-        try:
-            targetStringContent = f.read()
+            targetStringContent = self.session[self.TARGET_KEY]
             targetDict = ast.literal_eval(targetStringContent)
-            fileDict = json.dumps({"target": targetDict})
-        finally:
-            f.close()
 
-        return self.returnJSON(fileDict)
+            targetDict["metadata"] = ""
+
+            targetString = json.dumps(targetDict)
+            targetString =  targetString.replace("\"metadata\": \"\"", "\"metadata\": \"" + metadata + "\"")
+
+            self.session[self.TARGET_KEY] = targetString
+
+        print "Post metadata: " + self.session[self.TARGET_KEY]
+        return self.returnJSON({"asd": 1})
 
     def createInteractionConfigList(self, targetDict):
         interactionElemetList = targetDict['interaction']

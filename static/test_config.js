@@ -41,9 +41,11 @@ app.factory('resetTargetJsonFactory', function ($http) {
 
 app.factory('targetJsonFactory', function ($http) {
     return {
+
         downloadTargetJson: function () {
             return $http.get("/download_target_json");
         },
+
         uploadTargetJson: function (targetFileContent) {
             return $http.post("/upload_target_json", {"targetFileContent": targetFileContent});
         }
@@ -55,8 +57,15 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
     $scope.basicConfig;
     $scope.convertedInteractionList;
 
+    /*
+    Något konstigt när man laddar upp data i sessionen och och trycker på refresh så uppdaters
+    interaction om man inte sparat dessa, men det gör inte basic config?!
+    */
+
     var getBasicConfigSuccessCallback = function (data, status, headers, config) {
+        alert("asd")
         $scope.basicConfig = data;
+        alert(JSON.stringify($scope.basicConfig))
     };
 
     var postBasicConfigSuccessCallback = function (data, status, headers, config) {
@@ -80,8 +89,22 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         e.preventDefault();
     };
 
+    var reloadTargetJsonSuccessCallback = function (data, status, headers, config) {
+        alert("reloadTargetJsonSuccessCallback");
+    };
+
+    var updateConfigFields = function(){
+        alert("updateConfigFields");
+
+        //Since no info is stored on the server in the a session it's not necessary to show this info before now
+        basicConfigFactory.getBasicConfig().success(getBasicConfigSuccessCallback).error(errorCallback);
+        interactionConfigFactory.getInteractionConfig().success(getInteractionConfigSuccessCallback).error(errorCallback);
+        $scope.$apply();
+    }
+
     var uploadTargetJsonSuccessCallback = function (data, status, headers, config) {
         alert("uploadTargetJsonSuccessCallback");
+        updateConfigFields();
     };
 
     var getInteractionConfigSuccessCallback = function (data, status, headers, config) {
@@ -98,11 +121,8 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
     };
 
     var errorCallback = function (data, status, headers, config) {
-        alert("errorCallback");
+        bootbox.alert(data.ExceptionMessage);
     };
-
-    basicConfigFactory.getBasicConfig().success(getBasicConfigSuccessCallback).error(errorCallback);
-    interactionConfigFactory.getInteractionConfig().success(getInteractionConfigSuccessCallback).error(errorCallback);
 
     $scope.test = function () {
         alert("test");
@@ -206,7 +226,6 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         var file = document.getElementById("metadataFile").files[0];
 
         if (file) {
-            alert("1")
             var reader = new FileReader();
             reader.readAsText(file, "UTF-8");
             reader.onload = function (evt) {
@@ -221,10 +240,6 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
                 alert("error reading file");
             }
         }
-    }
-
-    $scope.resetTargetJson = function(){
-        resetTargetJsonFactory.postResetTargetJson().success(postResetTargetJsonSuccessCallback).error(errorCallback);
     }
 
     $scope.resetTargetJson = function(){
@@ -250,6 +265,10 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
                 alert("error reading file");
             }
         }
+    }
+
+    $scope.reloadTargetJson = function(){
+        updateConfigFields();
     }
 
 });
