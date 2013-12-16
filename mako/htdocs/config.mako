@@ -32,8 +32,12 @@
 
         <h2>Configurations</h2>
 
-        <button class="btn btn-primary btn-sm" ng-click="test();">Upload configurations</button>
-        <button class="btn btn-primary btn-sm" ng-click="test();">Download configurations</button>
+        <form>
+        <input type="file" name="file" id="targetFile">
+        <button class="btn btn-primary btn-sm" ng-click="uploadTargetJson();">Upload configurations</button>
+        </form>
+
+        <button class="btn btn-primary btn-sm" ng-click="downloadTargetJson();">Download configurations</button>
 
         <hr>
 
@@ -45,8 +49,8 @@
                 </div>
 
                 <div class="col-lg-10">
-                    <input type="file" name="file" id="file">
-                    <button class="btn btn-primary btn-sm" ng-click="uploadFileContent();">Upload</button>
+                    <input type="file" name="file" id="metadataFile">
+                    <button class="btn btn-primary btn-sm" ng-click="uploadMetadataFile();">Upload</button>
                     <br>
                     <br>
                 </div>

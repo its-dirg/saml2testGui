@@ -115,16 +115,20 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         $scope.numberOfTestsRunning--;
 
         if ($scope.numberOfTestsRunning <= 0){
-            $('button').prop('disabled', false);
-            isRunningAllTests = false;
-            hasShownInteractionConfigDialog = false;
-            hasShownWrongPasswordDialog = false;
+            resetFlags();
 
             var resultString = "Successful tests: " + $scope.resultSummary.success + "\n" + " Failed tests: " + $scope.resultSummary.failed
             toaster.pop('note', "Result summary", resultString);
             addedIds = []
         }
     };
+
+    var resetFlags = function(){
+        $('button').prop('disabled', false);
+        isRunningAllTests = false;
+        hasShownInteractionConfigDialog = false;
+        hasShownWrongPasswordDialog = false;
+    }
 
     var getPostBasicDataSuccessCallback = function (data, status, headers, config) {
         //TODO It this nessecerry?
@@ -135,7 +139,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     };
 
     var errorCallback = function (data, status, headers, config) {
-        notificationFactory.error(data.ExceptionMessage);
+        bootbox.alert(data.ExceptionMessage);
+        resetFlags();
     };
 
     testFactory.getTests($scope.selectedItem.type).success(getListSuccessCallback).error(errorCallback);

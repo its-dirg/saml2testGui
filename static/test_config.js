@@ -39,7 +39,18 @@ app.factory('resetTargetJsonFactory', function ($http) {
     };
 });
 
-app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionConfigFactory, uploadMetadataFactory, resetTargetJsonFactory, toaster) {
+app.factory('targetJsonFactory', function ($http) {
+    return {
+        downloadTargetJson: function () {
+            return $http.get("/download_target_json");
+        },
+        uploadTargetJson: function (targetFileContent) {
+            return $http.post("/upload_target_json", {"targetFileContent": targetFileContent});
+        }
+    };
+});
+
+app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionConfigFactory, uploadMetadataFactory, resetTargetJsonFactory, targetJsonFactory, toaster) {
 
     $scope.basicConfig;
     $scope.convertedInteractionList;
@@ -58,6 +69,19 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
 
     var postResetTargetJsonSuccessCallback = function (data, status, headers, config) {
         alert("postResetTargetJsonSuccessCallback");
+    };
+
+    var downloadTargetJsonSuccessCallback = function (data, status, headers, config) {
+        targetContent = JSON.stringify(data["target"])
+        var a = document.createElement("a");
+        a.download = "target.json";
+        a.href = "data:text/plain;base64," + btoa(targetContent);
+        a.click();
+        e.preventDefault();
+    };
+
+    var uploadTargetJsonSuccessCallback = function (data, status, headers, config) {
+        alert("uploadTargetJsonSuccessCallback");
     };
 
     var getInteractionConfigSuccessCallback = function (data, status, headers, config) {
@@ -178,10 +202,11 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         interactionConfigFactory.postInteractionConfig($scope.originalInteractionList).success(postInteractionConfigSuccessCallback).error(errorCallback);
     }
 
-    $scope.uploadFileContent = function(){
-        var file = document.getElementById("file").files[0];
+    $scope.uploadMetadataFile = function(){
+        var file = document.getElementById("metadataFile").files[0];
 
         if (file) {
+            alert("1")
             var reader = new FileReader();
             reader.readAsText(file, "UTF-8");
             reader.onload = function (evt) {
@@ -200,6 +225,31 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
 
     $scope.resetTargetJson = function(){
         resetTargetJsonFactory.postResetTargetJson().success(postResetTargetJsonSuccessCallback).error(errorCallback);
+    }
+
+    $scope.resetTargetJson = function(){
+        resetTargetJsonFactory.postResetTargetJson().success(postResetTargetJsonSuccessCallback).error(errorCallback);
+    }
+
+    $scope.downloadTargetJson = function(){
+        targetJsonFactory.downloadTargetJson().success(downloadTargetJsonSuccessCallback).error(errorCallback);
+    }
+
+    $scope.uploadTargetJson = function(){
+        var file = document.getElementById("targetFile").files[0];
+
+        if (file) {
+            var reader = new FileReader();
+            reader.readAsText(file, "UTF-8");
+            reader.onload = function (evt) {
+                targetJsonFactory.uploadTargetJson(evt.target.result).success(uploadTargetJsonSuccessCallback).error(errorCallback);
+                //Has to be done since this code is executed outside of
+                $scope.$apply();
+            }
+            reader.onerror = function (evt) {
+                alert("error reading file");
+            }
+        }
     }
 
 });

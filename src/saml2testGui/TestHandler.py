@@ -50,7 +50,9 @@ class Test:
             "get_interaction_config" : None,
             "post_interaction_config" : None,
             "post_metadata" : None,
-            "temp_reset_target_json" : None
+            "temp_reset_target_json" : None,
+            "download_target_json" : None,
+            "upload_target_json" : None
         }
         self.cache = cache
 
@@ -91,35 +93,26 @@ class Test:
             return self.handlePostMetadata()
         elif path == "temp_reset_target_json":
             return self.handleResetTargetJson()
+        elif path == "download_target_json":
+            return self.handleDownloadTargetJson()
+        elif path == "upload_target_json":
+            return self.handleUploadTargetJson()
 
     def handleResetTargetJson(self):
         shutil.copyfile(self.CONFIG_FILE_PATH + "/config_backup/target.json", self.CONFIG_FILE_PATH + "target.json")
         return self.returnJSON({"asd": 1})
 
     #TODO Enter code
-    def handlePostMetadata(self):
-
-        metadata = str(self.parameters['metadata'])
-
-        #Checking if the incoming data is valid xml
-        tree = ElementTree.ElementTree(ElementTree.fromstring(metadata))
-
-        f = open(self.CONFIG_FILE_PATH + "target.json", "r")
-        try:
-            targetStringContent = f.read()
-            targetDict = ast.literal_eval(targetStringContent)
-        finally:
-            f.close()
+    def handleUploadTargetJson(self):
 
         f = open(self.CONFIG_FILE_PATH + "target.json", "w")
-        try:
-            targetDict["metadata"] = metadata
 
-            f.write(json.dumps(targetDict))
+        try:
+            f.write(self.parameters['targetFileContent'])
         finally:
             f.close()
 
-        return self.returnJSON({"asd": 1})
+        return self.returnJSON({"target": "asd"})
 
 
     def handleIndex(self, file):
@@ -143,9 +136,6 @@ class Test:
         argv = {
             "a_value": "Hello world"
         }
-
-        #TODO this should be removed since the target file shouldn't be replaced ever time the site is loaded
-        #shutil.copyfile(self.CONFIG_FILE_PATH + "/config_backup/target.json", self.CONFIG_FILE_PATH + "target.json")
 
         return resp(self.environ, self.start_response, **argv)
 
@@ -290,15 +280,18 @@ class Test:
 
             #self.formatOutput(p_out)
 
-            if (ok):
-                response = {
-                    "result": json.loads(p_out),
-                    "errorlog": cgi.escape(p_err),
-                    "testid": testid
-                }
-                return self.returnJSON(json.dumps(response))
-            else:
-                return self.serviceError("Cannot run test")
+            try:
+                if (ok):
+                    response = {
+                        "result": json.loads(p_out),
+                        "errorlog": cgi.escape(p_err),
+                        "testid": testid
+                    }
+                    return self.returnJSON(json.dumps(response))
+                else:
+                    return self.serviceError("Cannot run test")
+            except ValueError:
+                return self.serviceError("Target.json couldn't be decoded, try to upload a new version")
 
         return self.serviceError("The test is not valid")
 
@@ -401,6 +394,46 @@ class Test:
             pass
 
         return self.returnJSON({"asd": 1})
+
+    def handlePostMetadata(self):
+
+        metadata = str(self.parameters['metadata'])
+
+        #Checking if the incoming data is valid xml
+        #tree = ElementTree.ElementTree(ElementTree.fromstring(metadata))
+
+        if(metadata.startswith( '<?xml' )):
+            f = open(self.CONFIG_FILE_PATH + "target.json", "r")
+            try:
+                targetStringContent = f.read()
+                targetDict = ast.literal_eval(targetStringContent)
+            finally:
+                f.close()
+
+            f = open(self.CONFIG_FILE_PATH + "target.json", "w")
+            try:
+                targetDict["metadata"] = ""
+
+                targetString = json.dumps(targetDict)
+                targetString =  targetString.replace("\"metadata\": \"\"", "\"metadata\": \"" + metadata + "\"")
+
+                f.write(targetString)
+            finally:
+                f.close()
+
+        return self.returnJSON({"asd": 1})
+
+    def handleDownloadTargetJson(self):
+        f = open(self.CONFIG_FILE_PATH + "target.json", "r")
+
+        try:
+            targetStringContent = f.read()
+            targetDict = ast.literal_eval(targetStringContent)
+            fileDict = json.dumps({"target": targetDict})
+        finally:
+            f.close()
+
+        return self.returnJSON(fileDict)
 
     def createInteractionConfigList(self, targetDict):
         interactionElemetList = targetDict['interaction']
