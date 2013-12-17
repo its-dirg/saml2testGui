@@ -63,21 +63,21 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
     */
 
     var getBasicConfigSuccessCallback = function (data, status, headers, config) {
-        alert("asd")
         $scope.basicConfig = data;
+        $scope.$apply();
         alert(JSON.stringify($scope.basicConfig))
     };
 
     var postBasicConfigSuccessCallback = function (data, status, headers, config) {
-        alert("postBasicConfigSuccessCallback");
+        alert("Basic config successfully SAVED");
     };
 
     var postMetadataSuccessCallback = function (data, status, headers, config) {
-        alert("postMetadataSuccessCallback");
+        alert("Metadata successfully SAVED");
     };
 
     var postResetTargetJsonSuccessCallback = function (data, status, headers, config) {
-        alert("postResetTargetJsonSuccessCallback");
+        alert("Target json successfully RESTORED");
     };
 
     var downloadTargetJsonSuccessCallback = function (data, status, headers, config) {
@@ -87,23 +87,22 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         a.href = "data:text/plain;base64," + btoa(targetContent);
         a.click();
         e.preventDefault();
+        alert("Target json successfully DOWNLOADED");
     };
 
     var reloadTargetJsonSuccessCallback = function (data, status, headers, config) {
-        alert("reloadTargetJsonSuccessCallback");
+        alert("Target json successfully REFRESHED");
     };
 
     var updateConfigFields = function(){
-        alert("updateConfigFields");
 
         //Since no info is stored on the server in the a session it's not necessary to show this info before now
         basicConfigFactory.getBasicConfig().success(getBasicConfigSuccessCallback).error(errorCallback);
         interactionConfigFactory.getInteractionConfig().success(getInteractionConfigSuccessCallback).error(errorCallback);
-        $scope.$apply();
     }
 
     var uploadTargetJsonSuccessCallback = function (data, status, headers, config) {
-        alert("uploadTargetJsonSuccessCallback");
+        alert("Target json successfully UPLOADED");
         updateConfigFields();
     };
 
@@ -114,10 +113,11 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         for (var i = 0; i < data.length; i++){
            $scope.convertedInteractionList[i]['entry']['pagetype'] = data[i]['entry']['page-type']
         }
+        alert("interaction successfully LOADED");
     };
 
     var postInteractionConfigSuccessCallback = function (data, status, headers, config) {
-        alert("postInteractionConfigSuccessCallback");
+        alert("interaction successfully SAVED");
     };
 
     var errorCallback = function (data, status, headers, config) {
@@ -195,7 +195,8 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
     }
 
     $scope.saveInteractionConfig = function(){
-        $( ".block" ).each(function() {
+
+        $(".block").each(function() {
             var thisBlockId = $(this).attr('id');
 
             var newUrl = $(this).find("#url").val();
@@ -204,6 +205,8 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
             var newType = $(this).find("#type").val();
             var newIndex = $(this).find("#index").val();
             var newSet = $(this).find("#set").val();
+
+            alert($scope.originalInteractionList.length);
 
             for (var i = 0; i < $scope.originalInteractionList.length; i++){
                 if ($scope.originalInteractionList[i].id == thisBlockId){
@@ -217,9 +220,8 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
                 }
             }
 
+            interactionConfigFactory.postInteractionConfig($scope.originalInteractionList).success(postInteractionConfigSuccessCallback).error(errorCallback);
         });
-
-        interactionConfigFactory.postInteractionConfig($scope.originalInteractionList).success(postInteractionConfigSuccessCallback).error(errorCallback);
     }
 
     $scope.uploadMetadataFile = function(){
