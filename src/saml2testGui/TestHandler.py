@@ -395,15 +395,26 @@ class Test:
         print "Post metadata: " + self.session[self.TARGET_KEY]
         return self.returnJSON({"asd": 1})
 
+    def setDefaultValeInDict(self, key, dict, defaultValue):
+        if key in dict:
+            pass
+        else:
+            dict[key] = defaultValue
+        return dict[key]
+
     def createInteractionConfigList(self, targetDict):
         interactionElemetList = targetDict['interaction']
         interactionConfigList = []
         loopIndex = 0;
         for entry in interactionElemetList:
 
+            entry['control']['index'] = self.setDefaultValeInDict("index", entry['control'], 0)
+            entry['control']['set'] = self.setDefaultValeInDict("set", entry['control'], {})
+
             entry = {"id": loopIndex,
                      "entry": entry
             }
+
             interactionConfigList.append(entry)
             loopIndex += 1
         return interactionConfigList

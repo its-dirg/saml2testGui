@@ -197,6 +197,7 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
     $scope.saveInteractionConfig = function(){
 
         $(".block").each(function() {
+
             var thisBlockId = $(this).attr('id');
 
             var newUrl = $(this).find("#url").val();
@@ -205,8 +206,6 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
             var newType = $(this).find("#type").val();
             var newIndex = $(this).find("#index").val();
             var newSet = $(this).find("#set").val();
-
-            alert($scope.originalInteractionList.length);
 
             for (var i = 0; i < $scope.originalInteractionList.length; i++){
                 if ($scope.originalInteractionList[i].id == thisBlockId){
@@ -217,11 +216,15 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
                     $scope.originalInteractionList[i]['entry']['control']['type'] = newType;
                     $scope.originalInteractionList[i]['entry']['control']['index'] = newIndex;
                     $scope.originalInteractionList[i]['entry']['control']['set'] = JSON.parse(newSet);
+
+                    break;
                 }
             }
 
-            interactionConfigFactory.postInteractionConfig($scope.originalInteractionList).success(postInteractionConfigSuccessCallback).error(errorCallback);
         });
+
+        interactionConfigFactory.postInteractionConfig($scope.originalInteractionList).success(postInteractionConfigSuccessCallback).error(errorCallback);
+
     }
 
     $scope.uploadMetadataFile = function(){
