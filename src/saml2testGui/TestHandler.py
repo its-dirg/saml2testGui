@@ -44,7 +44,7 @@ class Test:
             "run_test" : None,
             "final_target_data" : None,
             "basic_target_data" : None,
-            "reset_target_data" : None,
+            "reset_interaction" : None,
             "test_config" : "config.mako",
             "get_basic_config" : None,
             "post_basic_config" : None,
@@ -80,8 +80,8 @@ class Test:
             return self.handleFinalTargetData()
         elif path == "basic_target_data":
             return self.handleBasicTargetData()
-        elif path == "reset_target_data":
-            return self.handleResetTargetData()
+        elif path == "reset_interaction":
+            return self.handleResetInteraction()
         elif path == "test_config":
             return self.handleTestConfig(self.urls[path])
         elif path == "get_basic_config":
@@ -200,8 +200,8 @@ class Test:
         pageType = interactionParameters['pageType']
         controlType = interactionParameters['controlType']
 
-        targetContent = self.session[self.TARGET_KEY]
-        targetJson = json.loads(targetContent)
+        configFileAsString = self.session[self.TARGET_KEY]
+        configFileAsDict = ast.literal_eval(configFileAsString)
 
         #create the new interaction object based on the parameters
         if password == None and username == None:
@@ -224,13 +224,12 @@ class Test:
             }
         ]
 
-        if (targetJson.get('interaction') == None):
-            targetJson['interaction'] = []
+        if not('interaction' in configFileAsDict):
+            configFileAsDict['interaction'] = []
 
-        targetJson['interaction'].extend(newInteraction)
+        configFileAsDict['interaction'].extend(newInteraction)
 
-        self.session[self.TARGET_KEY] = str(json.dumps(targetJson))
-
+        self.session[self.TARGET_KEY] = str(json.dumps(configFileAsDict))
 
 
     def handleFinalTargetData(self):
@@ -257,9 +256,13 @@ class Test:
 
         return self.returnJSON({"asd": "asd"})
 
-    #TODO Remove this method it should not be nesseccery
-    def handleResetTargetData(self):
-        shutil.copyfile(self.CONFIG_FILE_PATH + "/backup/target.json", self.CONFIG_FILE_PATH + "target.json")
+    def handleResetInteraction(self):
+
+        targetStringContent = self.session[self.TARGET_KEY]
+        targetDict = ast.literal_eval(targetStringContent)
+        targetDict['interaction'] = []
+        self.session[self.TARGET_KEY] = str(targetDict)
+
         return self.returnHTML("<h1>Data</h1>")
 
     def handleRunTest(self):
@@ -283,7 +286,7 @@ class Test:
             json.dump(targetDict, outfile)
             outfile.flush()
 
-            #Directs to the folder containing the saml2test config file an enters the target.json files as a parameter to the test script
+            #Directs to the folder containing the saml2test config file
             ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J', outfile.name, testToRun], "./saml2test")
 
             outfile.close()
@@ -301,7 +304,7 @@ class Test:
                 else:
                     return self.serviceError("Cannot run test")
             except ValueError:
-                return self.serviceError("Target.json couldn't be decoded, try to upload a new version")
+                return self.serviceError("The configuration couldn't be decoded, try to upload a new version")
 
         return self.serviceError("The test is not valid")
 
@@ -398,7 +401,7 @@ class Test:
 
     def handleResetConfigFile(self):
 
-        f = open(self.CONFIG_FILE_PATH + "/config_backup/target.json", "r")
+        f = open(self.CONFIG_FILE_PATH + "/backup/target.json", "r")
         try:
             targetStringContent = f.read()
             targetDict = ast.literal_eval(targetStringContent)

@@ -38,10 +38,10 @@ app.factory('postBasicTargetDataFactory', function ($http) {
     };
 });
 
-app.factory('postResetTargetDataFactory', function ($http) {
+app.factory('postResetInteractionFactory', function ($http) {
     return {
-        postResetTargetData: function () {
-            return $http.post("/reset_target_data");
+        postResetInteraction: function () {
+            return $http.post("/reset_interaction");
         }
     };
 });
@@ -61,7 +61,7 @@ app.factory('notificationFactory', function () {
 });
 
 
-app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, configFactory, runTestFactory, postBasicTargetDataFactory, postResetTargetDataFactory, toaster) {
+app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, configFactory, runTestFactory, postBasicTargetDataFactory, postResetInteractionFactory, toaster) {
     $scope.configList = [];
     $scope.testResult = "";
     $scope.currentFlattenedTree = "None";
@@ -408,7 +408,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
                     label: "Yes",
                     className: "btn-primary",
                     callback: function () {
-                        postResetTargetDataFactory.postResetTargetData().success(getPostResetDataSuccessCallback).error(errorCallback);
+                        postResetInteractionFactory.postResetInteraction().success(getPostResetDataSuccessCallback).error(errorCallback);
                     }
                 }
             }
