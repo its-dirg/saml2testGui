@@ -51,9 +51,11 @@ class Test:
             "get_interaction_config" : None,
             "post_interaction_config" : None,
             "post_metadata" : None,
-            "temp_reset_target_json" : None,
-            "download_target_json" : None,
-            "upload_target_json" : None
+            "temp_reset_config_file" : None,
+            "download_config_file" : None,
+            "upload_config_file" : None,
+            "create_new_config_file": None,
+            "does_config_file_exist": None
         }
         self.cache = cache
 
@@ -92,46 +94,27 @@ class Test:
             return self.handlePostInteractionConfig()
         elif path == "post_metadata":
             return self.handlePostMetadata()
-        elif path == "temp_reset_target_json":
-            return self.handleResetTargetJson()
-        elif path == "download_target_json":
-            return self.handleDownloadTargetJson()
-        elif path == "upload_target_json":
-            return self.handleUploadTargetJson()
-
-    def handleResetTargetJson(self):
-
-        f = open(self.CONFIG_FILE_PATH + "/config_backup/target.json", "r")
-        try:
-            targetStringContent = f.read()
-            targetDict = ast.literal_eval(targetStringContent)
-            self.session[self.TARGET_KEY] = str(targetDict)
-        finally:
-            f.close()
-
-        print "Reset: " + self.session[self.TARGET_KEY]
-        return self.returnJSON({"asd": 1})
-
-    def handleUploadTargetJson(self):
-
-        self.session[self.TARGET_KEY] = str(self.parameters['targetFileContent'])
-
-        print "Upload target: " + self.session[self.TARGET_KEY]
-        return self.returnJSON({"target": "asd"})
+        elif path == "temp_reset_config_file":
+            return self.handleResetConfigFile()
+        elif path == "download_config_file":
+            return self.handleDownloadConfigFile()
+        elif path == "upload_config_file":
+            return self.handleUploadConfigFile()
+        elif path == "create_new_config_file":
+            return self.handleCreateNewConfigFile()
+        elif path == "does_config_file_exist":
+            return self.handleDoesConfigFileExist()
 
 
-    def handleDownloadTargetJson(self):
+    def doesConfigFileExist(self):
+        if self.TARGET_KEY in self.session:
+            return True
+        else:
+            return False
 
-        if not (self.isSessionEmpty()):
-
-            targetStringContent = self.session[self.TARGET_KEY]
-            targetDict = ast.literal_eval(targetStringContent)
-            fileDict = json.dumps({"target": targetDict})
-
-            print "Download target: " + self.session[self.TARGET_KEY]
-            return self.returnJSON(fileDict)
-
-        return self.serviceError("No target configurations stored in the session")
+    def handleDoesConfigFileExist(self):
+        result = json.dumps({"doesConfigFileExist": self.doesConfigFileExist()})
+        return self.returnJSON(result)
 
     def handleIndex(self, file):
         resp = Response(mako_template=file,
@@ -146,12 +129,6 @@ class Test:
 
         return resp(self.environ, self.start_response, **argv)
 
-    def isSessionEmpty(self):
-        if self.TARGET_KEY in self.session:
-            return False
-        else:
-            return True
-
     def handleTestConfig(self, file):
 
         resp = Response(mako_template=file,
@@ -163,7 +140,6 @@ class Test:
         }
 
         return resp(self.environ, self.start_response, **argv)
-
 
     def handleList(self):
         #Gör en knapp som ändrar synen på trädet
@@ -337,15 +313,13 @@ class Test:
 
     def handleGetBasicConfig(self):
 
-        if not (self.isSessionEmpty()):
-            targetStringContent = self.session[self.TARGET_KEY]
-            targetDict = ast.literal_eval(targetStringContent)
+        targetStringContent = self.session[self.TARGET_KEY]
+        targetDict = ast.literal_eval(targetStringContent)
 
-            basicConfig = {"metadata": "Find a way to handle metadata!!", "entity_id": targetDict['entity_id']}
+        basicConfig = {"entity_id": targetDict['entity_id'], "name_format": targetDict['name_format']}
 
-            return self.returnJSON(json.dumps(basicConfig))
+        return self.returnJSON(json.dumps(basicConfig))
 
-        return self.serviceError("No target configurations stored in the session")
 
     def handlePostBasicConfig(self):
 
@@ -353,6 +327,7 @@ class Test:
         targetDict = ast.literal_eval(targetStringContent)
 
         targetDict["entity_id"] = self.parameters['entityID']
+        targetDict["name_format"] = self.parameters['name_format']
         targetAsString = str(targetDict)
 
         self.session[self.TARGET_KEY] = targetAsString
@@ -363,14 +338,12 @@ class Test:
 
     def handleGetInteractionConfig(self):
 
-        if not (self.isSessionEmpty()):
+        targetStringContent = self.session[self.TARGET_KEY]
+        targetDict = ast.literal_eval(targetStringContent)
 
-            targetStringContent = self.session[self.TARGET_KEY]
-            targetDict = ast.literal_eval(targetStringContent)
+        interactionConfigList = self.createInteractionConfigList(targetDict)
 
-            interactionConfigList = self.createInteractionConfigList(targetDict)
-
-            return self.returnJSON(json.dumps(interactionConfigList))
+        return self.returnJSON(json.dumps(interactionConfigList))
 
 
     def handlePostInteractionConfig(self):
@@ -409,6 +382,50 @@ class Test:
 
         print "Post metadata: " + self.session[self.TARGET_KEY]
         return self.returnJSON({"asd": 1})
+
+    def handleCreateNewConfigFile(self):
+        templateFile = open("src/saml2testGui/template_config.json", "r")
+
+        try:
+            targetStringContent = templateFile.read()
+            targetDict = ast.literal_eval(targetStringContent)
+            self.session[self.TARGET_KEY] = str(targetDict)
+        finally:
+            templateFile.close()
+
+        print "Create: " + self.session[self.TARGET_KEY]
+        return self.returnJSON({"asd": 1})
+
+    def handleResetConfigFile(self):
+
+        f = open(self.CONFIG_FILE_PATH + "/config_backup/target.json", "r")
+        try:
+            targetStringContent = f.read()
+            targetDict = ast.literal_eval(targetStringContent)
+            self.session[self.TARGET_KEY] = str(targetDict)
+        finally:
+            f.close()
+
+        print "Reset: " + self.session[self.TARGET_KEY]
+        return self.returnJSON({"asd": 1})
+
+    def handleUploadConfigFile(self):
+
+        self.session[self.TARGET_KEY] = str(self.parameters['targetFileContent'])
+
+        print "Upload target: " + self.session[self.TARGET_KEY]
+        return self.returnJSON({"target": "asd"})
+
+
+    def handleDownloadConfigFile(self):
+
+        targetStringContent = self.session[self.TARGET_KEY]
+        targetDict = ast.literal_eval(targetStringContent)
+        fileDict = json.dumps({"target": targetDict})
+
+        print "Download target: " + self.session[self.TARGET_KEY]
+        return self.returnJSON(fileDict)
+
 
     def setDefaultValeInDict(self, key, dict, defaultValue):
         if key in dict:

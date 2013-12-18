@@ -28,19 +28,31 @@
 
     <div id="content">
 
-        <button class="btn btn-primary btn-sm" ng-click="resetTargetJson();">Reset Target.json</button>
+        <button class="btn btn-primary btn-sm" ng-click="resetConfigFile();">Reset config file</button>
 
         <hr>
+<!-- ################################################################################################# -->
 
         <h2>IDP configuration:
-            <button class="btn btn-primary btn-sm" ng-click="reloadTargetJson();">
+            <button class="btn btn-primary btn-sm" ng-click="reloadConfigFile();">
                 <span class="glyphicon glyphicon-refresh"></span>
             </button>
         </h2>
 
         <form>
-             <div class="row">
+            <div class="row">
+                <div class="col-lg-2">
+                    Create new config:
+                </div>
 
+                <div class="col-lg-10">
+                    <button class="btn btn-primary btn-sm" ng-click="createNewConfigFile();">Create configurations</button>
+                    <br>
+                    <br>
+                </div>
+            </div>
+
+             <div class="row">
                 <div class="col-lg-2">
                     Upload config file:
                 </div>
@@ -48,147 +60,155 @@
                 <div class="col-lg-10">
 
                     <input type="file" name="file" id="targetFile">
-                    <button class="btn btn-primary btn-sm" ng-click="uploadTargetJson();">Upload configurations</button>
+                    <button class="btn btn-primary btn-sm" ng-click="uploadConfigFile();">Upload configurations</button>
                     <br>
                     <br>
                 </div>
             </div>
 
              <div class="row">
-
                 <div class="col-lg-2">
                     Download config file:
                 </div>
 
                 <div class="col-lg-10">
-                    <button class="btn btn-primary btn-sm" ng-click="downloadTargetJson();">Download configurations</button>
+                    <button class="btn btn-primary btn-sm" ng-click="downloadConfigFile();">Download configurations</button>
                 </div>
             </div>
         </form>
 
         <hr>
 
-        <form>
-            <div class="row">
+        <!-- HIDE EVERY THING UNDER THIS LINE UNTIL DATA IS STORED IN THE SESSION -->
 
-                <div class="col-lg-2">
-                    Upload metadata file:
-                </div>
-
-                <div class="col-lg-10">
-                    <input type="file" name="file" id="metadataFile">
-                    <button class="btn btn-primary btn-sm" ng-click="uploadMetadataFile();">Upload</button>
-                    <br>
-                    <br>
-                </div>
-            </div>
-
-<!--
-            <div class="row">
-                <div class="col-lg-2" id="label">
-                    Upload metadata by url:
-                </div>
-
-                <div class="col-lg-10">
-                    <input type="text" value="" id="entity_id">
-                </div>
-            </div>
--->
-
-            <div class="row">
-                <div class="col-lg-2" id="label">
-                    Entity id:
-                </div>
-
-                <div class="col-lg-10">
-                    <input type="text" value="{{basicConfig.entity_id}}" id="entity_id">
-                </div>
-            </div>
-        </form>
-
-
-        <button class="btn btn-primary btn-sm" ng-click="saveBasicConfig();">Save configurations</button>
-
-        <hr>
-
-        Interaction: <button class="btn btn-default btn-sm" ng-click="addInteraction();">+</button>
-
-        <div class="block" ng-repeat="entry in convertedInteractionList" id="{{entry.id}}">
+<!-- ################################################################################################# -->
+        <div ng-show="basicConfig">
             <form>
-                id:{{entry.id}}
-
                 <div class="row">
                     <div class="col-lg-2">
-                        Url:
+                        Upload metadata file:
                     </div>
 
                     <div class="col-lg-10">
-                        <input type="text" value="{{entry.entry.matches.url}}" id="url">
+                        <input type="file" name="file" id="metadataFile">
+                        <button class="btn btn-primary btn-sm" ng-click="uploadMetadataFile();">Upload</button>
+                        <br>
+                        <br>
                     </div>
-                    <br>
                 </div>
+
+    <!--
                 <div class="row">
-                    <div class="col-lg-2">
-                        Title:
+                    <div class="col-lg-2" id="label">
+                        Upload metadata by url:
                     </div>
 
                     <div class="col-lg-10">
-                        <input type="text" value="{{entry.entry.matches.title}}" id="title">
+                        <input type="text" value="" id="metadataUrl">
                     </div>
-                    <br>
                 </div>
-                <div class="row">
-                    <div class="col-lg-2">
-                        Page-type:
+    -->
+                <!--
+                    This ng-repeat is only necessary in order to prevent a bug, which occurs when the
+                    input field is is modified and the the page is updated
+                -->
+                <div class="row" ng-repeat="(key, data) in basicConfig">
+                    <div class="col-lg-2" id="label">
+                        {{key}}:
                     </div>
 
                     <div class="col-lg-10">
-                        <input type="text" value="{{entry.entry.pagetype}}" id="pagetype">
+                        <input type="text" value="{{data}}" id="{{key}}">
                     </div>
-                    <br>
-                </div>
-                <div class="row">
-                    <div class="col-lg-2">
-                        Type:
-                    </div>
-
-                    <div class="col-lg-10">
-                        <input type="text" value="{{entry.entry.control.type}}" id="type">
-                    </div>
-                    <br>
-                </div>
-                <div class="row">
-                    <div class="col-lg-2">
-                        Index:
-                    </div>
-
-                    <div class="col-lg-10">
-                        <input type="text" value="{{entry.entry.control.index}}" id="index">
-                    </div>
-                    <br>
-                </div>
-                <div class="row">
-                    <div class="col-lg-2">
-                        Set:
-                    </div>
-
-                    <div class="col-lg-10">
-                        <input type="text" value="{{entry.entry.control.set}}" id="set">
-                    </div>
-                    <br>
                 </div>
 
             </form>
 
-            <div class="close">
-                <button class="btn btn-danger btn-sm" ng-click="tryToRemoveInteraction(entry.id);">X</button>
+
+            <button class="btn btn-primary btn-sm" ng-click="saveBasicConfig();">Save configurations</button>
+
+            <hr>
+
+<!-- ################################################################################################# -->
+
+            Interaction: <button class="btn btn-default btn-sm" ng-click="addInteraction();">+</button>
+
+            <div class="block" ng-repeat="entry in convertedInteractionList" id="{{entry.id}}">
+                <form>
+                    id:{{entry.id}}
+
+                    <div class="row">
+                        <div class="col-lg-2">
+                            Url:
+                        </div>
+
+                        <div class="col-lg-10">
+                            <input type="text" value="{{entry.entry.matches.url}}" id="url">
+                        </div>
+                        <br>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2">
+                            Title:
+                        </div>
+
+                        <div class="col-lg-10">
+                            <input type="text" value="{{entry.entry.matches.title}}" id="title">
+                        </div>
+                        <br>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2">
+                            Page-type:
+                        </div>
+
+                        <div class="col-lg-10">
+                            <input type="text" value="{{entry.entry.pagetype}}" id="pagetype">
+                        </div>
+                        <br>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2">
+                            Type:
+                        </div>
+
+                        <div class="col-lg-10">
+                            <input type="text" value="{{entry.entry.control.type}}" id="type">
+                        </div>
+                        <br>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2">
+                            Index:
+                        </div>
+
+                        <div class="col-lg-10">
+                            <input type="text" value="{{entry.entry.control.index}}" id="index">
+                        </div>
+                        <br>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2">
+                            Set:
+                        </div>
+
+                        <div class="col-lg-10">
+                            <input type="text" value="{{entry.entry.control.set}}" id="set">
+                        </div>
+                        <br>
+                    </div>
+
+                </form>
+
+                <div class="close">
+                    <button class="btn btn-danger btn-sm" ng-click="tryToRemoveInteraction(entry.id);">X</button>
+                </div>
             </div>
+
+            <br>
+
+            <button class="btn btn-primary btn-sm" ng-click="saveInteractionConfig();">Save configurations</button>
         </div>
-
-        <br>
-
-        <button class="btn btn-primary btn-sm" ng-click="saveInteractionConfig();">Save configurations</button>
-
     </div>
 </%block>
 

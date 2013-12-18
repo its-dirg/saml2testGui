@@ -6,8 +6,8 @@ app.factory('basicConfigFactory', function ($http) {
         getBasicConfig: function () {
             return $http.get("/get_basic_config");
         },
-        postBasicConfig: function (metadata, entityID) {
-            return $http.post("/post_basic_config", {"metadata": metadata, "entityID": entityID});
+        postBasicConfig: function (name_format, entityID) {
+            return $http.post("/post_basic_config", {"name_format": name_format, "entityID": entityID});
         }
     };
 });
@@ -31,41 +31,44 @@ app.factory('uploadMetadataFactory', function ($http) {
     };
 });
 
-app.factory('resetTargetJsonFactory', function ($http) {
+app.factory('resetconfigFileFactory', function ($http) {
     return {
-        postResetTargetJson: function () {
-            return $http.post("/temp_reset_target_json");
+        postResetConfigFile: function () {
+            return $http.post("/temp_reset_config_file");
         }
     };
 });
 
-app.factory('targetJsonFactory', function ($http) {
+app.factory('configFileFactory', function ($http) {
     return {
 
-        downloadTargetJson: function () {
-            return $http.get("/download_target_json");
+        downloadConfigFile: function () {
+            return $http.get("/download_config_file");
         },
 
-        uploadTargetJson: function (targetFileContent) {
-            return $http.post("/upload_target_json", {"targetFileContent": targetFileContent});
+        uploadConfigFile: function (targetFileContent) {
+            return $http.post("/upload_config_file", {"targetFileContent": targetFileContent});
+        },
+
+        createNewConfigFile: function () {
+            return $http.get("/create_new_config_file");
+        },
+
+        doesConfigFileExist: function () {
+            return $http.get("/does_config_file_exist");
         }
+
     };
 });
 
-app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionConfigFactory, uploadMetadataFactory, resetTargetJsonFactory, targetJsonFactory, toaster) {
+app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionConfigFactory, uploadMetadataFactory, resetconfigFileFactory, configFileFactory, toaster) {
 
     $scope.basicConfig;
     $scope.convertedInteractionList;
 
-    /*
-    Något konstigt när man laddar upp data i sessionen och och trycker på refresh så uppdaters
-    interaction om man inte sparat dessa, men det gör inte basic config?!
-    */
-
     var getBasicConfigSuccessCallback = function (data, status, headers, config) {
         $scope.basicConfig = data;
-        $scope.$apply();
-        alert(JSON.stringify($scope.basicConfig))
+        //alert("Basic config successfully LOADED")
     };
 
     var postBasicConfigSuccessCallback = function (data, status, headers, config) {
@@ -76,33 +79,66 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         alert("Metadata successfully SAVED");
     };
 
-    var postResetTargetJsonSuccessCallback = function (data, status, headers, config) {
+    var postResetConfigFileSuccessCallback = function (data, status, headers, config) {
         alert("Target json successfully RESTORED");
     };
 
-    var downloadTargetJsonSuccessCallback = function (data, status, headers, config) {
+    var downloadConfigFileSuccessCallback = function (data, status, headers, config) {
         targetContent = JSON.stringify(data["target"])
         var a = document.createElement("a");
         a.download = "target.json";
         a.href = "data:text/plain;base64," + btoa(targetContent);
         a.click();
         e.preventDefault();
-        alert("Target json successfully DOWNLOADED");
+        //alert("Target json successfully DOWNLOADED");
     };
 
-    var reloadTargetJsonSuccessCallback = function (data, status, headers, config) {
+    var reloadConfigFileSuccessCallback = function (data, status, headers, config) {
         alert("Target json successfully REFRESHED");
     };
 
     var updateConfigFields = function(){
+        //TODO remove this
+        $scope.basicConfig = {"entity_id": ""}
+
         //Since no info is stored on the server in the a session it's not necessary to show this info before now
         basicConfigFactory.getBasicConfig().success(getBasicConfigSuccessCallback).error(errorCallback);
         interactionConfigFactory.getInteractionConfig().success(getInteractionConfigSuccessCallback).error(errorCallback);
     }
 
-    var uploadTargetJsonSuccessCallback = function (data, status, headers, config) {
+    var uploadConfigFileSuccessCallback = function (data, status, headers, config) {
         alert("Target json successfully UPLOADED");
         updateConfigFields();
+    };
+
+    var createNewConfigFileSuccessCallback = function (data, status, headers, config) {
+        //alert("New Target json successfully CREATED");
+    };
+
+    var showNoConfigAvailable = function(){
+        bootbox.alert("No configurations available. Either the session may have timed out or no configuration has be created or uploaded to the server.");
+    }
+
+    var reloadDoesConfigFileExistSuccessCallback = function (data, status, headers, config) {
+        var doesConfigFileExist = data['doesConfigFileExist'];
+
+        if (doesConfigFileExist == true){
+            updateConfigFields();
+        }else{
+            showNoConfigAvailable();
+        }
+
+    };
+
+    var downloadDoesConfigFileExistSuccessCallback = function (data, status, headers, config) {
+        var doesConfigFileExist = data['doesConfigFileExist'];
+
+        if (doesConfigFileExist == true){
+            configFileFactory.downloadConfigFile().success(downloadConfigFileSuccessCallback).error(errorCallback);
+        }else{
+            showNoConfigAvailable();
+        }
+
     };
 
     var getInteractionConfigSuccessCallback = function (data, status, headers, config) {
@@ -112,7 +148,7 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         for (var i = 0; i < data.length; i++){
            $scope.convertedInteractionList[i]['entry']['pagetype'] = data[i]['entry']['page-type']
         }
-        alert("interaction successfully LOADED");
+        //alert("interaction successfully LOADED");
     };
 
     var postInteractionConfigSuccessCallback = function (data, status, headers, config) {
@@ -187,10 +223,10 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
     }
 
     $scope.saveBasicConfig = function(){
-        var metadata = $('#metadata').val();
+        var name_format = $('#name_format').val();
         var entityID = $('#entity_id').val();
 
-        basicConfigFactory.postBasicConfig(metadata, entityID).success(postBasicConfigSuccessCallback).error(errorCallback);
+        basicConfigFactory.postBasicConfig(name_format, entityID).success(postBasicConfigSuccessCallback).error(errorCallback);
     }
 
     $scope.saveInteractionConfig = function(){
@@ -246,22 +282,22 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         }
     }
 
-    $scope.resetTargetJson = function(){
-        resetTargetJsonFactory.postResetTargetJson().success(postResetTargetJsonSuccessCallback).error(errorCallback);
+    $scope.resetConfigFile = function(){
+        resetconfigFileFactory.postResetConfigFile().success(postResetConfigFileSuccessCallback).error(errorCallback);
     }
 
-    $scope.downloadTargetJson = function(){
-        targetJsonFactory.downloadTargetJson().success(downloadTargetJsonSuccessCallback).error(errorCallback);
+    $scope.downloadConfigFile = function(){
+        configFileFactory.doesConfigFileExist().success(downloadDoesConfigFileExistSuccessCallback).error(errorCallback);
     }
 
-    $scope.uploadTargetJson = function(){
+    $scope.uploadConfigFile = function(){
         var file = document.getElementById("targetFile").files[0];
 
         if (file) {
             var reader = new FileReader();
             reader.readAsText(file, "UTF-8");
             reader.onload = function (evt) {
-                targetJsonFactory.uploadTargetJson(evt.target.result).success(uploadTargetJsonSuccessCallback).error(errorCallback);
+                configFileFactory.uploadConfigFile(evt.target.result).success(uploadConfigFileSuccessCallback).error(errorCallback);
                 //Has to be done since this code is executed outside of
                 $scope.$apply();
             }
@@ -271,8 +307,31 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         }
     }
 
-    $scope.reloadTargetJson = function(){
-        updateConfigFields();
+    $scope.reloadConfigFile = function(){
+        configFileFactory.doesConfigFileExist().success(reloadDoesConfigFileExistSuccessCallback).error(errorCallback);
+    }
+    
+    $scope.createNewConfigFile = function(){
+        bootbox.dialog({
+            message: "All your existing configurations which is not downloaded will be overwritten. Are you sure you want to create a new configuration?",
+            title: "Create new file",
+            buttons: {
+                danger: {
+                    label: "No",
+                    className: "btn-default"
+                },
+                success: {
+                    label: "Yes",
+                    className: "btn-primary",
+                    callback: function () {
+                        configFileFactory.createNewConfigFile().success(createNewConfigFileSuccessCallback).error(errorCallback);
+                        updateConfigFields();
+                        $scope.$apply();
+                    }
+                }
+            }
+        });
+
     }
 
 });

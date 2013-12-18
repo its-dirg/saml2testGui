@@ -1,0 +1,1 @@
+{"entity_id": "http://example.com:8088/idp.xml", "interaction": [{"matches": {"url": "http://example.com:8088/sso/redirect", "title": "IDP test login"}, "control": {"set": {"login": "username", "password": "password"}, "type": "form"}, "page-type": "login"}], "name_format": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri"}
