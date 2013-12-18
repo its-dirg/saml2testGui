@@ -32,7 +32,7 @@
 
         <hr>
 
-        <h2>Configurations
+        <h2>IDP configuration:
             <button class="btn btn-primary btn-sm" ng-click="reloadTargetJson();">
                 <span class="glyphicon glyphicon-refresh"></span>
             </button>

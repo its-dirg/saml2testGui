@@ -95,7 +95,6 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
     };
 
     var updateConfigFields = function(){
-
         //Since no info is stored on the server in the a session it's not necessary to show this info before now
         basicConfigFactory.getBasicConfig().success(getBasicConfigSuccessCallback).error(errorCallback);
         interactionConfigFactory.getInteractionConfig().success(getInteractionConfigSuccessCallback).error(errorCallback);

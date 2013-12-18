@@ -12,7 +12,7 @@ from os.path import basename
 import os
 import uuid
 import ast
-from xml.etree import ElementTree
+import tempfile
 
 __author__ = 'haho0032'
 
@@ -122,7 +122,7 @@ class Test:
 
     def handleDownloadTargetJson(self):
 
-        if self.session[self.TARGET_KEY] != None:
+        if not (self.isSessionEmpty()):
 
             targetStringContent = self.session[self.TARGET_KEY]
             targetDict = ast.literal_eval(targetStringContent)
@@ -145,6 +145,12 @@ class Test:
         #shutil.copyfile(self.CONFIG_FILE_PATH + "/backup/target.json", self.CONFIG_FILE_PATH + "target.json")
 
         return resp(self.environ, self.start_response, **argv)
+
+    def isSessionEmpty(self):
+        if self.TARGET_KEY in self.session:
+            return False
+        else:
+            return True
 
     def handleTestConfig(self, file):
 
@@ -275,7 +281,7 @@ class Test:
 
         return self.returnJSON({"asd": "asd"})
 
-    #TODO Rmove this method it should not be nesseccery
+    #TODO Remove this method it should not be nesseccery
     def handleResetTargetData(self):
         shutil.copyfile(self.CONFIG_FILE_PATH + "/backup/target.json", self.CONFIG_FILE_PATH + "target.json")
         return self.returnHTML("<h1>Data</h1>")
@@ -292,9 +298,19 @@ class Test:
         targetFile = targetFile.strip(' \n\t')
 
         if self.checkIfParamentersAreValid(targetFile, testToRun):
+
+            targetStringContent = self.session[self.TARGET_KEY]
+            targetDict = ast.literal_eval(targetStringContent)
+
+            outfile = tempfile.NamedTemporaryFile()
+
+            json.dump(targetDict, outfile)
+            outfile.flush()
+
             #Directs to the folder containing the saml2test config file an enters the target.json files as a parameter to the test script
-            #TODO Create a temp file which could be sent into the IDP_TESTDRV
-            ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J', 'configFiles/'+ targetFile + '.json', testToRun], "./saml2test")
+            ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J', outfile.name, testToRun], "./saml2test")
+
+            outfile.close()
 
             #self.formatOutput(p_out)
 
@@ -321,8 +337,7 @@ class Test:
 
     def handleGetBasicConfig(self):
 
-
-        if self.session[self.TARGET_KEY] != None:
+        if not (self.isSessionEmpty()):
             targetStringContent = self.session[self.TARGET_KEY]
             targetDict = ast.literal_eval(targetStringContent)
 
@@ -348,7 +363,7 @@ class Test:
 
     def handleGetInteractionConfig(self):
 
-        if self.session[self.TARGET_KEY] != None:
+        if not (self.isSessionEmpty()):
 
             targetStringContent = self.session[self.TARGET_KEY]
             targetDict = ast.literal_eval(targetStringContent)
