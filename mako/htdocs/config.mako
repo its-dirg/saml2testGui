@@ -108,10 +108,7 @@
                     </div>
                 </div>
     -->
-                <!--
-                    This ng-repeat is only necessary in order to prevent a bug, which occurs when the
-                    input field is is modified and the the page is updated
-                -->
+
                 <div class="row" ng-repeat="(key, data) in basicConfig">
                     <div class="col-lg-2" id="label">
                         {{key}}:
@@ -123,7 +120,6 @@
                 </div>
 
             </form>
-
 
             <button class="btn btn-primary btn-sm" ng-click="saveBasicConfig();">Save configurations</button>
 
@@ -137,26 +133,17 @@
                 <form>
                     id:{{entry.id}}
 
-                    <div class="row">
+                    <div class="row" ng-repeat="(key, data) in entry.entry.matches">
                         <div class="col-lg-2">
-                            Url:
+                            {{key}}:
                         </div>
 
                         <div class="col-lg-10">
-                            <input type="text" value="{{entry.entry.matches.url}}" id="url">
+                            <input type="text" value="{{data}}" id="{{key}}">
                         </div>
                         <br>
                     </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            Title:
-                        </div>
 
-                        <div class="col-lg-10">
-                            <input type="text" value="{{entry.entry.matches.title}}" id="title">
-                        </div>
-                        <br>
-                    </div>
                     <div class="row">
                         <div class="col-lg-2">
                             Page-type:
@@ -167,33 +154,14 @@
                         </div>
                         <br>
                     </div>
-                    <div class="row">
+
+                    <div class="row" ng-repeat="(key, data) in entry.entry.control">
                         <div class="col-lg-2">
-                            Type:
+                            {{key}}:
                         </div>
 
                         <div class="col-lg-10">
-                            <input type="text" value="{{entry.entry.control.type}}" id="type">
-                        </div>
-                        <br>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            Index:
-                        </div>
-
-                        <div class="col-lg-10">
-                            <input type="text" value="{{entry.entry.control.index}}" id="index">
-                        </div>
-                        <br>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            Set:
-                        </div>
-
-                        <div class="col-lg-10">
-                            <input type="text" value="{{entry.entry.control.set}}" id="set">
+                            <input type="text" value="{{data}}" id="{{key}}">
                         </div>
                         <br>
                     </div>
