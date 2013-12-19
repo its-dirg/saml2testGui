@@ -3,7 +3,6 @@ import cgi
 import copy
 
 import json
-import shutil
 import subprocess
 from saml2.httputil import Response, ServiceError
 
@@ -13,6 +12,7 @@ import os
 import uuid
 import ast
 import tempfile
+import urllib2
 
 __author__ = 'haho0032'
 
@@ -40,8 +40,8 @@ class Test:
         self.urls = {
             "" : "index.mako",
             "list" : None,
-            "config" : None,
             "run_test" : None,
+            #Rename to basic interaction data
             "final_target_data" : None,
             "basic_target_data" : None,
             "reset_interaction" : None,
@@ -50,12 +50,14 @@ class Test:
             "post_basic_config" : None,
             "get_interaction_config" : None,
             "post_interaction_config" : None,
-            "post_metadata" : None,
+            "post_metadata_file" : None,
             "temp_reset_config_file" : None,
             "download_config_file" : None,
             "upload_config_file" : None,
             "create_new_config_file": None,
-            "does_config_file_exist": None
+            "does_config_file_exist": None,
+            "get_metadata": None,
+            "post_metadata_url": None
         }
         self.cache = cache
 
@@ -72,8 +74,6 @@ class Test:
             return self.handleIndex(self.urls[path])
         elif path == "list":
             return self.handleList()
-        elif path == "config":
-            return self.handleConfigFiles()
         elif path == "run_test":
             return self.handleRunTest()
         elif path == "final_target_data":
@@ -92,8 +92,8 @@ class Test:
             return self.handleGetInteractionConfig()
         elif path == "post_interaction_config":
             return self.handlePostInteractionConfig()
-        elif path == "post_metadata":
-            return self.handlePostMetadata()
+        elif path == "post_metadata_file":
+            return self.handlePostMetadataFile()
         elif path == "temp_reset_config_file":
             return self.handleResetConfigFile()
         elif path == "download_config_file":
@@ -104,7 +104,39 @@ class Test:
             return self.handleCreateNewConfigFile()
         elif path == "does_config_file_exist":
             return self.handleDoesConfigFileExist()
+        elif path == "get_metadata":
+            return self.handleGetMetadata()
+        elif path == "post_metadata_url":
+            return self.handlePostMetadataUrl()
 
+    def handlePostMetadataUrl(self):
+        metadataUrl = self.parameters['metadataUrl']
+
+        metadata = urllib2.urlopen(metadataUrl).read()
+
+        self.addMetdataToSession(metadata)
+
+        print "Post metadata url: " + self.session[self.TARGET_KEY]
+        return self.returnJSON({"asd": 1})
+
+    def handleResetConfigFile(self):
+
+        f = open(self.CONFIG_FILE_PATH + "working.json", "r")
+        #f = open(self.CONFIG_FILE_PATH + "working_no_interaction.json", "r")
+        #f = open(self.CONFIG_FILE_PATH + "broken_metadata.json", "r")
+
+        try:
+            targetStringContent = f.read()
+            targetDict = ast.literal_eval(targetStringContent)
+            self.session[self.TARGET_KEY] = str(targetDict)
+        finally:
+            f.close()
+
+        print "Reset: " + self.session[self.TARGET_KEY]
+        return self.returnJSON({"asd": 1})
+
+    def handleGetMetadata(self):
+        return self.returnXml("<?xml version='1.0' encoding='UTF-8'?>\n<ns0:EntityDescriptor xmlns:ns0=\"urn:oasis:names:tc:SAML:2.0:metadata\" xmlns:ns1=\"http://www.w3.org/2000/09/xmldsig#\" entityID=\"http://localhost:8088/idp.xml\"><ns0:IDPSSODescriptor WantAuthnRequestsSigned=\"false\" protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\"><ns0:KeyDescriptor use=\"encryption\"><ns1:KeyInfo><ns1:X509Data><ns1:X509Certificate>MIIC8jCCAlugAwIBAgIJAJHg2V5J31I8MA0GCSqGSIb3DQEBBQUAMFoxCzAJBgNV\nBAYTAlNFMQ0wCwYDVQQHEwRVbWVhMRgwFgYDVQQKEw9VbWVhIFVuaXZlcnNpdHkx\nEDAOBgNVBAsTB0lUIFVuaXQxEDAOBgNVBAMTB1Rlc3QgU1AwHhcNMDkxMDI2MTMz\nMTE1WhcNMTAxMDI2MTMzMTE1WjBaMQswCQYDVQQGEwJTRTENMAsGA1UEBxMEVW1l\nYTEYMBYGA1UEChMPVW1lYSBVbml2ZXJzaXR5MRAwDgYDVQQLEwdJVCBVbml0MRAw\nDgYDVQQDEwdUZXN0IFNQMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDkJWP7\nbwOxtH+E15VTaulNzVQ/0cSbM5G7abqeqSNSs0l0veHr6/ROgW96ZeQ57fzVy2MC\nFiQRw2fzBs0n7leEmDJyVVtBTavYlhAVXDNa3stgvh43qCfLx+clUlOvtnsoMiiR\nmo7qf0BoPKTj7c0uLKpDpEbAHQT4OF1HRYVxMwIDAQABo4G/MIG8MB0GA1UdDgQW\nBBQ7RgbMJFDGRBu9o3tDQDuSoBy7JjCBjAYDVR0jBIGEMIGBgBQ7RgbMJFDGRBu9\no3tDQDuSoBy7JqFepFwwWjELMAkGA1UEBhMCU0UxDTALBgNVBAcTBFVtZWExGDAW\nBgNVBAoTD1VtZWEgVW5pdmVyc2l0eTEQMA4GA1UECxMHSVQgVW5pdDEQMA4GA1UE\nAxMHVGVzdCBTUIIJAJHg2V5J31I8MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEF\nBQADgYEAMuRwwXRnsiyWzmRikpwinnhTmbooKm5TINPE7A7gSQ710RxioQePPhZO\nzkM27NnHTrCe2rBVg0EGz7QTd1JIwLPvgoj4VTi/fSha/tXrYUaqc9AqU1kWI4WN\n+vffBGQ09mo+6CffuFTZYeOhzP/2stAPwCTU4kxEoiy0KpZMANI=\n</ns1:X509Certificate></ns1:X509Data></ns1:KeyInfo></ns0:KeyDescriptor><ns0:KeyDescriptor use=\"signing\"><ns1:KeyInfo><ns1:X509Data><ns1:X509Certificate>MIIC8jCCAlugAwIBAgIJAJHg2V5J31I8MA0GCSqGSIb3DQEBBQUAMFoxCzAJBgNV\nBAYTAlNFMQ0wCwYDVQQHEwRVbWVhMRgwFgYDVQQKEw9VbWVhIFVuaXZlcnNpdHkx\nEDAOBgNVBAsTB0lUIFVuaXQxEDAOBgNVBAMTB1Rlc3QgU1AwHhcNMDkxMDI2MTMz\nMTE1WhcNMTAxMDI2MTMzMTE1WjBaMQswCQYDVQQGEwJTRTENMAsGA1UEBxMEVW1l\nYTEYMBYGA1UEChMPVW1lYSBVbml2ZXJzaXR5MRAwDgYDVQQLEwdJVCBVbml0MRAw\nDgYDVQQDEwdUZXN0IFNQMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDkJWP7\nbwOxtH+E15VTaulNzVQ/0cSbM5G7abqeqSNSs0l0veHr6/ROgW96ZeQ57fzVy2MC\nFiQRw2fzBs0n7leEmDJyVVtBTavYlhAVXDNa3stgvh43qCfLx+clUlOvtnsoMiiR\nmo7qf0BoPKTj7c0uLKpDpEbAHQT4OF1HRYVxMwIDAQABo4G/MIG8MB0GA1UdDgQW\nBBQ7RgbMJFDGRBu9o3tDQDuSoBy7JjCBjAYDVR0jBIGEMIGBgBQ7RgbMJFDGRBu9\no3tDQDuSoBy7JqFepFwwWjELMAkGA1UEBhMCU0UxDTALBgNVBAcTBFVtZWExGDAW\nBgNVBAoTD1VtZWEgVW5pdmVyc2l0eTEQMA4GA1UECxMHSVQgVW5pdDEQMA4GA1UE\nAxMHVGVzdCBTUIIJAJHg2V5J31I8MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEF\nBQADgYEAMuRwwXRnsiyWzmRikpwinnhTmbooKm5TINPE7A7gSQ710RxioQePPhZO\nzkM27NnHTrCe2rBVg0EGz7QTd1JIwLPvgoj4VTi/fSha/tXrYUaqc9AqU1kWI4WN\n+vffBGQ09mo+6CffuFTZYeOhzP/2stAPwCTU4kxEoiy0KpZMANI=\n</ns1:X509Certificate></ns1:X509Data></ns1:KeyInfo></ns0:KeyDescriptor><ns0:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:SOAP\" Location=\"http://localhost:8088/slo/soap\" /><ns0:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"http://localhost:8088/slo/post\" /><ns0:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\" Location=\"http://localhost:8088/slo/redirect\" /><ns0:ManageNameIDService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:SOAP\" Location=\"http://localhost:8088/mni/soap\" /><ns0:ManageNameIDService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"http://localhost:8088/mni/post\" /><ns0:ManageNameIDService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\" Location=\"http://localhost:8088/mni/redirect\" /><ns0:ManageNameIDService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact\" Location=\"http://localhost:8088/mni/art\" /><ns0:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</ns0:NameIDFormat><ns0:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</ns0:NameIDFormat><ns0:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\" Location=\"http://localhost:8088/sso/redirect\" /><ns0:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"http://localhost:8088/sso/post\" /><ns0:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact\" Location=\"http://localhost:8088/sso/art\" /><ns0:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:SOAP\" Location=\"http://localhost:8088/sso/ecp\" /><ns0:NameIDMappingService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:SOAP\" Location=\"http://localhost:8088/nim\" /><ns0:AssertionIDRequestService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:URI\" Location=\"http://localhost:8088/airs\" /></ns0:IDPSSODescriptor><ns0:AuthnAuthorityDescriptor protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\"><ns0:KeyDescriptor use=\"encryption\"><ns1:KeyInfo><ns1:X509Data><ns1:X509Certificate>MIIC8jCCAlugAwIBAgIJAJHg2V5J31I8MA0GCSqGSIb3DQEBBQUAMFoxCzAJBgNV\nBAYTAlNFMQ0wCwYDVQQHEwRVbWVhMRgwFgYDVQQKEw9VbWVhIFVuaXZlcnNpdHkx\nEDAOBgNVBAsTB0lUIFVuaXQxEDAOBgNVBAMTB1Rlc3QgU1AwHhcNMDkxMDI2MTMz\nMTE1WhcNMTAxMDI2MTMzMTE1WjBaMQswCQYDVQQGEwJTRTENMAsGA1UEBxMEVW1l\nYTEYMBYGA1UEChMPVW1lYSBVbml2ZXJzaXR5MRAwDgYDVQQLEwdJVCBVbml0MRAw\nDgYDVQQDEwdUZXN0IFNQMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDkJWP7\nbwOxtH+E15VTaulNzVQ/0cSbM5G7abqeqSNSs0l0veHr6/ROgW96ZeQ57fzVy2MC\nFiQRw2fzBs0n7leEmDJyVVtBTavYlhAVXDNa3stgvh43qCfLx+clUlOvtnsoMiiR\nmo7qf0BoPKTj7c0uLKpDpEbAHQT4OF1HRYVxMwIDAQABo4G/MIG8MB0GA1UdDgQW\nBBQ7RgbMJFDGRBu9o3tDQDuSoBy7JjCBjAYDVR0jBIGEMIGBgBQ7RgbMJFDGRBu9\no3tDQDuSoBy7JqFepFwwWjELMAkGA1UEBhMCU0UxDTALBgNVBAcTBFVtZWExGDAW\nBgNVBAoTD1VtZWEgVW5pdmVyc2l0eTEQMA4GA1UECxMHSVQgVW5pdDEQMA4GA1UE\nAxMHVGVzdCBTUIIJAJHg2V5J31I8MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEF\nBQADgYEAMuRwwXRnsiyWzmRikpwinnhTmbooKm5TINPE7A7gSQ710RxioQePPhZO\nzkM27NnHTrCe2rBVg0EGz7QTd1JIwLPvgoj4VTi/fSha/tXrYUaqc9AqU1kWI4WN\n+vffBGQ09mo+6CffuFTZYeOhzP/2stAPwCTU4kxEoiy0KpZMANI=\n</ns1:X509Certificate></ns1:X509Data></ns1:KeyInfo></ns0:KeyDescriptor><ns0:KeyDescriptor use=\"signing\"><ns1:KeyInfo><ns1:X509Data><ns1:X509Certificate>MIIC8jCCAlugAwIBAgIJAJHg2V5J31I8MA0GCSqGSIb3DQEBBQUAMFoxCzAJBgNV\nBAYTAlNFMQ0wCwYDVQQHEwRVbWVhMRgwFgYDVQQKEw9VbWVhIFVuaXZlcnNpdHkx\nEDAOBgNVBAsTB0lUIFVuaXQxEDAOBgNVBAMTB1Rlc3QgU1AwHhcNMDkxMDI2MTMz\nMTE1WhcNMTAxMDI2MTMzMTE1WjBaMQswCQYDVQQGEwJTRTENMAsGA1UEBxMEVW1l\nYTEYMBYGA1UEChMPVW1lYSBVbml2ZXJzaXR5MRAwDgYDVQQLEwdJVCBVbml0MRAw\nDgYDVQQDEwdUZXN0IFNQMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDkJWP7\nbwOxtH+E15VTaulNzVQ/0cSbM5G7abqeqSNSs0l0veHr6/ROgW96ZeQ57fzVy2MC\nFiQRw2fzBs0n7leEmDJyVVtBTavYlhAVXDNa3stgvh43qCfLx+clUlOvtnsoMiiR\nmo7qf0BoPKTj7c0uLKpDpEbAHQT4OF1HRYVxMwIDAQABo4G/MIG8MB0GA1UdDgQW\nBBQ7RgbMJFDGRBu9o3tDQDuSoBy7JjCBjAYDVR0jBIGEMIGBgBQ7RgbMJFDGRBu9\no3tDQDuSoBy7JqFepFwwWjELMAkGA1UEBhMCU0UxDTALBgNVBAcTBFVtZWExGDAW\nBgNVBAoTD1VtZWEgVW5pdmVyc2l0eTEQMA4GA1UECxMHSVQgVW5pdDEQMA4GA1UE\nAxMHVGVzdCBTUIIJAJHg2V5J31I8MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEF\nBQADgYEAMuRwwXRnsiyWzmRikpwinnhTmbooKm5TINPE7A7gSQ710RxioQePPhZO\nzkM27NnHTrCe2rBVg0EGz7QTd1JIwLPvgoj4VTi/fSha/tXrYUaqc9AqU1kWI4WN\n+vffBGQ09mo+6CffuFTZYeOhzP/2stAPwCTU4kxEoiy0KpZMANI=\n</ns1:X509Certificate></ns1:X509Data></ns1:KeyInfo></ns0:KeyDescriptor><ns0:AuthnQueryService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:SOAP\" Location=\"http://localhost:8088/aqs\" /></ns0:AuthnAuthorityDescriptor><ns0:AttributeAuthorityDescriptor protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\"><ns0:KeyDescriptor use=\"encryption\"><ns1:KeyInfo><ns1:X509Data><ns1:X509Certificate>MIIC8jCCAlugAwIBAgIJAJHg2V5J31I8MA0GCSqGSIb3DQEBBQUAMFoxCzAJBgNV\nBAYTAlNFMQ0wCwYDVQQHEwRVbWVhMRgwFgYDVQQKEw9VbWVhIFVuaXZlcnNpdHkx\nEDAOBgNVBAsTB0lUIFVuaXQxEDAOBgNVBAMTB1Rlc3QgU1AwHhcNMDkxMDI2MTMz\nMTE1WhcNMTAxMDI2MTMzMTE1WjBaMQswCQYDVQQGEwJTRTENMAsGA1UEBxMEVW1l\nYTEYMBYGA1UEChMPVW1lYSBVbml2ZXJzaXR5MRAwDgYDVQQLEwdJVCBVbml0MRAw\nDgYDVQQDEwdUZXN0IFNQMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDkJWP7\nbwOxtH+E15VTaulNzVQ/0cSbM5G7abqeqSNSs0l0veHr6/ROgW96ZeQ57fzVy2MC\nFiQRw2fzBs0n7leEmDJyVVtBTavYlhAVXDNa3stgvh43qCfLx+clUlOvtnsoMiiR\nmo7qf0BoPKTj7c0uLKpDpEbAHQT4OF1HRYVxMwIDAQABo4G/MIG8MB0GA1UdDgQW\nBBQ7RgbMJFDGRBu9o3tDQDuSoBy7JjCBjAYDVR0jBIGEMIGBgBQ7RgbMJFDGRBu9\no3tDQDuSoBy7JqFepFwwWjELMAkGA1UEBhMCU0UxDTALBgNVBAcTBFVtZWExGDAW\nBgNVBAoTD1VtZWEgVW5pdmVyc2l0eTEQMA4GA1UECxMHSVQgVW5pdDEQMA4GA1UE\nAxMHVGVzdCBTUIIJAJHg2V5J31I8MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEF\nBQADgYEAMuRwwXRnsiyWzmRikpwinnhTmbooKm5TINPE7A7gSQ710RxioQePPhZO\nzkM27NnHTrCe2rBVg0EGz7QTd1JIwLPvgoj4VTi/fSha/tXrYUaqc9AqU1kWI4WN\n+vffBGQ09mo+6CffuFTZYeOhzP/2stAPwCTU4kxEoiy0KpZMANI=\n</ns1:X509Certificate></ns1:X509Data></ns1:KeyInfo></ns0:KeyDescriptor><ns0:KeyDescriptor use=\"signing\"><ns1:KeyInfo><ns1:X509Data><ns1:X509Certificate>MIIC8jCCAlugAwIBAgIJAJHg2V5J31I8MA0GCSqGSIb3DQEBBQUAMFoxCzAJBgNV\nBAYTAlNFMQ0wCwYDVQQHEwRVbWVhMRgwFgYDVQQKEw9VbWVhIFVuaXZlcnNpdHkx\nEDAOBgNVBAsTB0lUIFVuaXQxEDAOBgNVBAMTB1Rlc3QgU1AwHhcNMDkxMDI2MTMz\nMTE1WhcNMTAxMDI2MTMzMTE1WjBaMQswCQYDVQQGEwJTRTENMAsGA1UEBxMEVW1l\nYTEYMBYGA1UEChMPVW1lYSBVbml2ZXJzaXR5MRAwDgYDVQQLEwdJVCBVbml0MRAw\nDgYDVQQDEwdUZXN0IFNQMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDkJWP7\nbwOxtH+E15VTaulNzVQ/0cSbM5G7abqeqSNSs0l0veHr6/ROgW96ZeQ57fzVy2MC\nFiQRw2fzBs0n7leEmDJyVVtBTavYlhAVXDNa3stgvh43qCfLx+clUlOvtnsoMiiR\nmo7qf0BoPKTj7c0uLKpDpEbAHQT4OF1HRYVxMwIDAQABo4G/MIG8MB0GA1UdDgQW\nBBQ7RgbMJFDGRBu9o3tDQDuSoBy7JjCBjAYDVR0jBIGEMIGBgBQ7RgbMJFDGRBu9\no3tDQDuSoBy7JqFepFwwWjELMAkGA1UEBhMCU0UxDTALBgNVBAcTBFVtZWExGDAW\nBgNVBAoTD1VtZWEgVW5pdmVyc2l0eTEQMA4GA1UECxMHSVQgVW5pdDEQMA4GA1UE\nAxMHVGVzdCBTUIIJAJHg2V5J31I8MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEF\nBQADgYEAMuRwwXRnsiyWzmRikpwinnhTmbooKm5TINPE7A7gSQ710RxioQePPhZO\nzkM27NnHTrCe2rBVg0EGz7QTd1JIwLPvgoj4VTi/fSha/tXrYUaqc9AqU1kWI4WN\n+vffBGQ09mo+6CffuFTZYeOhzP/2stAPwCTU4kxEoiy0KpZMANI=\n</ns1:X509Certificate></ns1:X509Data></ns1:KeyInfo></ns0:KeyDescriptor><ns0:AttributeService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:SOAP\" Location=\"http://localhost:8088/attr\" /><ns0:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</ns0:NameIDFormat><ns0:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</ns0:NameIDFormat></ns0:AttributeAuthorityDescriptor><ns0:Organization><ns0:OrganizationName xml:lang=\"en\">Rolands Identiteter</ns0:OrganizationName><ns0:OrganizationDisplayName xml:lang=\"en\">Rolands Identiteter</ns0:OrganizationDisplayName><ns0:OrganizationURL xml:lang=\"en\">http://www.example.com</ns0:OrganizationURL></ns0:Organization><ns0:ContactPerson contactType=\"technical\"><ns0:GivenName>Roland</ns0:GivenName><ns0:SurName>Hedberg</ns0:SurName><ns0:EmailAddress>technical@example.com</ns0:EmailAddress></ns0:ContactPerson><ns0:ContactPerson contactType=\"support\"><ns0:GivenName>Support</ns0:GivenName><ns0:EmailAddress>support@example.com</ns0:EmailAddress></ns0:ContactPerson></ns0:EntityDescriptor>\n")
 
     def doesConfigFileExist(self):
         if self.TARGET_KEY in self.session:
@@ -123,9 +155,6 @@ class Test:
         argv = {
             "a_value": "Hello world"
         }
-
-        #TODO this should be removed since the target file shouldn't be replaced ever time the site is loaded
-        #shutil.copyfile(self.CONFIG_FILE_PATH + "/backup/target.json", self.CONFIG_FILE_PATH + "target.json")
 
         return resp(self.environ, self.start_response, **argv)
 
@@ -186,10 +215,6 @@ class Test:
             return self.serviceError("Cannot list the tests.")
         return self.returnJSON(myJson)
 
-    def handleConfigFiles(self):
-        self.checkForNewConfigFiles()
-        configJSONString = json.dumps(self.config.IDPTESTENVIROMENT)
-        return self.returnJSON(configJSONString)
 
     def writeToTargetConfig(self, password=None, username=None):
 
@@ -257,7 +282,6 @@ class Test:
         return self.returnJSON({"asd": "asd"})
 
     def handleResetInteraction(self):
-
         targetStringContent = self.session[self.TARGET_KEY]
         targetDict = ast.literal_eval(targetStringContent)
         targetDict['interaction'] = []
@@ -267,16 +291,13 @@ class Test:
 
     def handleRunTest(self):
         testToRun = self.parameters['testname']
-        targetFile = self.parameters['targetFile']
 
         if 'testid' in self.parameters:
             testid = self.parameters['testid']
         else:
             testid = None
 
-        targetFile = targetFile.strip(' \n\t')
-
-        if self.checkIfParamentersAreValid(targetFile, testToRun):
+        if self.checkIfIncommingTestIsLeagal(testToRun):
 
             targetStringContent = self.session[self.TARGET_KEY]
             targetDict = ast.literal_eval(targetStringContent)
@@ -367,11 +388,11 @@ class Test:
         print "Post interaction config: " + self.session[self.TARGET_KEY]
         return self.returnJSON({"asd": 1})
 
-    def handlePostMetadata(self):
 
-        metadata = str(self.parameters['metadata'])
-
-        if(metadata.startswith( '<?xml' )):
+    def addMetdataToSession(self, metadata):
+        if (metadata.startswith('<?xml')):
+            metadata = metadata.replace('\n', "")
+            metadata = metadata.replace('\"', "\'")
 
             targetStringContent = self.session[self.TARGET_KEY]
             targetDict = ast.literal_eval(targetStringContent)
@@ -379,11 +400,18 @@ class Test:
             targetDict["metadata"] = ""
 
             targetString = json.dumps(targetDict)
-            targetString =  targetString.replace("\"metadata\": \"\"", "\"metadata\": \"" + metadata + "\"")
+            targetString = targetString.replace("\"metadata\": \"\"", "\"metadata\": \"" + metadata + "\"")
 
             self.session[self.TARGET_KEY] = targetString
 
-        print "Post metadata: " + self.session[self.TARGET_KEY]
+
+    def handlePostMetadataFile(self):
+
+        metadata = str(self.parameters['metadataFile'])
+
+        self.addMetdataToSession(metadata)
+
+        print "Post metadata file: " + self.session[self.TARGET_KEY]
         return self.returnJSON({"asd": 1})
 
     def handleCreateNewConfigFile(self):
@@ -397,19 +425,6 @@ class Test:
             templateFile.close()
 
         print "Create: " + self.session[self.TARGET_KEY]
-        return self.returnJSON({"asd": 1})
-
-    def handleResetConfigFile(self):
-
-        f = open(self.CONFIG_FILE_PATH + "/backup/target.json", "r")
-        try:
-            targetStringContent = f.read()
-            targetDict = ast.literal_eval(targetStringContent)
-            self.session[self.TARGET_KEY] = str(targetDict)
-        finally:
-            f.close()
-
-        print "Reset: " + self.session[self.TARGET_KEY]
         return self.returnJSON({"asd": 1})
 
     def handleUploadConfigFile(self):
@@ -438,6 +453,9 @@ class Test:
         return dict[key]
 
     def createInteractionConfigList(self, targetDict):
+        if not('interaction' in targetDict):
+            targetDict['interaction'] = []
+
         interactionElemetList = targetDict['interaction']
         interactionConfigList = []
         loopIndex = 0;
@@ -556,9 +574,6 @@ class Test:
             childrenToVisitList = newChildrenToVisitList
         return allChildren
 
-
-
-
     def updateChildrensLevelFlat(self, child):
         childrenList = child['children']
         for unvisitedChild in childrenList:
@@ -604,37 +619,6 @@ class Test:
             parentList = newParentTestsList
         return tree
 
-    def getListedIdpEnviroments(self):
-        listedIdpEnviroments = []
-        for dictionary in self.config.IDPTESTENVIROMENT:
-            listedIdpEnviroments.append(dictionary["Name"])
-        return listedIdpEnviroments
-
-    def checkForNewConfigFiles(self):
-        listedIdpEnviroments = self.getListedIdpEnviroments()
-
-        configPaths = glob.glob(self.CONFIG_FILE_PATH + "*.json")
-
-        for path in configPaths:
-            filename = basename(path)
-            filenameNoExtention = os.path.splitext(filename)[0]
-
-            """
-            if (filenameNoExtention in listedIdpEnviroments):
-                print filenameNoExtention
-            else:
-                print filenameNoExtention + " not specified in server_conf"
-            """
-
-
-    def checkIfParamentersAreValid(self, targetFile, testToRun):
-        listedIdpEnviroments = self.getListedIdpEnviroments();
-
-        if targetFile in listedIdpEnviroments:
-            if self.checkIfIncommingTestIsLeagal(testToRun):
-                return True
-
-
     def checkIfIncommingTestIsLeagal(self, tmpTest):
         testToRun = None
         if "verify_test_dict" not in self.cache:
@@ -663,6 +647,9 @@ class Test:
         resp = Response(text, headers=[('Content-Type', "text/html")])
         return resp(self.environ, self.start_response)
 
+    def returnXml(self, text):
+        resp = Response(text, headers=[('Content-Type', "text/xml")])
+        return resp(self.environ, self.start_response)
 
     def serviceError(self, message):
         message = {"ExceptionMessage": message}

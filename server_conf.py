@@ -32,12 +32,3 @@ SERVER_CERT = "httpsCert/server.crt"
 SERVER_KEY = "httpsCert/server.key"
 #CERT_CHAIN="certs/chain.pem"
 CERT_CHAIN = None
-
-CONFIGFILES="configFiles"
-
-IDPTESTENVIROMENT = [
-    {
-        "Name": "target",
-        "Description" : "The new Local IdP"
-    }
-]

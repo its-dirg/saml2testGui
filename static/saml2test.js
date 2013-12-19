@@ -9,23 +9,13 @@ app.factory('testFactory', function ($http) {
     };
 });
 
-app.factory('configFactory', function ($http) {
-    return {
-        getConfig: function () {
-            return $http.get("/config");
-        }
-    };
-});
-
 app.factory('runTestFactory', function ($http) {
     return {
         getTestResult: function (testname, testid) {
-            targetFile = $('#targetIdp').val();
-            return $http.get("/run_test", {params: { "testname": testname, "targetFile": targetFile, "testid": testid}});
+            return $http.get("/run_test", {params: { "testname": testname, "testid": testid}});
         },
         getAllTestResult: function (testname) {
-            targetFile = $('#targetIdp').val();
-            return $http.get("/run_test", {params: { "testname": testname, "targetFile": targetFile}});
+            return $http.get("/run_test", {params: { "testname": testname}});
         }
     };
 });
@@ -61,8 +51,7 @@ app.factory('notificationFactory', function () {
 });
 
 
-app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, configFactory, runTestFactory, postBasicTargetDataFactory, postResetInteractionFactory, toaster) {
-    $scope.configList = [];
+app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, runTestFactory, postBasicTargetDataFactory, postResetInteractionFactory, toaster) {
     $scope.testResult = "";
     $scope.currentFlattenedTree = "None";
     $scope.currentOriginalTree;
@@ -89,10 +78,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         $scope.flatBottomUpTree = data["flatBottomUpTree"];
 
         changeCurrentTree($scope.selectedItem.type);
-    };
-
-    var getConfigSuccessCallback = function (data, status, headers, config) {
-        $scope.configList = data;
     };
 
     var isRunningAllTests = false;
@@ -144,7 +129,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     };
 
     testFactory.getTests($scope.selectedItem.type).success(getListSuccessCallback).error(errorCallback);
-    configFactory.getConfig().success(getConfigSuccessCallback).error(errorCallback);
 
     $scope.runMultipleTest = function (id, testid) {
 

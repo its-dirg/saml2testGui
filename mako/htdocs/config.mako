@@ -97,17 +97,19 @@
                     </div>
                 </div>
 
-    <!--
                 <div class="row">
                     <div class="col-lg-2" id="label">
                         Upload metadata by url:
                     </div>
 
                     <div class="col-lg-10">
-                        <input type="text" value="" id="metadataUrl">
+                        <input type="text" value="https://localhost:4545/get_metadata" id="metadataUrl">
+                        <button class="btn btn-primary btn-sm" ng-click="uploadMetadataUrl();">Upload</button>
+                        <br>
+                        <br>
                     </div>
                 </div>
-    -->
+
 
                 <div class="row" ng-repeat="(key, data) in basicConfig">
                     <div class="col-lg-2" id="label">

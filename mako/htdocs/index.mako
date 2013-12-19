@@ -34,15 +34,6 @@
 
     <br>
 
-    Available configurations:
-    <select id="targetIdp">
-        <option ng-repeat="tests in configList | orderBy:'Name':true">
-             {{tests.Name}}
-        </option>
-    </select>
-
-    <br>
-
     <div ng-click="toggleInstructionVisibility();" ng-show="instructionVisible == true" id="instructions">
         <img src="static/pitures/arrowDown.png">
         Hide instructions

@@ -25,13 +25,16 @@ app.factory('interactionConfigFactory', function ($http) {
 
 app.factory('uploadMetadataFactory', function ($http) {
     return {
-        postMetadata: function (metadata) {
-            return $http.post("/post_metadata", {"metadata": metadata});
+        postMetadataFile: function (metadataFile) {
+            return $http.post("/post_metadata_file", {"metadataFile": metadataFile});
+        },
+        postMetadataUrl: function (metadataUrl) {
+            return $http.post("/post_metadata_url", {"metadataUrl": metadataUrl});
         }
     };
 });
 
-app.factory('resetconfigFileFactory', function ($http) {
+app.factory('resetConfigFileFactory', function ($http) {
     return {
         postResetConfigFile: function () {
             return $http.post("/temp_reset_config_file");
@@ -61,7 +64,7 @@ app.factory('configFileFactory', function ($http) {
     };
 });
 
-app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionConfigFactory, uploadMetadataFactory, resetconfigFileFactory, configFileFactory, toaster) {
+app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionConfigFactory, uploadMetadataFactory, resetConfigFileFactory, configFileFactory, toaster) {
 
     $scope.basicConfig;
     $scope.convertedInteractionList;
@@ -75,12 +78,17 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         alert("Basic config successfully SAVED");
     };
 
-    var postMetadataSuccessCallback = function (data, status, headers, config) {
-        alert("Metadata successfully SAVED");
+    var postMetadataFileSuccessCallback = function (data, status, headers, config) {
+        alert("Metadata file successfully SAVED");
+    };
+
+    var postMetadataUrlSuccessCallback = function (data, status, headers, config) {
+        alert("Metadata url successfully SAVED");
     };
 
     var postResetConfigFileSuccessCallback = function (data, status, headers, config) {
         alert("Target json successfully RESTORED");
+        updateConfigFields();
     };
 
     var downloadConfigFileSuccessCallback = function (data, status, headers, config) {
@@ -270,7 +278,7 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
             reader.readAsText(file, "UTF-8");
             reader.onload = function (evt) {
 
-                uploadMetadataFactory.postMetadata(evt.target.result).success(postMetadataSuccessCallback).error(errorCallback);
+                uploadMetadataFactory.postMetadataFile(evt.target.result).success(postMetadataFileSuccessCallback).error(errorCallback);
                 //Has to be done since this code is executed outside of
                 $scope.$apply();
 
@@ -283,7 +291,7 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
     }
 
     $scope.resetConfigFile = function(){
-        resetconfigFileFactory.postResetConfigFile().success(postResetConfigFileSuccessCallback).error(errorCallback);
+        resetConfigFileFactory.postResetConfigFile().success(postResetConfigFileSuccessCallback).error(errorCallback);
     }
 
     $scope.downloadConfigFile = function(){
@@ -331,7 +339,12 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
                 }
             }
         });
+    }
 
+    $scope.uploadMetadataUrl = function(){
+        var metadataUrl = $("#metadataUrl").val();
+
+        uploadMetadataFactory.postMetadataUrl(metadataUrl).success(postMetadataUrlSuccessCallback).error(errorCallback);
     }
 
 });
