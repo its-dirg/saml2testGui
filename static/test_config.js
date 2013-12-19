@@ -17,8 +17,8 @@ app.factory('interactionConfigFactory', function ($http) {
         getInteractionConfig: function () {
             return $http.get("/get_interaction_config");
         },
-        postInteractionConfig: function (interactionConfigList) {
-            return $http.post("/post_interaction_config", {"convertedInteractionList": interactionConfigList});
+        postInteractionConfig: function (interactionList) {
+            return $http.post("/post_interaction_config", {"interactionList": interactionList});
         }
     };
 });
@@ -49,8 +49,8 @@ app.factory('configFileFactory', function ($http) {
             return $http.get("/download_config_file");
         },
 
-        uploadConfigFile: function (targetFileContent) {
-            return $http.post("/upload_config_file", {"targetFileContent": targetFileContent});
+        uploadConfigFile: function (configFileContent) {
+            return $http.post("/upload_config_file", {"configFileContent": configFileContent});
         },
 
         createNewConfigFile: function () {
@@ -92,10 +92,10 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
     };
 
     var downloadConfigFileSuccessCallback = function (data, status, headers, config) {
-        targetContent = JSON.stringify(data["target"])
+        configDict = JSON.stringify(data["configDict"])
         var a = document.createElement("a");
-        a.download = "target.json";
-        a.href = "data:text/plain;base64," + btoa(targetContent);
+        a.download = "config.json";
+        a.href = "data:text/plain;base64," + btoa(configDict);
         a.click();
         e.preventDefault();
         //alert("Target json successfully DOWNLOADED");

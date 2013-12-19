@@ -4,7 +4,7 @@ var app = angular.module('main', ['toaster'])
 app.factory('testFactory', function ($http) {
     return {
         getTests: function (treeType) {
-            return $http.get("/list", {params: { "treeType": treeType}});
+            return $http.get("/list_tests", {params: { "treeType": treeType}});
         }
     };
 });
@@ -20,10 +20,10 @@ app.factory('runTestFactory', function ($http) {
     };
 });
 
-app.factory('postBasicTargetDataFactory', function ($http) {
+app.factory('postBasicInteractionDataFactory', function ($http) {
     return {
-        postBasicTargetData: function (title, redirectUri, pageType, controlType) {
-            return $http.post("/basic_target_data", {"title": title, "redirectUri": redirectUri, "pageType": pageType, "controlType": controlType});
+        postBasicInteractionData: function (title, redirectUri, pageType, controlType) {
+            return $http.post("/post_basic_interaction_data", {"title": title, "redirectUri": redirectUri, "pageType": pageType, "controlType": controlType});
         }
     };
 });
@@ -51,7 +51,7 @@ app.factory('notificationFactory', function () {
 });
 
 
-app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, runTestFactory, postBasicTargetDataFactory, postResetInteractionFactory, toaster) {
+app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, runTestFactory, postBasicInteractionDataFactory, postResetInteractionFactory, toaster) {
     $scope.testResult = "";
     $scope.currentFlattenedTree = "None";
     $scope.currentOriginalTree;
@@ -292,7 +292,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         var loginForm = document.createElement('html');
         loginForm.innerHTML = testList[lastElement].message;
         var formtag = loginForm.getElementsByTagName('form')[0];
-        formtag.setAttribute('action', '/final_target_data');
+        formtag.setAttribute('action', '/post_final_interaction_data');
 
         //Create a iframe and present the login screen inside the iframe
         var iframe = document.createElement('iframe');
@@ -367,7 +367,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
                 var controlType = "form"
             }
 
-            postBasicTargetDataFactory.postBasicTargetData(title, url, pageType, controlType).success(getPostBasicDataSuccessCallback).error(errorCallback);
+            postBasicInteractionDataFactory.postBasicInteractionData(title, url, pageType, controlType).success(getPostBasicDataSuccessCallback).error(errorCallback);
 
             if (!hasShownInteractionConfigDialog){
 
