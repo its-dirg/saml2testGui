@@ -49,27 +49,9 @@ mako/modules/base.mako.pyc
 
 *.pyc
 
-saml2test/keys/mykey.pem
-
-saml2test/keys/mykey.pem
-
-saml2test/keys/mycert.pem
-
 saml2test/configFiles/target.json
 
 saml2test/configFiles/target.json
-
-saml2test/config.py
-
-saml2test/config.py
-
-saml2test/attributemaps/shibboleth_uri.py
-
-saml2test/attributemaps/saml_uri.py
-
-saml2test/attributemaps/saml_uri.py
-
-saml2test/attributemaps/basic.py
 
 build/lib/saml2testGui/util/session.py
 
