@@ -93,6 +93,14 @@
     border-color:#CFCFCF;
 }
 
+#reportForm{
+    margin:20px;
+}
+
+#reportForm input, textarea{
+    margin-bottom: 5px;
+}
+
 #level1{
     padding-left:0px;
 }

@@ -6,13 +6,15 @@ import json
 import subprocess
 from saml2.httputil import Response, ServiceError
 
-import glob
-from os.path import basename
-import os
 import uuid
 import ast
 import tempfile
 import urllib2
+
+import smtplib
+
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 __author__ = 'haho0032'
 
@@ -38,13 +40,16 @@ class Test:
         self.config = config
         self.parameters = parameters
         self.urls = {
+            #Calles from test_idp
             "test_idp" : "test_idp.mako",
             "list_tests" : None,
             "run_test" : None,
             "post_final_interaction_data" : None,
             "post_basic_interaction_data" : None,
             "reset_interaction" : None,
+            "post_error_report": None,
 
+            #Calles from config
             "config_idp" : "config.mako",
             "get_basic_config" : None,
             "post_basic_config" : None,
@@ -59,6 +64,7 @@ class Test:
             "temp_get_metadata": None,
             "post_metadata_url": None,
 
+            #Calles from home
             "" : "home.mako"
         }
         self.cache = cache
@@ -70,6 +76,7 @@ class Test:
 
 
     def handle(self, path):
+        #Calles from test_idp
         if path == "test_idp":
             return self.handleTestIDP(self.urls[path])
         elif path == "list_tests":
@@ -82,8 +89,11 @@ class Test:
             return self.handlePostBasicInteractionData()
         elif path == "reset_interaction":
             return self.handleResetInteraction()
-        elif path == "config_idp":
+        elif path == "post_error_report":
+            return self.handlePostErrorReport()
 
+        #Calles from config_idp
+        elif path == "config_idp":
             return self.handleConfigIDP(self.urls[path])
         elif path == "get_basic_config":
             return self.handleGetBasicConfig()
@@ -110,9 +120,41 @@ class Test:
         elif path == "post_metadata_url":
             return self.handlePostMetadataUrl()
 
+        #Calls made from home
         elif path == "":
             return self.handleHomePage(self.urls[path])
 
+    #TODO enter Dirgs mail settings
+    def handlePostErrorReport(self):
+
+        reportEmail = self.parameters['reportEmail']
+        reportMessage = self.parameters['reportMessage']
+        testResults = self.parameters['testResults']
+
+        fromAdress = reportEmail
+        toAddress  = 'drig@example.com'
+
+        message = MIMEMultipart()
+        message['From'] = fromAdress
+        message['To'] = toAddress
+        message['Subject'] = "Error report (saml2test)"
+
+        filename = "error_report.txt"
+        attachment = MIMEText(testResults)
+        attachment.add_header('Content-Disposition', 'attachment', filename=filename)
+        message.attach(attachment)
+
+        message.attach(MIMEText(reportMessage, 'plain'))
+
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        server.login("gmail username", "gmail password")
+        text = message.as_string()
+        server.sendmail(fromAdress, toAddress, text)
+
+        return self.returnJSON({"asd": 1})
 
     def handlePostMetadataUrl(self):
         metadataUrl = self.parameters['metadataUrl']

@@ -97,7 +97,7 @@
     <!-- The headline of the test table -->
     <div class="col-lg-7" id="testHeadline">
         Test
-        <button class="btn btn-primary btn-sm" ng-click="test();">Send error report</button>
+        <button class="btn btn-primary btn-sm" ng-click="showModalWindowsErrorReport();">Send error report</button>
     </div>
 
     <div class="col-lg-1" id="testHeadline">
@@ -190,11 +190,28 @@
 <%block name="footer">
     </div>
 
-    <!-- Modal window-->
-    <div class="modal fade" id="modalWindow" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <!-- Modal window containg iframe-->
+    <div class="modal fade" id="modalWindowIframe" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <div class="modal-content" id="modalContent">
+            <div class="modal-content" id="modalIframeContent">
 
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal window for error report-->
+    <div class="modal fade" id="modalWindowErrorReport" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" id="modalErrorReportContent">
+
+                <form id="reportForm">
+                    <span>If you have questions about the result of a test run you could sent a a question to us using the form below. In order for us to get a better understanding of your problem the result of the last test will be attached to the mail.</span>
+
+                    <input type="email" class="form-control" placeholder="Your Email" id="reportEmail">
+                    <textarea class="form-control" rows="3" placeholder="Text" id="reportMessage"></textarea>
+
+                    <button class="btn btn-primary btn-sm" ng-click="sendReport();">Send report</button>
+                </form>
             </div>
         </div>
     </div>

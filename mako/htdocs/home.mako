@@ -39,5 +39,14 @@
 <%block name="footer">
     </div>
 
+    <!-- Modal window-->
+    <div class="modal fade" id="modalWindow" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" id="modalContent">
+
+            </div>
+        </div>
+    </div>
+
     ${parent.footer()}
 </%block>

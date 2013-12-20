@@ -351,5 +351,4 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
 
         uploadMetadataFactory.postMetadataUrl(metadataUrl).success(postMetadataUrlSuccessCallback).error(errorCallback);
     }
-
 });

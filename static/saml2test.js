@@ -51,7 +51,15 @@ app.factory('notificationFactory', function () {
 });
 
 
-app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, runTestFactory, postBasicInteractionDataFactory, postResetInteractionFactory, toaster) {
+app.factory('errorReportFactory', function ($http) {
+    return {
+        postErrorReport: function (reportEmail, reportMessage, testResults) {
+            return $http.post("/post_error_report", {"reportEmail": reportEmail, "reportMessage": reportMessage, "testResults": testResults});
+        }
+    };
+});
+
+app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, runTestFactory, postBasicInteractionDataFactory, postResetInteractionFactory, errorReportFactory, toaster) {
     $scope.testResult = "";
     $scope.currentFlattenedTree = "None";
     $scope.currentOriginalTree;
@@ -122,6 +130,12 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     var getPostResetDataSuccessCallback = function (data, status, headers, config) {
         //TODO It this nessecerry?
     };
+
+    var getPostErrorReportSuccessCallback = function (data, status, headers, config) {
+        alert("getPostErrorReportSuccessCallback");
+    };
+
+
 
     var errorCallback = function (data, status, headers, config) {
         bootbox.alert(data.ExceptionMessage);
@@ -223,7 +237,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }
     }
 
-    $scope.exportTestResultToExcel = function (testid) {
+    $scope.exportTestResultToExcel = function () {
         var a = document.createElement('a');
         var data_type = 'data:application/vnd.ms-excel';
 
@@ -241,7 +255,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         e.preventDefault();
     }
 
-    $scope.exportTestResultToTextFile = function (testid) {
+    $scope.exportTestResultToTextFile = function () {
 
         var resultString  = generateExportResultString();
         var a = document.createElement("a");
@@ -290,11 +304,11 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         lastElement = testList.length -1;
         testList = data['result']['tests'];
 
-        $('#modalWindow').modal('show');
-        $('#modalContent').empty();
+        $('#modalWindowIframe').modal('show');
+        $('#modalIframeContent').empty();
 
         //Resets the foundInteractionStatus to false if the user exit the log in window
-        $('#modalWindow').on('hidden.bs.modal', function (e) {
+        $('#modalWindowIframe').on('hidden.bs.modal', function (e) {
             foundInteractionStatus = false;
         });
 
@@ -309,8 +323,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         iframe.setAttribute('width', '100%');
         iframe.setAttribute('height', '750px');
 
-        $('#modalContent').append("<h1>Information</h1><span>In order to use this application you need to log in to the IDP. The information will be stored which means that you only have to do this once  </span>");
-        $('#modalContent').append(iframe);
+        $('#modalIframeContent').append("<h1>Information</h1><span>In order to use this application you need to log in to the IDP. The information will be stored which means that you only have to do this once  </span>");
+        $('#modalIframeContent').append(iframe);
 
         iframe.contentWindow.document.open();
         iframe.contentWindow.document.write(loginForm.innerHTML);
@@ -455,7 +469,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     window.postBack = function(){
         //A bug appers when interactions without login screen
         setTimeout(function() {
-            $('#modalWindow').modal('hide');
+            $('#modalWindowIframe').modal('hide');
             foundInteractionStatus = false;
             var infoString = "The interaction data was successfully stored on the server. Please rerun the tests, it's possible that more interaction data has to be collected and stored on the server"
 
@@ -660,6 +674,26 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     $scope.test = function () {
         alert("test");
     };
+
+    $scope.showModalWindowsErrorReport = function () {
+
+        $('#modalWindowErrorReport').modal('show');
+        $('#reportForm')[0].reset();
+
+    };
+
+    $scope.sendReport = function () {
+        $('#modalWindowErrorReport').modal('hide');
+
+        //Get data from text fields and send it to the server the get the file reuse exporty txt file
+        var email = $('#reportEmail').val();
+        var message = $('#reportMessage').val();
+
+        testResults = generateExportResultString();
+
+        errorReportFactory.postErrorReport(email, message, testResults).success(getPostErrorReportSuccessCallback).error(errorCallback);
+    };
+
 
 });
 
