@@ -8,7 +8,7 @@
 
 <%block name="css">
     <!-- Add more css imports here! -->
-    <link rel="stylesheet" type="text/css" href="/static/test_config.css">
+    <link rel="stylesheet" type="text/css" href="/static/idp_config.css">
 </%block>
 
 <%block name="title">
@@ -29,11 +29,6 @@
 <%block name="body">
 
     <div id="content">
-
-        <button class="btn btn-primary btn-sm" ng-click="resetConfigFile();">Reset config file</button>
-
-        <hr>
-<!-- ################################################################################################# -->
 
         <h2>IDP configuration:
             <button class="btn btn-primary btn-sm" ng-click="reloadConfigFile();">
@@ -187,7 +182,7 @@
 <%block name="footer">
     </div>
 
-    <script type="text/javascript" src="/static/test_config.js"></script>
+    <script type="text/javascript" src="/static/idp_config.js"></script>
 
     ${parent.footer()}
 </%block>

@@ -17,7 +17,7 @@ document.write('<ul class="nav navbar-nav">');
 //The buttons in the navigation bar
 document.write('<li><a href="/">Home</a></li>');
 document.write('<li><a href="test_idp">Test idp</a></li>');
-document.write('<li><a href="/config_idp">Configure idp </a></li>');
+document.write('<li><a href="/idp_config">Configure idp </a></li>');
 
 document.write('</ul>');
 document.write('</div>');

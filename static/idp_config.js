@@ -34,14 +34,6 @@ app.factory('uploadMetadataFactory', function ($http) {
     };
 });
 
-app.factory('resetConfigFileFactory', function ($http) {
-    return {
-        postResetConfigFile: function () {
-            return $http.post("/temp_reset_config_file");
-        }
-    };
-});
-
 app.factory('configFileFactory', function ($http) {
     return {
 
@@ -64,7 +56,7 @@ app.factory('configFileFactory', function ($http) {
     };
 });
 
-app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionConfigFactory, uploadMetadataFactory, resetConfigFileFactory, configFileFactory, toaster) {
+app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionConfigFactory, uploadMetadataFactory, configFileFactory, toaster) {
 
     $scope.basicConfig;
     $scope.convertedInteractionList;
@@ -84,11 +76,6 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
 
     var postMetadataUrlSuccessCallback = function (data, status, headers, config) {
         alert("Metadata url successfully SAVED");
-    };
-
-    var postResetConfigFileSuccessCallback = function (data, status, headers, config) {
-        alert("Target json successfully RESTORED");
-        updateConfigFields();
     };
 
     var downloadConfigFileSuccessCallback = function (data, status, headers, config) {
@@ -293,10 +280,6 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
                 alert("error reading file");
             }
         }
-    }
-
-    $scope.resetConfigFile = function(){
-        resetConfigFileFactory.postResetConfigFile().success(postResetConfigFileSuccessCallback).error(errorCallback);
     }
 
     $scope.downloadConfigFile = function(){

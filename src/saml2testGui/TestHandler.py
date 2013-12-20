@@ -50,13 +50,12 @@ class Test:
             "post_error_report": None,
 
             #Calles from config
-            "config_idp" : "config.mako",
+            "idp_config" : "idp_config.mako",
             "get_basic_config" : None,
             "post_basic_config" : None,
             "get_interaction_config" : None,
             "post_interaction_config" : None,
             "post_metadata_file" : None,
-            "temp_reset_config_file" : None,
             "download_config_file" : None,
             "upload_config_file" : None,
             "create_new_config_file": None,
@@ -93,7 +92,7 @@ class Test:
             return self.handlePostErrorReport()
 
         #Calles from config_idp
-        elif path == "config_idp":
+        elif path == "idp_config":
             return self.handleConfigIDP(self.urls[path])
         elif path == "get_basic_config":
             return self.handleGetBasicConfig()
@@ -105,8 +104,6 @@ class Test:
             return self.handlePostInteractionConfig()
         elif path == "post_metadata_file":
             return self.handlePostMetadataFile()
-        elif path == "temp_reset_config_file":
-            return self.handleResetConfigFile()
         elif path == "download_config_file":
             return self.handleDownloadConfigFile()
         elif path == "upload_config_file":
@@ -162,21 +159,6 @@ class Test:
         self.addMetdataToSession(metadata)
 
         print "Post metadata url: " + self.session[self.CONFIG_KEY]
-        return self.returnJSON({"asd": 1})
-
-    def handleResetConfigFile(self):
-        configFile = open(self.CONFIG_FILE_PATH + "working.json", "r")
-        #configFile = open(self.CONFIG_FILE_PATH + "working_no_interaction.json", "r")
-        #configFile = open(self.CONFIG_FILE_PATH + "broken_metadata.json", "r")
-
-        try:
-            configString = configFile.read()
-            configDict = ast.literal_eval(configString)
-            self.session[self.CONFIG_KEY] = str(configDict)
-        finally:
-            configFile.close()
-
-        print "Reset: " + self.session[self.CONFIG_KEY]
         return self.returnJSON({"asd": 1})
 
     def handleGetMetadata(self):

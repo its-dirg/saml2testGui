@@ -8,7 +8,7 @@
 
 <%block name="css">
     <!-- Add more css imports here! -->
-    <link rel="stylesheet" type="text/css" href="/static/saml2testgui.css">
+    <link rel="stylesheet" type="text/css" href="/static/test_idp.css">
 </%block>
 
 <%block name="title">
@@ -216,7 +216,7 @@
         </div>
     </div>
 
-    <script type="text/javascript" src="/static/saml2test.js"></script>
+    <script type="text/javascript" src="/static/test_idp.js"></script>
 
     ${parent.footer()}
 </%block>
