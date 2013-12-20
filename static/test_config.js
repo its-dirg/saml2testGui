@@ -96,7 +96,12 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         var a = document.createElement("a");
         a.download = "config.json";
         a.href = "data:text/plain;base64," + btoa(configDict);
+
+        //Appending the element a to the body is only necessary for the download to work in firefox
+        document.body.appendChild(a)
         a.click();
+        document.body.removeChild(a)
+
         e.preventDefault();
         //alert("Target json successfully DOWNLOADED");
     };

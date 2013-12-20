@@ -38,12 +38,13 @@ class Test:
         self.config = config
         self.parameters = parameters
         self.urls = {
-            "" : "index.mako",
+            "test_idp" : "test_idp.mako",
             "list_tests" : None,
             "run_test" : None,
             "post_final_interaction_data" : None,
             "post_basic_interaction_data" : None,
             "reset_interaction" : None,
+
             "config_idp" : "config.mako",
             "get_basic_config" : None,
             "post_basic_config" : None,
@@ -56,7 +57,9 @@ class Test:
             "create_new_config_file": None,
             "does_config_file_exist": None,
             "temp_get_metadata": None,
-            "post_metadata_url": None
+            "post_metadata_url": None,
+
+            "" : "home.mako"
         }
         self.cache = cache
 
@@ -67,8 +70,8 @@ class Test:
 
 
     def handle(self, path):
-        if path == "":
-            return self.handleIndex(self.urls[path])
+        if path == "test_idp":
+            return self.handleTestIDP(self.urls[path])
         elif path == "list_tests":
             return self.handleListTests()
         elif path == "run_test":
@@ -80,6 +83,7 @@ class Test:
         elif path == "reset_interaction":
             return self.handleResetInteraction()
         elif path == "config_idp":
+
             return self.handleConfigIDP(self.urls[path])
         elif path == "get_basic_config":
             return self.handleGetBasicConfig()
@@ -106,6 +110,10 @@ class Test:
         elif path == "post_metadata_url":
             return self.handlePostMetadataUrl()
 
+        elif path == "":
+            return self.handleHomePage(self.urls[path])
+
+
     def handlePostMetadataUrl(self):
         metadataUrl = self.parameters['metadataUrl']
         metadata = urllib2.urlopen(metadataUrl).read()
@@ -115,9 +123,9 @@ class Test:
         return self.returnJSON({"asd": 1})
 
     def handleResetConfigFile(self):
-        #configFile = open(self.CONFIG_FILE_PATH + "working.json", "r")
+        configFile = open(self.CONFIG_FILE_PATH + "working.json", "r")
         #configFile = open(self.CONFIG_FILE_PATH + "working_no_interaction.json", "r")
-        configFile = open(self.CONFIG_FILE_PATH + "broken_metadata.json", "r")
+        #configFile = open(self.CONFIG_FILE_PATH + "broken_metadata.json", "r")
 
         try:
             configString = configFile.read()
@@ -142,7 +150,7 @@ class Test:
         result = json.dumps({"doesConfigFileExist": self.doesConfigFileExist()})
         return self.returnJSON(result)
 
-    def handleIndex(self, file):
+    def handleTestIDP(self, file):
         resp = Response(mako_template=file,
                         template_lookup=self.lookup,
                         headers=[])
@@ -153,6 +161,18 @@ class Test:
         return resp(self.environ, self.start_response, **argv)
 
     def handleConfigIDP(self, file):
+
+        resp = Response(mako_template=file,
+                        template_lookup=self.lookup,
+                        headers=[])
+
+        argv = {
+            "a_value": "Hello world"
+        }
+
+        return resp(self.environ, self.start_response, **argv)
+
+    def handleHomePage(self, file):
 
         resp = Response(mako_template=file,
                         template_lookup=self.lookup,

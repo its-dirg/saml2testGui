@@ -21,6 +21,8 @@
 
 <%block name="headline">
     <div ng-controller="IndexCtrl">
+
+    <script language="JavaScript" type="text/javascript" src="/static/menu.js"></script>
 </%block>
 
 
@@ -95,7 +97,7 @@
     <!-- The headline of the test table -->
     <div class="col-lg-7" id="testHeadline">
         Test
-        <button class="btn btn-primary btn-sm" ng-click="resetAll();">Reset Tests</button>
+        <button class="btn btn-primary btn-sm" ng-click="test();">Send error report</button>
     </div>
 
     <div class="col-lg-1" id="testHeadline">

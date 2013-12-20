@@ -21,6 +21,8 @@
 
 <%block name="headline">
     <div ng-controller="IndexCtrl">
+
+    <script language="JavaScript" type="text/javascript" src="/static/menu.js"></script>
 </%block>
 
 
@@ -110,6 +112,8 @@
                     </div>
                 </div>
 
+                <hr>
+<!-- ################################################################################################# -->
 
                 <div class="row" ng-repeat="(key, data) in basicConfig">
                     <div class="col-lg-2" id="label">
@@ -120,13 +124,11 @@
                         <input type="text" value="{{data}}" id="{{key}}">
                     </div>
                 </div>
-
             </form>
 
             <button class="btn btn-primary btn-sm" ng-click="saveBasicConfig();">Save configurations</button>
 
             <hr>
-
 <!-- ################################################################################################# -->
 
             Interaction: <button class="btn btn-default btn-sm" ng-click="addInteraction();">+</button>
@@ -148,7 +150,7 @@
 
                     <div class="row">
                         <div class="col-lg-2">
-                            Page-type:
+                            page-type:
                         </div>
 
                         <div class="col-lg-10">

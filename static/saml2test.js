@@ -232,7 +232,12 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         a.href = data_type + ', ' + table_html;
         a.download = 'exported_table' + '.xls';
+
+        //Appending the element a to the body is only necessary for the download to work in firefox
+        document.body.appendChild(a)
         a.click();
+        document.body.removeChild(a)
+
         e.preventDefault();
     }
 
@@ -243,7 +248,12 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         a.download = "export.txt";
         a.href = "data:text/plain;base64," + btoa(resultString);
+
+        //Appending the element a to the body is only necessary for the download to work in firefox
+        document.body.appendChild(a)
         a.click();
+        document.body.removeChild(a)
+
         e.preventDefault();
     }
 
@@ -646,6 +656,10 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
             $scope.resultSummary.failed++;
         }
     }
+
+    $scope.test = function () {
+        alert("test");
+    };
 
 });
 
