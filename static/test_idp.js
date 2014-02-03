@@ -115,10 +115,12 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     };
 
     var resetFlags = function(){
+        alert("resetFlags");
         $('button').prop('disabled', false);
         isRunningAllTests = false;
         hasShownInteractionConfigDialog = false;
         hasShownWrongPasswordDialog = false;
+        isShowingErrorMessage = false;
     }
 
     var getPostBasicDataSuccessCallback = function (data, status, headers, config) {
@@ -133,9 +135,17 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         alert("getPostErrorReportSuccessCallback");
     };
 
+    var isShowingErrorMessage = false;
+
     var errorCallback = function (data, status, headers, config) {
-        bootbox.alert(data.ExceptionMessage);
-        resetFlags();
+
+        if (!isShowingErrorMessage){
+            isShowingErrorMessage = true;
+
+            bootbox.alert(data.ExceptionMessage, function() {
+                resetFlags();
+            });
+        }
     };
 
     testFactory.getTests($scope.selectedItem.type).success(getListSuccessCallback).error(errorCallback);
@@ -191,7 +201,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
             var id = $scope.currentFlattenedTree[i].id;
             var testid = $scope.currentFlattenedTree[i].testid;
             $scope.runOneTest(id, testid, "allTest");
-
         }
 
         $scope.numberOfTestsRunning = treeSize;
@@ -297,8 +306,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
     var createIframeAndShowInModelWindow = function(data) {
 
-        lastElement = testList.length -1;
-        testList = data['result']['tests'];
+        var subTestList = data['result']['tests'];
+        var lastElement = subTestList.length -1;
 
         $('#modalWindowIframe').modal('show');
         $('#modalIframeContent').empty();
@@ -310,7 +319,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         // Change the form action to log_in
         var loginForm = document.createElement('html');
-        loginForm.innerHTML = testList[lastElement].message;
+        loginForm.innerHTML = subTestList[lastElement].message;
         var formtag = loginForm.getElementsByTagName('form')[0];
         formtag.setAttribute('action', '/post_final_interaction_data');
 
@@ -420,9 +429,9 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     }
 
     function handleError() {
-        var lastElement = testList.length - 1;
+        var lastElement = subTestList.length - 1;
 
-        var errorMessage = testList[lastElement].message
+        var errorMessage = subTestList[lastElement].message
 
         if (errorMessage.indexOf("Unknown user or wrong password") != -1) {
 
@@ -435,18 +444,24 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }
     }
 
+    var formatSubTests = function (subTest) {
+
+        //if (subTest.status = )
+
+        return subTest.status + " : " + subTest.id + " : " + subTest.name
+    }
+
+
     var enterResultToTree = function (data, i) {
 
-        testList = data['result']['tests'];
-        var testResultList = [];
+        var subTestList = data['result']['tests'];
 
-        for (var j = 0; j < testList.length; j++) {
-            testResultList.push(testList[j]);
-            var statusNumber = testList[j].status;
-            testList[j]['status'] = convertStatusToText(statusNumber);
+        for (var j = 0; j < subTestList.length; j++) {
+            var statusNumber = subTestList[j].status;
+            subTestList[j]['status'] = convertStatusToText(statusNumber);
         }
 
-        $scope.currentFlattenedTree[i].result = testResultList;
+        $scope.currentFlattenedTree[i].result = subTestList;
 
         $scope.currentFlattenedTree[i].status = convertStatusToText(data['result']['status']);
         countSuccessAndFails(data['result']['status']);
@@ -688,10 +703,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         testResults = generateExportResultString();
 
         errorReportFactory.postErrorReport(email, message, testResults).success(getPostErrorReportSuccessCallback).error(errorCallback);
-    };
-
-    $scope.test = function () {
-        alert("test");
     };
 
 });

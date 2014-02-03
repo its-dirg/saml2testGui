@@ -177,12 +177,11 @@
                 Result:
                 <br>
 
+                <div ng-repeat="test in data.result">Status: <b>{{test.status}}</b> : {{test.name}}{{test.message}} : {{test.id}}{{test.content}}</div>
+
                 <!--
-                <div ng-repeat="test in data.result">{{test.status}} : {{test.id}} : {{test.name}}</div>
-                -->
-
                 <div ng-repeat="test in data.result">{{test}}</div>
-
+                -->
             </div>
         </div>
     </div>
