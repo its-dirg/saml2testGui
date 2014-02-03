@@ -4,6 +4,7 @@
 <%block name="script">
     <!-- Add more script imports here! -->
     <script src="/static/bootbox.min.js"></script>
+
 </%block>
 
 <%block name="css">
@@ -125,7 +126,7 @@
 
     <br>
 
-    <!-- The code which genertaes the rows of the test table -->
+    <!-- The code which generates the rows of the test table -->
     <div ng-repeat="data in currentFlattenedTree" class="row">
 
         <div ng-show="data.visible == true" id="testRow">

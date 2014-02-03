@@ -20,7 +20,7 @@ __author__ = 'haho0032'
 
 class Test:
     IDP_TESTDRV = '/usr/local/bin/idp_testdrv.py'
-    #Only used to check to check for new config files this which does nothing useful for the moment
+    #Only used to check to check for new config files this which does nothing useful at the moment
     CONFIG_FILE_PATH = 'saml2test/configFiles/'
     CONFIG_KEY = "target"
 

@@ -50,7 +50,6 @@ app.factory('notificationFactory', function () {
     };
 });
 
-
 app.factory('errorReportFactory', function ($http) {
     return {
         postErrorReport: function (reportEmail, reportMessage, testResults) {
@@ -78,7 +77,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     ];
 
     $scope.selectedItem = $scope.items[1];
-
 
     var getListSuccessCallback = function (data, status, headers, config) {
         $scope.topDownTree = data["topDownTree"];
@@ -134,8 +132,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     var getPostErrorReportSuccessCallback = function (data, status, headers, config) {
         alert("getPostErrorReportSuccessCallback");
     };
-
-
 
     var errorCallback = function (data, status, headers, config) {
         bootbox.alert(data.ExceptionMessage);
@@ -694,6 +690,9 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         errorReportFactory.postErrorReport(email, message, testResults).success(getPostErrorReportSuccessCallback).error(errorCallback);
     };
 
+    $scope.test = function () {
+        alert("test");
+    };
 
 });
 
