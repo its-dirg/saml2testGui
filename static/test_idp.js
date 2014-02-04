@@ -231,23 +231,27 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }
     }
 
-    $scope.showOrHideResult = function (testid) {
+    $scope.showOrHideResult = function (testid, testIndex) {
         test = findTestInTreeByTestid($scope.currentFlattenedTree, testid);
 
         if (test.showResult == true){
             test.showResult = false;
+            $("#resultButton" + testIndex).html('Show result');
         }else{
             test.showResult = true;
+            $("#resultButton" + testIndex).html('Hide result');
         }
     }
 
-    $scope.showOrHideErrorLog = function (testid) {
+    $scope.showOrHideErrorLog = function (testid, testIndex) {
         test = findTestInTreeByTestid($scope.currentFlattenedTree, testid);
 
         if (test.showErrorLog == true){
             test.showErrorLog = false;
+            $("#errorLogButton" + testIndex).html('Show error log');
         }else{
             test.showErrorLog = true;
+            $("#errorLogButton" + testIndex).html('Hide error log');
         }
     }
 

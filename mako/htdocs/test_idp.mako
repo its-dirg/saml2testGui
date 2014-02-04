@@ -151,7 +151,7 @@
 
             <!-- Show or hide result button -->
             <div class="col-lg-2" id="totalStatus{{data.status}}">
-                <div class="btn btn-default btn-xs" ng-click="showOrHideResult(data.testid);">Show result</div>
+                <div class="btn btn-default btn-xs" ng-click="showOrHideResult(data.testid, {{$index}});" id="resultButton{{$index}}">Show result</div>
             </div>
 
             <!-- Run test buttons -->
@@ -179,7 +179,7 @@
 
                 <div ng-repeat="test in data.result">Status: <b>{{test.status}}</b> : {{test.name}}{{test.message}} : {{test.id}}{{test.content}}</div>
 
-                <button class="btn btn-default btn-xs" ng-click="showOrHideErrorLog(data.testid);">Show error report</button>
+                <button class="btn btn-default btn-xs" ng-click="showOrHideErrorLog(data.testid, {{$index}});" id="errorLogButton{{$index}}">Show error report</button>
 
                 <div ng-show="data.showErrorLog == true">
                     <b>Error Log:</b>
