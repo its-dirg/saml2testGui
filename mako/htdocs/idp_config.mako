@@ -20,9 +20,9 @@
 </%block>
 
 <%block name="headline">
-    <div ng-controller="IndexCtrl">
+    <div menu></div>
 
-    <script language="JavaScript" type="text/javascript" src="/static/menu.js"></script>
+    <div ng-controller="IndexCtrl">
 </%block>
 
 
@@ -183,6 +183,5 @@
     </div>
 
     <script type="text/javascript" src="/static/idp_config.js"></script>
-
     ${parent.footer()}
 </%block>

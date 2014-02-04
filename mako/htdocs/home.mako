@@ -18,9 +18,9 @@
 </%block>
 
 <%block name="headline">
-    <div ng-controller="IndexCtrl">
+    <div menu></div>
 
-    <script language="JavaScript" type="text/javascript" src="/static/menu.js"></script>
+    <div ng-controller="IndexCtrl">
 </%block>
 
 
@@ -39,14 +39,6 @@
 <%block name="footer">
     </div>
 
-    <!-- Modal window-->
-    <div class="modal fade" id="modalWindow" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content" id="modalContent">
-
-            </div>
-        </div>
-    </div>
-
+    <script type="text/javascript" src="/static/home.js"></script>
     ${parent.footer()}
 </%block>
