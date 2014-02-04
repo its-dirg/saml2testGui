@@ -28,15 +28,6 @@
 
 
 <%block name="body">
-
-    Tree layout:
-    <br>
-    <select ng-model="selectedItem"
-        ng-options="item.type for item in items" ng-change="updateTree();">
-    </select>
-
-    <br>
-
     <div ng-click="toggleInstructionVisibility();" ng-show="instructionVisible == true" id="instructions">
         <img src="static/pitures/arrowDown.png">
         Hide instructions
@@ -185,7 +176,7 @@
                     <b>Error Log:</b>
                     <br>
 
-                    <div ng-repeat="error in data.errorLog">{{error.errorMessage}}</div>
+                    <div ng-repeat="error in data.errorLog" ng-bind-html-unsafe="error.errorMessage"></div>
                 </div>
             </div>
         </div>

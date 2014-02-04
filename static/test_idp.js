@@ -295,6 +295,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         for (var i = 0; i < tree.length; i++){
             tree[i].result = null;
             tree[i].status = null;
+            tree[i].errorLog = null;
         }
     }
 
@@ -720,5 +721,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     };
 
 });
+
+
 
 
