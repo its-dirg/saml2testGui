@@ -63,6 +63,7 @@
     margin-right:20px;
     border:2px solid;
     border-color:#CFCFCF;
+    word-wrap:break-word;
 }
 
 #instructions{

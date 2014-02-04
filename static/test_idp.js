@@ -115,7 +115,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     };
 
     var resetFlags = function(){
-        alert("resetFlags");
         $('button').prop('disabled', false);
         isRunningAllTests = false;
         hasShownInteractionConfigDialog = false;
@@ -239,6 +238,16 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
             test.showResult = false;
         }else{
             test.showResult = true;
+        }
+    }
+
+    $scope.showOrHideErrorLog = function (testid) {
+        test = findTestInTreeByTestid($scope.currentFlattenedTree, testid);
+
+        if (test.showErrorLog == true){
+            test.showErrorLog = false;
+        }else{
+            test.showErrorLog = true;
         }
     }
 
@@ -462,6 +471,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }
 
         $scope.currentFlattenedTree[i].result = subTestList;
+        $scope.currentFlattenedTree[i].errorLog = [{"errorMessage" : data['errorlog']}];
 
         $scope.currentFlattenedTree[i].status = convertStatusToText(data['result']['status']);
         countSuccessAndFails(data['result']['status']);

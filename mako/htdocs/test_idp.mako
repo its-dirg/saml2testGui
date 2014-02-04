@@ -174,14 +174,19 @@
 
             <!-- Result frame containing the result of a executed test -->
             <div class="resultFrame" ng-show="data.showResult == true">
-                Result:
+                <b>Result:</b>
                 <br>
 
                 <div ng-repeat="test in data.result">Status: <b>{{test.status}}</b> : {{test.name}}{{test.message}} : {{test.id}}{{test.content}}</div>
 
-                <!--
-                <div ng-repeat="test in data.result">{{test}}</div>
-                -->
+                <button class="btn btn-default btn-xs" ng-click="showOrHideErrorLog(data.testid);">Show error report</button>
+
+                <div ng-show="data.showErrorLog == true">
+                    <b>Error Log:</b>
+                    <br>
+
+                    <div ng-repeat="error in data.errorLog">{{error.errorMessage}}</div>
+                </div>
             </div>
         </div>
     </div>

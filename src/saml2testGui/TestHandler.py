@@ -187,6 +187,11 @@ class Test:
             "a_value": "Hello world"
         }
 
+        #TODO only used in development purposes
+        #f = open(self.CONFIG_FILE_PATH + "working.json", "r+")
+        #self.session[self.CONFIG_KEY] = f.read();
+        #f.close()
+
         return resp(self.environ, self.start_response, **argv)
 
 
