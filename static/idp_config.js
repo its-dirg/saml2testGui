@@ -171,10 +171,11 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
                  "entry": {
                             "matches": {
                                 "url": "",
-                                "title": ""
+                                "title": "Empty"
                             },
                             "pagetype": "",
                             "control": {
+                                "index": "0",
                                 "type": "",
                                 "set": {}
                             }

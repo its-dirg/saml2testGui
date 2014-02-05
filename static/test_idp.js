@@ -275,7 +275,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
     $scope.exportTestResultToTextFile = function () {
 
-        var resultString  = generateExportResultString();
+        var resultString  = JSON.stringify(exportResult)
         var a = document.createElement("a");
 
         a.download = "export.txt";
@@ -466,6 +466,23 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     }
 
 
+    var exportResult = []
+
+    var enterExportData = function(id, result, errorLog){
+
+        var resultClone = jQuery.extend(true, {}, result);
+
+        for (var i = 0; i < exportResult.length; i++){
+            if (id == exportResult[i].id){
+                exportResult.splice(i, 1);
+            }
+        }
+
+        exportResult.push({"id": id,
+                   "result": resultClone,
+                   "errorLog": errorLog});
+    }
+
     var enterResultToTree = function (data, i) {
 
         var subTestList = data['result']['tests'];
@@ -474,9 +491,13 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
             var statusNumber = subTestList[j].status;
             subTestList[j]['status'] = convertStatusToText(statusNumber);
         }
-
         $scope.currentFlattenedTree[i].result = subTestList;
-        $scope.currentFlattenedTree[i].errorLog = [{"errorMessage" : data['errorlog']}];
+
+        var convertedErrorLog = data['errorlog'];
+        convertedErrorLog = convertedErrorLog.replace(/\n/g, '<br />');
+        $scope.currentFlattenedTree[i].errorLog = [{"errorMessage" : convertedErrorLog}];
+
+        enterExportData($scope.currentFlattenedTree[i].id, data['result']['tests'], data['errorlog']);
 
         $scope.currentFlattenedTree[i].status = convertStatusToText(data['result']['status']);
         countSuccessAndFails(data['result']['status']);
@@ -527,20 +548,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         addedIds.push(id);
     }
 
-    var generateExportResultString = function(){
-        var tree = $scope.currentFlattenedTree;
-        var resultString = "";
-
-        for(var i = 0; i < tree.length; i++){
-
-            if (tree[i].result != null){
-                resultString += JSON.stringify(tree[i].id) + "\n";
-                resultString += JSON.stringify(tree[i].result) + "\n";
-            }
-        }
-        return resultString;
-    }
-
     var convertFromBottomUpToTopDownNodes = function (id){
         var test = findTestInTreeByID($scope.bottomUpTree, id);
         var testsToRun = getTestAndSubTests(test);
@@ -584,9 +591,11 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         if (treeType == "Bottom up flat") {
             $scope.currentOriginalTree = $scope.flatBottomUpTree;
             $scope.currentFlattenedTree = buildTree($scope.flatBottomUpTree);
+
         } else if (treeType == "Bottom up") {
             $scope.currentOriginalTree = $scope.bottomUpTree;
             $scope.currentFlattenedTree = buildTree($scope.bottomUpTree);
+
         } else if (treeType == "Top down") {
             $scope.currentOriginalTree = $scope.topDownTree;
             $scope.currentFlattenedTree = buildTree($scope.topDownTree);
@@ -715,7 +724,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         var email = $('#reportEmail').val();
         var message = $('#reportMessage').val();
 
-        testResults = generateExportResultString();
+        testResults = JSON.stringify(exportResult);
 
         errorReportFactory.postErrorReport(email, message, testResults).success(getPostErrorReportSuccessCallback).error(errorCallback);
     };
