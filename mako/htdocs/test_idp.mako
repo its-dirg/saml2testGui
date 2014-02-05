@@ -170,13 +170,13 @@
 
                 <div ng-repeat="test in data.result">Status: <b>{{test.status}}</b> : {{test.name}}{{test.message}} : {{test.id}}{{test.content}}</div>
 
-                <button class="btn btn-default btn-xs" ng-click="showOrHideErrorLog(data.testid, {{$index}});" id="errorLogButton{{$index}}">Show error report</button>
+                <button class="btn btn-default btn-xs" ng-click="showOrHideDebugLog(data.testid, {{$index}});" id="debugLogButton{{$index}}">Show debug log</button>
 
-                <div ng-show="data.showErrorLog == true">
-                    <b>Error Log:</b>
+                <div ng-show="data.showDebugLog == true">
+                    <b>Debug log:</b>
                     <br>
 
-                    <div ng-repeat="error in data.errorLog" ng-bind-html-unsafe="error.errorMessage"></div>
+                    <div ng-repeat="debug in data.debugLog" ng-bind-html-unsafe="debug.debugMessage"></div>
                 </div>
             </div>
         </div>

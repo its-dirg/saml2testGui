@@ -89,13 +89,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     var isRunningAllTests = false;
 
     var getTestResultSuccessCallback = function (data, status, headers, config) {
-        /*
-        (data['errorlog'];
-        (data['result']['status'];
-        (data['result']['id'];
-        var tests = data['result']['tests'];
-        */
-
         if (data['testid'] == null){
             isRunningAllTests = true;
             writeResultToTreeBasedOnId(data);
@@ -243,15 +236,15 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }
     }
 
-    $scope.showOrHideErrorLog = function (testid, testIndex) {
+    $scope.showOrHideDebugLog = function (testid, testIndex) {
         test = findTestInTreeByTestid($scope.currentFlattenedTree, testid);
 
-        if (test.showErrorLog == true){
-            test.showErrorLog = false;
-            $("#errorLogButton" + testIndex).html('Show error log');
+        if (test.showDebugLog == true){
+            test.showDebugLog = false;
+            $("#debugLogButton" + testIndex).html('Show debug log');
         }else{
-            test.showErrorLog = true;
-            $("#errorLogButton" + testIndex).html('Hide error log');
+            test.showDebugLog = true;
+            $("#debugLogButton" + testIndex).html('Hide debug log');
         }
     }
 
@@ -295,7 +288,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         for (var i = 0; i < tree.length; i++){
             tree[i].result = null;
             tree[i].status = null;
-            tree[i].errorLog = null;
+            tree[i].debugLog = null;
         }
     }
 
@@ -468,9 +461,9 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
     var exportResult = []
 
-    var enterExportData = function(id, result, errorLog){
+    var enterExportData = function(id, result, debugLog){
 
-        var resultClone = jQuery.extend(true, {}, result);
+        var resultClone = jQuery.extend(true, [], result);
 
         for (var i = 0; i < exportResult.length; i++){
             if (id == exportResult[i].id){
@@ -480,7 +473,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         exportResult.push({"id": id,
                    "result": resultClone,
-                   "errorLog": errorLog});
+                   "debugLog": debugLog});
+
     }
 
     var enterResultToTree = function (data, i) {
@@ -493,11 +487,11 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }
         $scope.currentFlattenedTree[i].result = subTestList;
 
-        var convertedErrorLog = data['errorlog'];
-        convertedErrorLog = convertedErrorLog.replace(/\n/g, '<br />');
-        $scope.currentFlattenedTree[i].errorLog = [{"errorMessage" : convertedErrorLog}];
+        var convertedDebugLog = data['debugLog'];
+        convertedDebugLog = convertedDebugLog.replace(/\n/g, '<br />');
+        $scope.currentFlattenedTree[i].debugLog = [{"debugMessage" : convertedDebugLog}];
 
-        enterExportData($scope.currentFlattenedTree[i].id, data['result']['tests'], data['errorlog']);
+        enterExportData($scope.currentFlattenedTree[i].id, data['result']['tests'], data['debugLog']);
 
         $scope.currentFlattenedTree[i].status = convertStatusToText(data['result']['status']);
         countSuccessAndFails(data['result']['status']);
@@ -654,29 +648,31 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         var row;
         var column1;
         var column2;
+        var column3;
         var text1;
         var text2;
+        var text3;
 
         var result;
 
-        for (var i = 0; i < $scope.currentFlattenedTree.length; i++){
+        for (var i = 0; i < exportResult.length; i++){
             row = document.createElement("tr");
             column1 = document.createElement("td");
             column2 = document.createElement("td");
+            column3 = document.createElement("td");
 
-            result = $scope.currentFlattenedTree[i].result;
+            text1 = document.createTextNode(exportResult[i].id);
+            text2 = document.createTextNode(JSON.stringify(exportResult[i].result));
+            text3 = document.createTextNode(exportResult[i].debugLog);
 
-            if(result != null){
-                text1 = document.createTextNode($scope.currentFlattenedTree[i].id);
-                text2 = document.createTextNode(JSON.stringify(result));
-                column2.appendChild(text2);
+            tbl.appendChild(row);
+            row.appendChild(column1);
+            row.appendChild(column2);
+            row.appendChild(column3);
 
-                tbl.appendChild(row);
-                row.appendChild(column1);
-                row.appendChild(column2);
-                column1.appendChild(text1);
-            }
-
+            column1.appendChild(text1);
+            column2.appendChild(text2);
+            column3.appendChild(text3);
        }
 
         return tbl;

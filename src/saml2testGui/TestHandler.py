@@ -360,7 +360,7 @@ class Test:
             outfile.flush()
 
             #Directs to the folder containing the saml2test config file
-            ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J', outfile.name, testToRun], "./saml2test")
+            ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J', outfile.name, '-d', testToRun], "./saml2test")
 
             outfile.close()
 
@@ -370,7 +370,7 @@ class Test:
                 if (ok):
                     response = {
                         "result": json.loads(p_out),
-                        "errorlog": cgi.escape(p_err),
+                        "debugLog": cgi.escape(p_err),
                         "testid": testid
                     }
                     return self.returnJSON(json.dumps(response))
