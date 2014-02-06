@@ -66,7 +66,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     $scope.bottomUpTree;
     $scope.flatBottomUpTree;
     $scope.numberOfTestsRunning = 0;
-    var addedIds = []
+    var addedIds = [];
+    var subTestList;
 
     $scope.resultSummary = {'success': 0, 'failed': 0};
 
@@ -460,7 +461,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         return subTest.status + " : " + subTest.id + " : " + subTest.name
     }
 
-
     var exportResult = []
 
     var enterExportData = function(id, result, debugLog){
@@ -481,7 +481,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
     var enterResultToTree = function (data, i) {
 
-        var subTestList = data['result']['tests'];
+        subTestList = data['result']['tests'];
 
         for (var j = 0; j < subTestList.length; j++) {
             var statusNumber = subTestList[j].status;
