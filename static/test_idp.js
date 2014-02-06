@@ -84,7 +84,9 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         $scope.flatBottomUpTree = data["flatBottomUpTree"];
 
         changeCurrentTree($scope.selectedItem.type);
-    };
+
+        $("[data-toggle='tooltip']").tooltip();
+    }
 
     var isRunningAllTests = false;
 
@@ -737,5 +739,15 @@ app.directive('menu', function($http) {
         }
     }
 });
+
+app.directive('directiveCallback', function(){
+    return function(scope, element, attrs){
+        attrs.$observe('directiveCallback',function(){
+            if (attrs.directiveCallback == "true"){
+                $("[data-toggle='tooltip']").tooltip();
+            }
+        });
+    }
+})
 
 

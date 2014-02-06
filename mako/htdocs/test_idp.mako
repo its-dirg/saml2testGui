@@ -23,11 +23,16 @@
 <%block name="headline">
     <div menu></div>
 
+    <!--
+    <a href="#" data-placement="bottom" data-toggle="tooltip" class="tip-bottom" data-original-title="Tooltip on bottom">Tooltip on bottom</a>
+    -->
+
     <div ng-controller="IndexCtrl">
 </%block>
 
 
 <%block name="body">
+
     <div ng-click="toggleInstructionVisibility();" ng-show="instructionVisible == true" id="instructions">
         <img src="static/pitures/arrowDown.png">
         Hide instructions
@@ -126,12 +131,12 @@
             <div class="col-lg-7" id="totalStatus{{data.status}}" ng-click="showOrHideTests(data.testid);">
                 <div id="level{{data.level}}">
 
-                    <span class="glyphicon glyphicon-info-sign" rel="tooltip" title="{{data.descr}}" id="infoIcon"></span>
+                    <span class="glyphicon glyphicon-info-sign" title="{{data.descr}}" id="infoIcon"
+                          data-toggle="tooltip" data-placement="left" directive-callback="{{$last}}"></span>
 
                     <img src="static/pitures/arrowRight.png" ng-show="data.hasChildren == true">
 
                     <span ng-click="removeTestResult(data.testid);" rel="tooltip" title="{{data.descr}}">{{data.id}}</span>
-
                 </div>
             </div>
 

@@ -84,6 +84,11 @@
     margin-bottom: 2px;
 }
 
+#infoIcon + .tooltip > .tooltip-inner {
+    background-color: #000000;
+    opacity:0.75;
+}
+
 #infoIcon{
     opacity: 0.40;
     font-size: 15px;
