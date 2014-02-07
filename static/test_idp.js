@@ -239,15 +239,15 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }
     }
 
-    $scope.showOrHideDebugLog = function (testid, testIndex) {
+    $scope.showOrHideTraceLog = function (testid, testIndex) {
         test = findTestInTreeByTestid($scope.currentFlattenedTree, testid);
 
-        if (test.showDebugLog == true){
-            test.showDebugLog = false;
-            $("#debugLogButton" + testIndex).html('Show debug log');
+        if (test.showTraceLog == true){
+            test.showTraceLog = false;
+            $("#traceLogButton" + testIndex).html('Show trace log');
         }else{
-            test.showDebugLog = true;
-            $("#debugLogButton" + testIndex).html('Hide debug log');
+            test.showTraceLog = true;
+            $("#traceLogButton" + testIndex).html('Hide trace log');
         }
     }
 
@@ -291,7 +291,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         for (var i = 0; i < tree.length; i++){
             tree[i].result = null;
             tree[i].status = null;
-            tree[i].debugLog = null;
+            tree[i].traceLog = null;
         }
     }
 
@@ -463,7 +463,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
     var exportResult = []
 
-    var enterExportData = function(id, result, debugLog){
+    var enterExportData = function(id, result, traceLog){
 
         var resultClone = jQuery.extend(true, [], result);
 
@@ -475,7 +475,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         exportResult.push({"id": id,
                    "result": resultClone,
-                   "debugLog": debugLog});
+                   "traceLog": traceLog});
 
     }
 
@@ -491,11 +491,11 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         $scope.currentFlattenedTree[i].result = subTestList;
 
 
-        var convertedDebugLog = data['debugLog'];
-        convertedDebugLog = convertedDebugLog.replace(/\n/g, '<br />');
-        $scope.currentFlattenedTree[i].debugLog = [{"debugMessage" : convertedDebugLog}];
+        var convertedTraceLog = data['traceLog'];
+        convertedTraceLog = convertedTraceLog.replace(/\n/g, '<br />');
+        $scope.currentFlattenedTree[i].traceLog = [{"traceMessage" : convertedTraceLog}];
 
-        enterExportData($scope.currentFlattenedTree[i].id, data['result']['tests'], data['debugLog']);
+        enterExportData($scope.currentFlattenedTree[i].id, data['result']['tests'], data['traceLog']);
 
         $scope.currentFlattenedTree[i].status = convertStatusToText(data['result']['status']);
         countSuccessAndFails(data['result']['status']);
@@ -667,7 +667,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
             text1 = document.createTextNode(exportResult[i].id);
             text2 = document.createTextNode(JSON.stringify(exportResult[i].result));
-            text3 = document.createTextNode(exportResult[i].debugLog);
+            text3 = document.createTextNode(exportResult[i].traceLog);
 
             tbl.appendChild(row);
             row.appendChild(column1);

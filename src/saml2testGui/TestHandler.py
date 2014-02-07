@@ -370,14 +370,14 @@ class Test:
                 if (ok):
                     response = {
                         "result": json.loads(p_out),
-                        "debugLog": cgi.escape(p_err),
+                        "traceLog": cgi.escape(p_err),
                         "testid": testid
                     }
                     return self.returnJSON(json.dumps(response))
                 else:
                     return self.serviceError("Failed to run test")
             except ValueError:
-                return self.serviceError("The configuration couldn't be decoded, it's possible that the metadata isn't correct. Check the configurations and upload it again")
+                return self.serviceError("The configuration couldn't be decoded, it's possible that the metadata isn't correct. Check that the configurations is correct and try again.");
 
         return self.serviceError("The test is not valid")
 
@@ -389,8 +389,9 @@ class Test:
 
 
     def handleGetBasicConfig(self):
-        configString = self.session[self.CONFIG_KEY]
-        configDict = ast.literal_eval(configString)
+        if self.CONFIG_KEY in self.session:
+            configString = self.session[self.CONFIG_KEY]
+            configDict = ast.literal_eval(configString)
 
         basicConfig = {"entity_id": configDict['entity_id'], "name_format": configDict['name_format']}
 
@@ -412,8 +413,10 @@ class Test:
 
 
     def handleGetInteractionConfig(self):
-        configString = self.session[self.CONFIG_KEY]
-        configDict = ast.literal_eval(configString)
+
+        if self.CONFIG_KEY in self.session:
+            configString = self.session[self.CONFIG_KEY]
+            configDict = ast.literal_eval(configString)
 
         interactionConfigList = self.createInteractionConfigList(configDict)
 
