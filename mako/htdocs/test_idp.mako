@@ -49,10 +49,10 @@
 
             <div class="col-xs-12 col-md-9">
                 In the table bellow all tests are presented. Test which depend on others are
-                makred with a little black arrow. In order to see the sub tests press the row containing an arrow.
+                makred with a little black arrow. In order to see the subtests press the row containing an arrow.
                 <br>
                 Tests could be executed at three levels. First of a single test could be executed or a test and
-                it's sub tests could be executed. In order to do this press the button "Run test" and then choose the appropriate alternative.
+                it's subtests could be executed. In order to do this press the button "Run test" and then choose the appropriate alternative.
                 Then last alternative is to execute all tests by pressing the button "Run all tests".
                 <br>
                 The result of the tests are presented by color encoding the row containing the test and a written status.
@@ -159,7 +159,7 @@
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu">
-                        <li ng-click="runMultipleTest(data.id, data.testid);"><a>Run test and sub tests</a></li>
+                        <li ng-click="runMultipleTest(data.id, data.testid);"><a>Run test and subtests</a></li>
                         <li ng-click="runOneTest(data.id, data.testid, 'singleTest');"><a>Run this test only</a></li>
                     </ul>
                 </div>

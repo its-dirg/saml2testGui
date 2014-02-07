@@ -26,7 +26,6 @@ SESSION_OPTS = {
     #'session.timeout' : 900 #Never expires only when the session is closed.
 }
 
-
 #If HTTPS is true you have to assign the server cert, key and certificate chain.
 SERVER_CERT = "httpsCert/server.crt"
 SERVER_KEY = "httpsCert/server.key"

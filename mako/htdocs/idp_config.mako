@@ -130,7 +130,6 @@
 
             <div class="block" ng-repeat="entry in convertedInteractionList" id="{{entry.id}}">
                 <form>
-                    id:{{entry.id}}
 
                     <div class="row" ng-repeat="(key, data) in entry.entry.matches">
                         <div class="col-lg-2">
