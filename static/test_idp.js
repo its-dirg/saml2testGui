@@ -481,13 +481,15 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
     var enterResultToTree = function (data, i) {
 
-        subTestList = data['result']['tests'];
+        subTestList = jQuery.extend(true, [], data['result']['tests']);
 
         for (var j = 0; j < subTestList.length; j++) {
             var statusNumber = subTestList[j].status;
-            subTestList[j]['status'] = convertStatusToText(statusNumber);
+            subTestList[j].status = convertStatusToText(statusNumber);
         }
+
         $scope.currentFlattenedTree[i].result = subTestList;
+
 
         var convertedDebugLog = data['debugLog'];
         convertedDebugLog = convertedDebugLog.replace(/\n/g, '<br />');
