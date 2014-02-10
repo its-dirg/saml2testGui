@@ -364,8 +364,6 @@ class Test:
 
             outfile.close()
 
-            #self.formatOutput(p_out)
-
             try:
                 if (ok):
                     response = {
@@ -380,13 +378,6 @@ class Test:
                 return self.serviceError("The configuration couldn't be decoded, it's possible that the metadata isn't correct. Check that the configurations is correct and try again.");
 
         return self.serviceError("The test is not valid")
-
-    #def formatOutput(self, p_out):
-        #print (p_out[0])
-        #returnValue = ""
-        #for test in p_out:
-           #print test.status
-
 
     def handleGetBasicConfig(self):
         if self.CONFIG_KEY in self.session:

@@ -8,7 +8,7 @@ setup(
     author = "Hans, Hoerberg och Daniel Evertsson",
     author_email = "hans.horberg@umu.se, daniel.evertsson@umu.se",
     license="Apache 2.0",
-    packages=['saml2testGui', 'saml2testGui/util'],
+    packages=['saml2testGui'],
     package_dir = {"": "src"},
     classifiers = ["Development Status :: 4 - Beta",
         "License :: OSI Approved :: Apache Software License",
