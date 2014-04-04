@@ -383,10 +383,9 @@ class Test:
         if self.CONFIG_KEY in self.session:
             configString = self.session[self.CONFIG_KEY]
             configDict = ast.literal_eval(configString)
-
-        basicConfig = {"entity_id": configDict['entity_id'], "name_format": configDict['name_format']}
-
-        return self.returnJSON(json.dumps(basicConfig))
+            basicConfig = {"entity_id": configDict['entity_id'], "name_format": configDict['name_format']}
+            return self.returnJSON(json.dumps(basicConfig))
+        return self.serviceError("No configuration has been uploaded")
 
 
     def handlePostBasicConfig(self):

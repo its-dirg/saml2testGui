@@ -92,17 +92,17 @@
     <br>
 
     <!-- The headline of the test table -->
-    <div class="col-lg-7" id="testHeadline">
+    <div class="col-sm-7" id="testHeadline">
         Test
         <button class="btn btn-primary btn-sm" ng-click="showModalWindowsErrorReport();">Send error report</button>
     </div>
 
-    <div class="col-lg-1" id="testHeadline">
+    <div class="col-sm-1" id="testHeadline">
         Status
     </div>
 
     <!-- Export button -->
-    <div class="col-lg-2" id="testHeadline">
+    <div class="col-sm-2" id="testHeadline">
         <div class="btn-group">
             <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
                 Export
@@ -116,7 +116,7 @@
     </div>
 
     <!-- Run all tests button-->
-    <div class="col-lg-2" id="testHeadline">
+    <div class="col-sm-2" id="testHeadline">
         <button class="btn btn-primary" ng-click="runAllTest();">Run all tests</button>
     </div>
 
@@ -128,7 +128,7 @@
         <div ng-show="data.visible == true" id="testRow">
 
             <!-- Tree containging all the tests -->
-            <div class="col-lg-7" id="totalStatus{{data.status}}" ng-click="showOrHideTests(data.testid);">
+            <div class="col-sm-7" id="totalStatus{{data.status}}" ng-click="showOrHideTests(data.testid);">
                 <div id="level{{data.level}}">
 
                     <span class="glyphicon glyphicon-info-sign" title="{{data.descr}}" id="infoIcon"
@@ -141,17 +141,17 @@
             </div>
 
             <!-- Status of a given test -->
-            <div class="col-lg-1" id="totalStatus{{data.status}}">
+            <div class="col-sm-1" id="totalStatus{{data.status}}">
                 {{data.status}}
              </div>
 
             <!-- Show or hide result button -->
-            <div class="col-lg-2" id="totalStatus{{data.status}}">
+            <div class="col-sm-2" id="totalStatus{{data.status}}">
                 <div class="btn btn-default btn-xs" ng-click="showOrHideResult(data.testid, {{$index}});" id="resultButton{{$index}}">Show result</div>
             </div>
 
             <!-- Run test buttons -->
-            <div class="col-lg-2" id="totalStatus{{data.status}}">
+            <div class="col-sm-2" id="totalStatus{{data.status}}">
 
                 <div class="btn-group">
                     <button class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" id="runButton">

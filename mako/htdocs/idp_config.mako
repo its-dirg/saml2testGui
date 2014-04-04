@@ -30,49 +30,35 @@
 
     <div id="content">
 
-        <h2>IDP configuration:
-            <button class="btn btn-primary btn-sm" ng-click="reloadConfigFile();">
+        <h2>
+            IDP configuration:
+            <button class="btn btn-default btn-sm" ng-click="reloadConfigFile();">
                 <span class="glyphicon glyphicon-refresh"></span>
             </button>
         </h2>
 
-        <form>
-            <div class="row">
-                <div class="col-lg-2">
-                    Create new config:
-                </div>
-
-                <div class="col-lg-10">
-                    <button class="btn btn-primary btn-sm" ng-click="createNewConfigFile();">Create configurations</button>
-                    <br>
-                    <br>
-                </div>
+        <div class="row">
+            <div class="col-sm-4">
+                <button class="btn btn-primary btn-sm" ng-click="createNewConfigFile();">
+                    <span class="glyphicon glyphicon-file"></span>
+                    Create new configurations
+                </button>
             </div>
 
-             <div class="row">
-                <div class="col-lg-2">
-                    Upload config file:
-                </div>
-
-                <div class="col-lg-10">
-
-                    <input type="file" name="file" id="targetFile">
-                    <button class="btn btn-primary btn-sm" ng-click="uploadConfigFile();">Upload configurations</button>
-                    <br>
-                    <br>
-                </div>
+            <div class="col-sm-4">
+                <button class="btn btn-primary btn-sm" ng-click="showModalUploadConfigWindow();">
+                    <span class="glyphicon glyphicon-open"></span>
+                    Upload configurations
+                </button>
             </div>
 
-             <div class="row">
-                <div class="col-lg-2">
-                    Download config file:
-                </div>
-
-                <div class="col-lg-10">
-                    <button class="btn btn-primary btn-sm" ng-click="downloadConfigFile();">Download configurations</button>
-                </div>
+            <div class="col-sm-4">
+                <button class="btn btn-primary btn-sm" ng-click="downloadConfigFile();">
+                    <span class="glyphicon glyphicon-download-alt"></span>
+                    Download configurations
+                </button>
             </div>
-        </form>
+        </div>
 
         <hr>
 
@@ -80,48 +66,46 @@
 
 <!-- ################################################################################################# -->
         <div ng-show="basicConfig">
-            <form>
-                <div class="row">
-                    <div class="col-lg-2">
-                        Upload metadata file:
-                    </div>
 
-                    <div class="col-lg-10">
-                        <input type="file" name="file" id="metadataFile">
-                        <button class="btn btn-primary btn-sm" ng-click="uploadMetadataFile();">Upload</button>
-                        <br>
-                        <br>
-                    </div>
+            <div class="row">
+                <div class="col-sm-2">
+                    Upload metadata file:
                 </div>
 
-                <div class="row">
-                    <div class="col-lg-2" id="label">
-                        Upload metadata by url:
-                    </div>
+                <div class="col-sm-10">
+                    <input type="file" name="file" id="metadataFile">
+                    <button class="btn btn-default btn-sm" ng-click="uploadMetadataFile();">Upload</button>
+                    <br>
+                    <br>
+                </div>
+            </div>
 
-                    <div class="col-lg-10">
-                        <input type="text" value="https://localhost:4545/temp_get_metadata" id="metadataUrl">
-                        <button class="btn btn-primary btn-sm" ng-click="uploadMetadataUrl();">Upload</button>
-                        <br>
-                        <br>
-                    </div>
+            <div class="row">
+                <div class="col-sm-2" id="label">
+                    Upload metadata by url:
                 </div>
 
-                <hr>
+                <div class="col-sm-10">
+                    <input type="text" value="https://localhost:4545/temp_get_metadata" id="metadataUrl">
+                    <button class="btn btn-default btn-sm" ng-click="uploadMetadataUrl();">Upload</button>
+                    <br>
+                    <br>
+                </div>
+            </div>
+
+            <hr>
 <!-- ################################################################################################# -->
 
-                <div class="row" ng-repeat="(key, data) in basicConfig">
-                    <div class="col-lg-2" id="label">
-                        {{key}}:
-                    </div>
-
-                    <div class="col-lg-10">
-                        <input type="text" value="{{data}}" id="{{key}}">
-                    </div>
+            <div class="row" ng-repeat="(key, data) in basicConfig">
+                <div class="col-sm-2" id="label">
+                    {{key}}:
                 </div>
-            </form>
 
-            <button class="btn btn-primary btn-sm" ng-click="saveBasicConfig();">Save configurations</button>
+                <div class="col-sm-10">
+                    <input type="text" value="{{data}}" id="{{key}}">
+                </div>
+            </div>
+
 
             <hr>
 <!-- ################################################################################################# -->
@@ -129,42 +113,39 @@
             Interaction: <button class="btn btn-default btn-sm" ng-click="addInteraction();">+</button>
 
             <div class="block" ng-repeat="entry in convertedInteractionList" id="{{entry.id}}">
-                <form>
 
-                    <div class="row" ng-repeat="(key, data) in entry.entry.matches">
-                        <div class="col-lg-2">
-                            {{key}}:
-                        </div>
-
-                        <div class="col-lg-10">
-                            <input type="text" value="{{data}}" id="{{key}}">
-                        </div>
-                        <br>
+                <div class="row" ng-repeat="(key, data) in entry.entry.matches">
+                    <div class="col-sm-2">
+                        {{key}}:
                     </div>
 
-                    <div class="row">
-                        <div class="col-lg-2">
-                            page-type:
-                        </div>
+                    <div class="col-sm-10">
+                        <input type="text" value="{{data}}" id="{{key}}">
+                    </div>
+                    <br>
+                </div>
 
-                        <div class="col-lg-10">
-                            <input type="text" value="{{entry.entry.pagetype}}" id="pagetype">
-                        </div>
-                        <br>
+                <div class="row">
+                    <div class="col-sm-2">
+                        page-type:
                     </div>
 
-                    <div class="row" ng-repeat="(key, data) in entry.entry.control">
-                        <div class="col-lg-2">
-                            {{key}}:
-                        </div>
+                    <div class="col-sm-10">
+                        <input type="text" value="{{entry.entry.pagetype}}" id="pagetype">
+                    </div>
+                    <br>
+                </div>
 
-                        <div class="col-lg-10">
-                            <input type="text" value="{{data}}" id="{{key}}">
-                        </div>
-                        <br>
+                <div class="row" ng-repeat="(key, data) in entry.entry.control">
+                    <div class="col-sm-2">
+                        {{key}}:
                     </div>
 
-                </form>
+                    <div class="col-sm-10">
+                        <input type="text" value="{{data}}" id="{{key}}">
+                    </div>
+                    <br>
+                </div>
 
                 <div class="close">
                     <button class="btn btn-danger btn-sm" ng-click="tryToRemoveInteraction(entry.id);">X</button>
@@ -173,9 +154,19 @@
 
             <br>
 
-            <button class="btn btn-primary btn-sm" ng-click="saveInteractionConfig();">Save configurations</button>
+            <button class="btn btn-primary btn-sm" ng-click="saveConfig();">Save configurations</button>
         </div>
     </div>
+
+    <div class="modal fade" id="modalWindowUploadConfigurationFile" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <input type="file" name="file" id="targetFile">
+                <button class="btn btn-primary btn-sm" ng-click="uploadConfigFile();">Upload configurations</button>
+            </div>
+        </div>
+    </div>
+
 </%block>
 
 <%block name="footer">

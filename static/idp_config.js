@@ -108,6 +108,7 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
 
     var uploadConfigFileSuccessCallback = function (data, status, headers, config) {
         alert("Target json successfully UPLOADED");
+        $("#modalWindowUploadConfigurationFile").modal('toggle');
         updateConfigFields();
     };
 
@@ -223,14 +224,19 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         $scope.$apply();
     }
 
-    $scope.saveBasicConfig = function(){
+    $scope.saveConfig = function(){
+        saveBasicConfig();
+        saveInteractionConfig();
+    }
+
+    var saveBasicConfig = function(){
         var name_format = $('#name_format').val();
         var entityID = $('#entity_id').val();
 
         basicConfigFactory.postBasicConfig(name_format, entityID).success(postBasicConfigSuccessCallback).error(errorCallback);
     }
 
-    $scope.saveInteractionConfig = function(){
+    var saveInteractionConfig = function(){
 
         $(".block").each(function() {
 
@@ -334,6 +340,10 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         var metadataUrl = $("#metadataUrl").val();
 
         uploadMetadataFactory.postMetadataUrl(metadataUrl).success(postMetadataUrlSuccessCallback).error(errorCallback);
+    }
+
+    $scope.showModalUploadConfigWindow = function(){
+        $("#modalWindowUploadConfigurationFile").modal('toggle');
     }
 });
 
