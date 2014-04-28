@@ -6,8 +6,8 @@ Configurate the server:
 
 
     1. Go to your SAML2testGui folder and open the server_conf.py
-    2. If you want to use https you need certficates.
-        * If you have access to production certificates you need to point them out. Point out all your certificates in the varaiables SERVER_CERT, SERVER_KEY and CERT_CHAIN.
+    2. If you want to use https you need certificates.
+        * If you have access to production certificates you need to point them out. Point out all your certificates in the variables SERVER_CERT, SERVER_KEY and CERT_CHAIN.
         * If you do not have any production certificates you can generate self signed certificates by running the script [..]/httpsCert/create_key.sh. If you use this method the server_conf.py file need no changes.
         * To activate https you also need to set the variable HTTPS to True.
     3. You must take a look at all the settings in server_conf.py and adjust them for your needs.
@@ -16,23 +16,23 @@ Configurate the server:
 Generate test tool metadata:
 ----------------------------
 
-    1. Go to the folder [your path]/saml2test/tests/idp_test
-    2. Copy the config.py.example
-    3. Rename the copy config.py
-    4. Edit the file. The most important infomation is:
+    #. Open the saml2test folder ([your path]/saml2test/tests/idp_test)
+    #. Copy the config.py.example
+    #. Rename the copy config.py
+    #. Edit the file. The most important information is:
         * BASE = the url too the test tool and port
-        * Entityid
+        * Entity id
         * And the path to the Key and Certificate files
-    5. Open a termanial
-    6. Go to the folder [...]/saml2test/tests/idp_test
-    7. Enter::
+    #. Open a terminal
+    #. Go to the folder [...]/saml2test/tests/idp_test
+    #. Enter::
 
         make_metadata.py config.py > test_tool_metadata.xml
 
 Configurate a simple test IDP:
 ******************************
 
-In order to do this you need the pysaml2 application. If you installed the application by using yais the script should have asked whether you wanted to configurat an test idp or not. By using yais it's possible to reconfigure the idp by executing the script called configureSaml.sh.
+In order to do this you need the pyoidc application. If you installed the application by using Yais the script should have asked whether you wanted to configure an test idp or not. By using Yais it's possible to reconfigure the idp by executing the script called configureSaml.sh.
 
     1. Open a terminal and enter::
 

@@ -12,16 +12,16 @@ Functionality test idp site:
 ---------------------------
 
 * List all available tests supported by the SAML2test tool
-* Tests will be pressented in a tree layout, where the leaf nodes doesn't depend on any other test.
+* Tests will be presented in a tree layout, where the leaf nodes doesn't depend on any other test.
 * Tests could be executed at three levels:
     * Run a single test,
-    * Run test and subtests
+    * Run test and sub-tests
     * Run all available tests
 * Overview of the test result are presented by color coding and in text
 * Detailed result view and a trace log
 * Export result to to a text or Excel file
 * Send error reports to the developers, the result will be attached to the report
-* If no interaction information is avaliable the application could sometimes collect the nessesary data.
+* If no interaction information is available the application could sometimes collect the necessary data.
 
 Functionality configurate idp site:
 -----------------------------------

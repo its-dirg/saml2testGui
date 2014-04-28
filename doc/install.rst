@@ -1,7 +1,7 @@
 Install
 #######
 
-This is a guid of how to install Saml2test
+This is a guide of how to install Saml2test
 
 How to install SAML2testGui:
 ===========================
@@ -78,5 +78,5 @@ Linux/Mac:
         cd [your path]/yais/script
         ./yaisLinux.sh
 
-On the question "Do you want to install SAML2test (Y/n):", type Y. If you want a simple test idp you should install the pysaml2 too. Every thing else should be ignorred, by typing n.
+On the question "Do you want to install SAML2test (Y/n):", type Y. If you want a simple test idp you should install the pysaml2 too. Every thing else should be ignored, by typing n.
 The script will install SAML2testGui and all the application on which it depends.
