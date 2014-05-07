@@ -368,7 +368,7 @@ class Test:
                 if (ok):
                     response = {
                         "result": json.loads(p_out),
-                        "traceLog": cgi.escape(p_err),
+                        "traceLog": cgi.escape(unicode(p_err, errors='replace')),
                         "testid": testid
                     }
                     return self.returnJSON(json.dumps(response))
