@@ -14,7 +14,7 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Topic :: Software Development :: Libraries :: Python Modules"],
     install_requires = ['requests', 'saml2test',
-                        "cherrypy", "mako", "pyjwkest", "beaker"],
+                        "cherrypy==3.2.4", "mako", "pyjwkest", "beaker"],
 
     zip_safe=False,
 )
