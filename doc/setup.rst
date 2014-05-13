@@ -4,14 +4,15 @@ Setup SAML2testGui:
 Configurate the server:
 ***********************
 
-
-    1. Go to your SAML2testGui folder and open the server_conf.py
-    2. If you want to use https you need certificates.
+    #. Go to your SAML2testGui folder rename the file **server_conf.py.example** it should be named **server_conf.py**
+    #. Open the server_conf.py
+    #. If you want to use https you need certificates.
         * If you have access to production certificates you need to point them out. Point out all your certificates in the variables SERVER_CERT, SERVER_KEY and CERT_CHAIN.
         * If you do not have any production certificates you can generate self signed certificates by running the script [..]/httpsCert/create_key.sh. If you use this method the server_conf.py file need no changes.
         * To activate https you also need to set the variable HTTPS to True.
-    3. You must take a look at all the settings in server_conf.py and adjust them for your needs.
-    4. Set PORT to the port you want to use. If HTTPS is True, this is your https port.
+    #. You must take a look at all the settings in server_conf.py and adjust them for your needs.
+    #. Set BASEURL to the url you want to use for the test tool
+    #. Set PORT to the port you want to use. If HTTPS is True, this is your https port.
 
 Generate test tool metadata:
 ----------------------------
