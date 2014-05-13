@@ -1,5 +1,5 @@
-Setup SAML2testGui:
-###################
+Setup
+#####
 
 Configurate the server:
 ***********************
@@ -25,15 +25,15 @@ Generate test tool metadata:
         * Entity id
         * And the path to the Key and Certificate files
     #. Open a terminal
-    #. Go to the folder [...]/saml2test/tests/idp_test
+    #. Go to the folder [...]/saml2test/tests
     #. Enter::
 
-        make_metadata.py config.py > test_tool_metadata.xml
+        make_metadata.py idp_test/config.py > test_tool_metadata.xml
 
 Configurate a simple test IDP:
 ******************************
 
-In order to do this you need the pyoidc application. If you installed the application by using Yais the script should have asked whether you wanted to configure an test idp or not. By using Yais it's possible to reconfigure the idp by executing the script called configureSaml.sh.
+In order to do this you need the pysaml2 application. If you installed the application by using Yais the script should have asked whether you wanted to configure an test idp or not. By using Yais it's possible to reconfigure the idp by executing the script called configureSaml.sh.
 
     1. Open a terminal and enter::
 

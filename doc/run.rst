@@ -1,5 +1,5 @@
-Start the server:
-#################
+Run
+####
 
 Go to your SAML2testGui folder and open a terminal enter::
 
