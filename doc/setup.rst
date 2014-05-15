@@ -26,11 +26,11 @@ Generate test tool metadata:
         * And the path to the Key and Certificate files
     #. Open a terminal
     #. Go to the folder [...]/saml2test/tests
-    #. Enter::
+    #. Generate the metadata by entering::
 
         make_metadata.py idp_test/config.py > test_tool_metadata.xml
 
-Configurate a simple test IDP:
+Configure a simple test IDP:
 ******************************
 
 In order to do this you need the pysaml2 application. If you installed the application by using Yais the script should have asked whether you wanted to configure an test idp or not. By using Yais it's possible to reconfigure the idp by executing the script called configureSaml.sh.
@@ -50,3 +50,10 @@ In order to configurate the idp without yais:
     4. Edit the necessary information, the most inportant infomation is the:
         * Base which is the idp url and port number
         * Metadata which is the path to saml2test tools metadata file
+
+Configure saml2test
+*******************
+Read more on how to `configure saml2test here<https://dirg.org.umu.se/page/saml2test>`_
+
+Note: The information in the "Test Target Configuration File" could be added on the page "Configute IDP" while running the saml2testGui web interface.
+

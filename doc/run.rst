@@ -20,7 +20,6 @@ In order to run tests you have to create or upload an saml2test configuration fo
 #. Remove the generated interaction-block, in some cases the application can gather this information by itself.
 
 
-
 Start simple test idp:
 **********************
 
@@ -32,4 +31,13 @@ Now you should be able to run tests.
 
 #. Go to the page named "Test idp"
 #. Run one or multiple tests
-#. If you didn't add any interaction-blocks the application will most likely ask whether to gather the information by itself or not. Note that while gathering infomation you need to run the test multpile time until all the infomation has been gathered.
+#. If you didn't add any interaction-blocks the application will most likely ask whether to gather the information by itself or not.
+Note that while gathering information you need to run the test multiple time until all the information has been gathered.
+
+
+Testing different IDP's:
+************************
+If you want to test different IDP's you need to create a “Test Target Configuration File” for every IDP.
+This could be done manually, see `How to use SAML2test <https://dirg.org.umu.se/page/saml2test>`_, it's also possible to use "Configure IDP" page in the web interface.
+
+Don't forget to upload the saml2test's metadata to the IDP you want to test.
