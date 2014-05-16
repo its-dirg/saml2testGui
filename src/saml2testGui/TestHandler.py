@@ -363,10 +363,16 @@ class Test:
 
             outfile.close()
 
+            result = ""
+            try:
+                if len(p_out) > 0:
+                    result = json.loads(p_out)
+            except ValueError:
+                return self.serviceError("saml2test is not returning json. Verify that saml2test is working correct!")
             try:
                 if (ok):
                     response = {
-                        "result": json.loads(p_out),
+                        "result": result,
                         "traceLog": cgi.escape(unicode(p_err, errors='replace')),
                         "testid": testid
                     }
