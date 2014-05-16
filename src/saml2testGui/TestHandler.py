@@ -19,7 +19,6 @@ from email.mime.text import MIMEText
 __author__ = 'haho0032'
 
 class Test:
-    IDP_TESTDRV = '/usr/local/bin/idp_testdrv.py'
     #Only used to check to check for new config files this which does nothing useful at the moment
     CONFIG_FILE_PATH = 'saml2test/configFiles/'
     CONFIG_KEY = "target"
@@ -225,7 +224,7 @@ class Test:
         if "handleList_result" not in self.cache:
 
             if "test_list" not in self.cache:
-                ok, p_out, p_err = self.runScript([self.IDP_TESTDRV, '-l'])
+                ok, p_out, p_err = self.runScript([self.config.SAML2TEST_PATH, '-l'])
                 if ok:
                     self.cache["test_list"] = p_out
             else:
@@ -360,7 +359,7 @@ class Test:
             outfile.flush()
 
             #Directs to the folder containing the saml2test config file
-            ok, p_out, p_err = self.runScript([self.IDP_TESTDRV,'-J', outfile.name, '-d', testToRun], "./saml2test")
+            ok, p_out, p_err = self.runScript([self.config.SAML2TEST_PATH,'-J', outfile.name, '-d', testToRun], "./saml2test")
 
             outfile.close()
 
@@ -663,7 +662,7 @@ class Test:
         if "verify_test_dict" not in self.cache:
             self.cache["verify_test_dict"] = {}
             if "test_list" not in self.cache:
-                ok, p_out, p_err = self.runScript([self.IDP_TESTDRV, '-l'])
+                ok, p_out, p_err = self.runScript([self.config.SAML2TEST_PATH, '-l'])
                 if ok:
                     self.cache["test_list"] = p_out
             tests = json.loads(self.cache["test_list"])

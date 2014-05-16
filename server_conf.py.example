@@ -17,6 +17,8 @@ ISSUER = "%s:%s" % (BASEURL, PORT)
 
 LOG_FILE="server.log"
 
+SAML2TEST_PATH = '/usr/local/bin/idp_testdrv.py'
+
 #Beaker session configuration.
 SESSION_OPTS = {
     'session.type': 'memory',
