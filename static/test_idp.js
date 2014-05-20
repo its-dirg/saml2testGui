@@ -94,9 +94,9 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     var getTestResultSuccessCallback = function (data, status, headers, config) {
         if (data['testid'] == null){
             isRunningAllTests = true;
-            writeResultToTreeBasedOnId(data);
+            writeAllTestsResultToTreeBasedOnId(data);
         }else{
-            writeResultToTreeBasedOnTestid(data);
+            writeSingleTestResultToTreeBasedOnTestid(data);
         }
 
         $scope.numberOfTestsRunning--;
@@ -497,18 +497,20 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         enterExportData($scope.currentFlattenedTree[i].id, data['result']['tests'], data['traceLog']);
 
-        $scope.currentFlattenedTree[i].status = convertStatusToText(data['result']['status']);
-        countSuccessAndFails(data['result']['status']);
-
-
         statusNumber = data['result']['status'];
 
-        if (statusNumber == 5) {
+        if(statusNumber == null){
+            statusNumber = TEST_STATUS['EMPTY_STATUS'].value
+        }
+        else if (statusNumber == 5) {
             handleInteraction(data);
         }
         else if (statusNumber == 3) {
             handleError();
         }
+
+        $scope.currentFlattenedTree[i].status = convertStatusToText(statusNumber);
+        countSuccessAndFails(data['result']['status']);
     }
 
     window.postBack = function(){
@@ -523,7 +525,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }, 200);
     }
 
-    var writeResultToTreeBasedOnTestid = function(data) {
+    var writeSingleTestResultToTreeBasedOnTestid = function(data) {
         testid = data['testid'];
 
         for (var i = 0; i < $scope.currentFlattenedTree.length; i++) {
@@ -533,7 +535,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         }
     }
 
-    var writeResultToTreeBasedOnId = function(data) {
+    var writeAllTestsResultToTreeBasedOnId = function(data) {
         id = data['result']['id'];
 
         for (var i = 0; i < $scope.currentFlattenedTree.length; i++) {
@@ -682,24 +684,30 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         return tbl;
     }
 
-    var convertStatusToText = function (status) {
-        if (status == 0){
-            return "INFORMATION";
-        }else if (status == 1){
-            return "OK";
-        }else if (status == 2){
-            return "WARNING";
-        }else if (status == 3){
-            return "ERROR";
-        }else if (status == 4){
-            return "CRITICAL";
-        }else if (status == 5){
-            return "INTERACTION";
+    var TEST_STATUS  = {
+        'INFORMATION':{value: 0, string:'INFORMATION'},
+        'OK':{value: 1, string:'OK'},
+        'WARNING':{value: 2, string:'WARNING'},
+        'ERROR':{value: 3, string:'ERROR'},
+        'CRITICAL':{value: 4, string:'CRITICAL'},
+        'INTERACTION':{value: 5, string:'INTERACTION'},
+        'EMPTY_STATUS':{value: 6, string:'EMPTY_STATUS'}
+      };
+
+    var convertStatusToText = function (statusToConvert) {
+        for (var status in TEST_STATUS){
+            if (TEST_STATUS[status].value == statusToConvert){
+                return TEST_STATUS[status].string;
+            }
         }
     };
 
+    var isTestSuccessful = function (status) {
+        return status == 0 || status == 1;
+    }
+
     var countSuccessAndFails = function(status){
-        if (status == 0 || status == 1){
+        if (isTestSuccessful(status)){
             $scope.resultSummary.success++;
         }else{
             $scope.resultSummary.failed++;

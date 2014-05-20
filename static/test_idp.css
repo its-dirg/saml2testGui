@@ -136,6 +136,6 @@
     background-color: #FEFE7A;
 }
 
-#totalStatusERROR, #totalStatusCRITICAL{
+#totalStatusERROR, #totalStatusCRITICAL, #totalStatusEMPTY_STATUS{
     background-color: #E57D7C;
 }

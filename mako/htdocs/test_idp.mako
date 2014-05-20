@@ -85,6 +85,10 @@
                 <div class="colorExampleBox" id="totalStatusCRITICAL">
                     CRITICAL
                 </div>
+
+                <div class="colorExampleBox" id="totalStatusEMPTY_STATUS">
+                    EMPTY_STATUS
+                </div>
           </div>
         </div>
     </div>
@@ -92,12 +96,12 @@
     <br>
 
     <!-- The headline of the test table -->
-    <div class="col-sm-7" id="testHeadline">
+    <div class="col-sm-6" id="testHeadline">
         Test
         <button class="btn btn-primary btn-sm" ng-click="showModalWindowsErrorReport();">Send error report</button>
     </div>
 
-    <div class="col-sm-1" id="testHeadline">
+    <div class="col-sm-2" id="testHeadline">
         Status
     </div>
 
@@ -128,7 +132,7 @@
         <div ng-show="data.visible == true" id="testRow">
 
             <!-- Tree containging all the tests -->
-            <div class="col-sm-7" id="totalStatus{{data.status}}" ng-click="showOrHideTests(data.testid);">
+            <div class="col-sm-6" id="totalStatus{{data.status}}" ng-click="showOrHideTests(data.testid);">
                 <div id="level{{data.level}}">
 
                     <span class="glyphicon glyphicon-info-sign" title="{{data.descr}}" id="infoIcon"
@@ -141,7 +145,7 @@
             </div>
 
             <!-- Status of a given test -->
-            <div class="col-sm-1" id="totalStatus{{data.status}}">
+            <div class="col-sm-2" id="totalStatus{{data.status}}">
                 {{data.status}}
              </div>
 
