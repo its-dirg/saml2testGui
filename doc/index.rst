@@ -20,7 +20,7 @@ SAML2 standard but also if it complies with a specific profile of SAML2.
    install
    setup
    run
-   saml2testGui
+   contents
 
 Indices and tables
 ==================
