@@ -1,6 +1,9 @@
 
 var app = angular.module('main', ['toaster'])
 
+/**
+ * Handles basic related configuration requests made to the server
+ */
 app.factory('basicConfigFactory', function ($http) {
     return {
         getBasicConfig: function () {
@@ -12,6 +15,9 @@ app.factory('basicConfigFactory', function ($http) {
     };
 });
 
+/**
+ * Handles interaction related configuration requests made to the server
+ */
 app.factory('interactionConfigFactory', function ($http) {
     return {
         getInteractionConfig: function () {
@@ -23,6 +29,9 @@ app.factory('interactionConfigFactory', function ($http) {
     };
 });
 
+/**
+ * Handles metadata related requests made to the server
+ */
 app.factory('uploadMetadataFactory', function ($http) {
     return {
         postMetadataFile: function (metadataFile) {
@@ -34,10 +43,13 @@ app.factory('uploadMetadataFactory', function ($http) {
     };
 });
 
+/**
+ * Handles configuration related requests made to the server
+ */
 app.factory('configFileFactory', function ($http) {
     return {
 
-        downloadConfigFile: function () {
+        requestDownloadConfigFile: function () {
             return $http.get("/download_config_file");
         },
 
@@ -45,7 +57,7 @@ app.factory('configFileFactory', function ($http) {
             return $http.post("/upload_config_file", {"configFileContent": configFileContent});
         },
 
-        createNewConfigFile: function () {
+        createNewConfigFileRequest: function () {
             return $http.get("/create_new_config_file");
         },
 
@@ -61,24 +73,62 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
     $scope.basicConfig;
     $scope.convertedInteractionList;
 
-    var getBasicConfigSuccessCallback = function (data, status, headers, config) {
+    /**
+     * Stores the basic configuration returned from the server
+     * @param data - The result returned from the server
+     * @param status - The status on the response from the server
+     * @param headers - The header on the response from the server
+     * @param config - The configuration on the response from the server
+     */
+    function getBasicConfigSuccessCallback(data, status, headers, config) {
         $scope.basicConfig = data;
-        //alert("Basic config successfully LOADED")
     };
 
-    var postBasicConfigSuccessCallback = function (data, status, headers, config) {
+
+    /**
+     * Confirms that the basic configuration has successfully been stored on the server
+     * @param data - The result returned from the server
+     * @param status - The status on the response from the server
+     * @param headers - The header on the response from the server
+     * @param config - The configuration on the response from the server
+     */
+    function postBasicConfigSuccessCallback(data, status, headers, config) {
         alert("Basic config successfully SAVED");
     };
 
-    var postMetadataFileSuccessCallback = function (data, status, headers, config) {
+
+    /**
+     * Confirms that the uploaded metadata file has successfully been stored on the server
+     * @param data - The result returned from the server
+     * @param status - The status on the response from the server
+     * @param headers - The header on the response from the server
+     * @param config - The configuration on the response from the server
+     */
+    function postMetadataFileSuccessCallback(data, status, headers, config) {
         alert("Metadata file successfully SAVED");
     };
 
-    var postMetadataUrlSuccessCallback = function (data, status, headers, config) {
+
+    /**
+     * Confirms that the metadata extracted from the url has successfully been stored on the server
+     * @param data - The result returned from the server
+     * @param status - The status on the response from the server
+     * @param headers - The header on the response from the server
+     * @param config - The configuration on the response from the server
+     */
+    function postMetadataUrlSuccessCallback(data, status, headers, config) {
         alert("Metadata url successfully SAVED");
     };
 
-    var downloadConfigFileSuccessCallback = function (data, status, headers, config) {
+
+    /**
+     * Confirms that the config file has successfully been downloaded from the server
+     * @param data - The result returned from the server
+     * @param status - The status on the response from the server
+     * @param headers - The header on the response from the server
+     * @param config - The configuration on the response from the server
+     */
+    function downloadConfigFileSuccessCallback(data, status, headers, config) {
         configDict = JSON.stringify(data["configDict"])
         var a = document.createElement("a");
         a.download = "config.json";
@@ -93,126 +143,132 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         //alert("Target json successfully DOWNLOADED");
     };
 
-    var reloadConfigFileSuccessCallback = function (data, status, headers, config) {
-        alert("Target json successfully REFRESHED");
-    };
-
-    var updateConfigFields = function(){
-        //TODO remove this
-        $scope.basicConfig = {"entity_id": ""}
-
-        //Since no info is stored on the server in the a session it's not necessary to show this info before now
+    /**
+     * Requests the latest config file from the server
+     */
+    function requestLatestConfigFileFromServer(){
         basicConfigFactory.getBasicConfig().success(getBasicConfigSuccessCallback).error(errorCallback);
         interactionConfigFactory.getInteractionConfig().success(getInteractionConfigSuccessCallback).error(errorCallback);
     }
 
-    var uploadConfigFileSuccessCallback = function (data, status, headers, config) {
+    /**
+     * Confirms that the config file has successfully been uploaded to the server
+     * @param data - The result returned from the server
+     * @param status - The status on the response from the server
+     * @param headers - The header on the response from the server
+     * @param config - The configuration on the response from the server
+     */
+    function uploadConfigFileSuccessCallback(data, status, headers, config) {
         alert("Target json successfully UPLOADED");
         $("#modalWindowUploadConfigurationFile").modal('toggle');
-        updateConfigFields();
+        requestLatestConfigFileFromServer();
     };
 
-    var createNewConfigFileSuccessCallback = function (data, status, headers, config) {
-        //alert("New Target json successfully CREATED");
+
+    /**
+     * Confirms that a new config file has successfully been created on the server
+     * @param data - The result returned from the server
+     * @param status - The status on the response from the server
+     * @param headers - The header on the response from the server
+     * @param config - The configuration on the response from the server
+     */
+    function createNewConfigFileSuccessCallback(data, status, headers, config) {
+        requestLatestConfigFileFromServer();
     };
 
-    var showNoConfigAvailable = function(){
+    /**
+     * Show a "No configuration is available" error dialog
+     */
+    function showNoConfigAvailable(){
         bootbox.alert("No configurations available. Either the session may have timed out or no configuration has be created or uploaded to the server.");
     }
 
-    var reloadDoesConfigFileExistSuccessCallback = function (data, status, headers, config) {
+    /**
+     * Confirms that a there exists a configuration file on the server
+     * @param data - The result returned from the server
+     * @param status - The status on the response from the server
+     * @param headers - The header on the response from the server
+     * @param config - The configuration on the response from the server
+     */
+    function reloadDoesConfigFileExistSuccessCallback(data, status, headers, config) {
         var doesConfigFileExist = data['doesConfigFileExist'];
 
         if (doesConfigFileExist == true){
-            updateConfigFields();
+            requestLatestConfigFileFromServer();
+        }
+    };
+
+
+    /**
+     * Confirms that a there exists a configuration file on the server. If configuration file exist then it's downloaded
+     * @param data - The result returned from the server
+     * @param status - The status on the response from the server
+     * @param headers - The header on the response from the server
+     * @param config - The configuration on the response from the server
+     */
+    function downloadDoesConfigFileExistSuccessCallback(data, status, headers, config) {
+        var doesConfigFileExist = data['doesConfigFileExist'];
+
+        if (doesConfigFileExist == true){
+            configFileFactory.requestDownloadConfigFile().success(downloadConfigFileSuccessCallback).error(errorCallback);
         }else{
             showNoConfigAvailable();
         }
 
     };
 
-    var downloadDoesConfigFileExistSuccessCallback = function (data, status, headers, config) {
-        var doesConfigFileExist = data['doesConfigFileExist'];
 
-        if (doesConfigFileExist == true){
-            configFileFactory.downloadConfigFile().success(downloadConfigFileSuccessCallback).error(errorCallback);
-        }else{
-            showNoConfigAvailable();
-        }
-
-    };
-
-    var getInteractionConfigSuccessCallback = function (data, status, headers, config) {
+    /**
+     * Confirms that the interaction blocks successfully has been returned from the server
+     * @param data - The result returned from the server
+     * @param status - The status on the response from the server
+     * @param headers - The header on the response from the server
+     * @param config - The configuration on the response from the server
+     */
+    function getInteractionConfigSuccessCallback(data, status, headers, config) {
         $scope.convertedInteractionList = data;
         $scope.originalInteractionList = angular.copy(data);
 
         for (var i = 0; i < data.length; i++){
            $scope.convertedInteractionList[i]['entry']['pagetype'] = data[i]['entry']['page-type']
         }
-        //alert("interaction successfully LOADED");
     };
 
-    var postInteractionConfigSuccessCallback = function (data, status, headers, config) {
+
+    /**
+     * Confirms that the interaction blocks successfully has been uploaded to the server
+     * @param data - The result returned from the server
+     * @param status - The status on the response from the server
+     * @param headers - The header on the response from the server
+     * @param config - The configuration on the response from the server
+     */
+    function postInteractionConfigSuccessCallback(data, status, headers, config) {
         alert("interaction successfully SAVED");
     };
 
-    var errorCallback = function (data, status, headers, config) {
+
+    /**
+     * Shows error message dialog
+     * @param data - The result returned from the server
+     * @param status - The status on the response from the server
+     * @param headers - The header on the response from the server
+     * @param config - The configuration on the response from the server
+     */
+    function errorCallback(data, status, headers, config) {
         bootbox.alert(data.ExceptionMessage);
     };
 
-    $scope.test = function () {
-        alert("test");
-    };
 
-    $scope.addInteraction = function () {
-
-        nextIndex = $scope.convertedInteractionList.length
-
-        entry = {"id": nextIndex,
-                 "entry": {
-                            "matches": {
-                                "url": "",
-                                "title": "Empty"
-                            },
-                            "pagetype": "",
-                            "control": {
-                                "index": "0",
-                                "type": "",
-                                "set": {}
-                            }
-                        }
-                }
-
-        $scope.convertedInteractionList.push(entry);
-        $scope.originalInteractionList.push(entry);
-    };
-
-    $scope.tryToRemoveInteraction = function (index) {
-        bootbox.dialog({
-            message: "Du you really want to remove this interaction?",
-            title: "Interaction information required",
-            buttons: {
-                danger: {
-                    label: "No",
-                    className: "btn-default"
-                },
-                success: {
-                    label: "Yes",
-                    className: "btn-primary",
-                    callback: function () {
-                        removeInteraction(index);
-                    }
-                }
-            }
-        });
-    }
-
-    var removeInteraction = function (index) {
+    /**
+     * Removes the interaction block
+     * @param interactionBlockId - The id of interaction block
+     */
+    function removeInteractionBlock(interactionBlockId) {
         var interactionList = $scope.convertedInteractionList
         var indexToRemove;
 
         for (var i = 0; i < interactionList.length; i++){
-            if (interactionList[i].id == index){
+            if (interactionList[i].id == interactionBlockId){
                 indexToRemove = i;
                 break;
             }
@@ -224,19 +280,20 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         $scope.$apply();
     }
 
-    $scope.saveConfig = function(){
-        saveBasicConfig();
-        saveInteractionConfig();
-    }
-
-    var saveBasicConfig = function(){
+    /**
+     * Requests to save the configuration on the server
+     */
+    function requestSaveBasicConfig(){
         var name_format = $('#name_format').val();
         var entityID = $('#entity_id').val();
 
         basicConfigFactory.postBasicConfig(name_format, entityID).success(postBasicConfigSuccessCallback).error(errorCallback);
     }
 
-    var saveInteractionConfig = function(){
+    /**
+     * Request to save the interaction blocks on the server
+     */
+    function requestToSaveInteractionConfig(){
 
         $(".block").each(function() {
 
@@ -269,6 +326,74 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
 
     }
 
+    /**
+     * TODO remvoe only used in test purposes
+     */
+    $scope.test = function () {
+        alert("test");
+    };
+
+    /**
+     * Adding a new interaction block
+     */
+    $scope.addInteractionBlock = function () {
+
+        nextIndex = $scope.convertedInteractionList.length
+
+        var newInteractionBlock = {"id": nextIndex,
+                 "entry": {
+                            "matches": {
+                                "url": "",
+                                "title": "Empty"
+                            },
+                            "pagetype": "",
+                            "control": {
+                                "index": "0",
+                                "type": "",
+                                "set": {}
+                            }
+                        }
+                }
+
+        $scope.convertedInteractionList.push(newInteractionBlock);
+        $scope.originalInteractionList.push(newInteractionBlock);
+    };
+
+    /**
+     * Creates a "confirm that you want to remove this interaction block" dialog
+     * @param interactionBlockId - The id of interaction block
+     */
+    $scope.createConfirmRemoveInteractionBlockDialog = function (index) {
+        bootbox.dialog({
+            message: "Du you really want to remove this interaction?",
+            title: "Interaction information required",
+            buttons: {
+                danger: {
+                    label: "No",
+                    className: "btn-default"
+                },
+                success: {
+                    label: "Yes",
+                    className: "btn-primary",
+                    callback: function () {
+                        removeInteractionBlock(index);
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Request to save configuration to the server
+     */
+    $scope.requestToSaveConfig = function(){
+        requestSaveBasicConfig();
+        requestToSaveInteractionConfig();
+    }
+
+    /**
+     * Uploads metadata to server by using post request
+     */
     $scope.uploadMetadataFile = function(){
         var file = document.getElementById("metadataFile").files[0];
 
@@ -280,8 +405,6 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
                 uploadMetadataFactory.postMetadataFile(evt.target.result).success(postMetadataFileSuccessCallback).error(errorCallback);
                 //Has to be done since this code is executed outside of
                 $scope.$apply();
-
-                //alert(evt.target.result);
             }
             reader.onerror = function (evt) {
                 alert("error reading file");
@@ -289,10 +412,16 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         }
     }
 
-    $scope.downloadConfigFile = function(){
+    /**
+     * Send a download config request to the server
+     */
+    $scope.requestDownloadConfigFile = function(){
         configFileFactory.doesConfigFileExist().success(downloadDoesConfigFileExistSuccessCallback).error(errorCallback);
     }
 
+    /**
+     * Upload config file to the server
+     */
     $scope.uploadConfigFile = function(){
         var file = document.getElementById("targetFile").files[0];
 
@@ -310,11 +439,13 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         }
     }
 
-    $scope.reloadConfigFile = function(){
-        configFileFactory.doesConfigFileExist().success(reloadDoesConfigFileExistSuccessCallback).error(errorCallback);
-    }
-    
-    $scope.createNewConfigFile = function(){
+    configFileFactory.doesConfigFileExist().success(reloadDoesConfigFileExistSuccessCallback).error(errorCallback);
+
+
+    /**
+     *  Shows new configuration dialog
+     */
+    $scope.showCreateNewConfigDialog = function(){
         bootbox.dialog({
             message: "All your existing configurations which is not downloaded will be overwritten. Are you sure you want to create a new configuration?",
             title: "Create new file",
@@ -327,8 +458,7 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
                     label: "Yes",
                     className: "btn-primary",
                     callback: function () {
-                        configFileFactory.createNewConfigFile().success(createNewConfigFileSuccessCallback).error(errorCallback);
-                        updateConfigFields();
+                        configFileFactory.createNewConfigFileRequest().success(createNewConfigFileSuccessCallback).error(errorCallback);
                         $scope.$apply();
                     }
                 }
@@ -336,12 +466,17 @@ app.controller('IndexCtrl', function ($scope, basicConfigFactory, interactionCon
         });
     }
 
-    $scope.uploadMetadataUrl = function(){
+    /**
+     * Request upload metadata from url
+     */
+    $scope.requestUploadMetadataUrl = function(){
         var metadataUrl = $("#metadataUrl").val();
-
         uploadMetadataFactory.postMetadataUrl(metadataUrl).success(postMetadataUrlSuccessCallback).error(errorCallback);
     }
 
+    /**
+     * Shows the upload configuration file dialog
+     */
     $scope.showModalUploadConfigWindow = function(){
         $("#modalWindowUploadConfigurationFile").modal('toggle');
     }
@@ -353,7 +488,6 @@ app.directive('menu', function($http) {
         restrict: 'A',
         templateUrl: '/static/templateMenu.html',
         link: function(scope, element, attrs) {
-            scope.fetchMenu();
         }
     }
 });

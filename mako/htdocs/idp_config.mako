@@ -32,14 +32,11 @@
 
         <h2>
             IDP configuration:
-            <button class="btn btn-default btn-sm" ng-click="reloadConfigFile();">
-                <span class="glyphicon glyphicon-refresh"></span>
-            </button>
         </h2>
 
         <div class="row">
             <div class="col-sm-4">
-                <button class="btn btn-primary btn-sm" ng-click="createNewConfigFile();">
+                <button class="btn btn-primary btn-sm" ng-click="showCreateNewConfigDialog();">
                     <span class="glyphicon glyphicon-file"></span>
                     Create new configurations
                 </button>
@@ -53,7 +50,7 @@
             </div>
 
             <div class="col-sm-4">
-                <button class="btn btn-primary btn-sm" ng-click="downloadConfigFile();">
+                <button class="btn btn-primary btn-sm" ng-click="requestDownloadConfigFile();">
                     <span class="glyphicon glyphicon-download-alt"></span>
                     Download configurations
                 </button>
@@ -87,7 +84,7 @@
 
                 <div class="col-sm-10">
                     <input type="text" id="metadataUrl">
-                    <button class="btn btn-default btn-sm" ng-click="uploadMetadataUrl();">Upload</button>
+                    <button class="btn btn-default btn-sm" ng-click="requestUploadMetadataUrl();">Upload</button>
                     <br>
                     <br>
                 </div>
@@ -110,7 +107,7 @@
             <hr>
 <!-- ################################################################################################# -->
 
-            Interaction: <button class="btn btn-default btn-sm" ng-click="addInteraction();">+</button>
+            Interaction: <button class="btn btn-default btn-sm" ng-click="addInteractionBlock();">+</button>
 
             <div class="block" ng-repeat="entry in convertedInteractionList" id="{{entry.id}}">
 
@@ -148,13 +145,13 @@
                 </div>
 
                 <div class="close">
-                    <button class="btn btn-danger btn-sm" ng-click="tryToRemoveInteraction(entry.id);">X</button>
+                    <button class="btn btn-danger btn-sm" ng-click="createConfirmRemoveInteractionBlockDialog(entry.id);">X</button>
                 </div>
             </div>
 
             <br>
 
-            <button class="btn btn-primary btn-sm" ng-click="saveConfig();">Save configurations</button>
+            <button class="btn btn-primary btn-sm" ng-click="requestToSaveConfig();">Save configurations</button>
         </div>
     </div>
 

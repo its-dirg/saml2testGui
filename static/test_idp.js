@@ -5,16 +5,11 @@ app.factory('testFactory', function ($http) {
     return {
         getTests: function (treeType) {
             return $http.get("/list_tests", {params: { "treeType": treeType}});
-        }
-    };
-});
-
-app.factory('runTestFactory', function ($http) {
-    return {
-        getTestResult: function (testname, testid) {
+        },
+        runTest: function (testname, testid) {
             return $http.get("/run_test", {params: { "testname": testname, "testid": testid}});
         },
-        getAllTestResult: function (testname) {
+        runAllTests: function (testname) {
             return $http.get("/run_test", {params: { "testname": testname}});
         }
     };
@@ -58,7 +53,7 @@ app.factory('errorReportFactory', function ($http) {
     };
 });
 
-app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, runTestFactory, postBasicInteractionDataFactory, postResetInteractionFactory, errorReportFactory, toaster) {
+app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, postBasicInteractionDataFactory, postResetInteractionFactory, errorReportFactory, toaster) {
     $scope.testResult = "";
     $scope.currentFlattenedTree = "None";
     $scope.currentOriginalTree;
@@ -79,7 +74,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
     var getListSuccessCallback = function (data, status, headers, config) {
         $scope.bottomUpTree = data["bottomUpTree"];
-        changeCurrentTree($scope.selectedItem.type);
+        $scope.currentOriginalTree = $scope.bottomUpTree;
+        $scope.currentFlattenedTree = buildTree($scope.bottomUpTree);
 
         $("[data-toggle='tooltip']").tooltip();
     }
@@ -162,13 +158,13 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         if (numberOfTest == "singleTest"){
             $scope.numberOfTestsRunning = 1;
-            runTestFactory.getTestResult(id, testid).success(getTestResultSuccessCallback).error(errorCallback);
+            testFactory.runTest(id, testid).success(getTestResultSuccessCallback).error(errorCallback);
 
         }else if(numberOfTest == "allTest"){
-            runTestFactory.getAllTestResult(id).success(getTestResultSuccessCallback).error(errorCallback);
+            testFactory.runAllTests(id).success(getTestResultSuccessCallback).error(errorCallback);
 
         }else{
-            runTestFactory.getTestResult(id, testid).success(getTestResultSuccessCallback).error(errorCallback);
+            testFactory.runTest(id, testid).success(getTestResultSuccessCallback).error(errorCallback);
         }
     };
 
@@ -186,10 +182,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         $scope.numberOfTestsRunning = treeSize;
     };
 
-    $scope.updateTree = function () {
-        changeCurrentTree($scope.selectedItem.type);
-    }
-
     $scope.removeTestResult = function (testid) {
         for (var i = 0; i < $scope.currentFlattenedTree.length; i++){
             if ($scope.currentFlattenedTree[i].testid == testid){
@@ -202,6 +194,9 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         var test = findTestInTreeByTestid($scope.currentOriginalTree, testid);
         var children = test.children;
+
+        if (children[0] == null)
+            return
 
         if(children[0].visible == false){
             showChildrenInTree(children, true);
@@ -560,11 +555,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         return flatTree;
     }
 
-    var changeCurrentTree = function (treeType) {
-            $scope.currentOriginalTree = $scope.bottomUpTree;
-            $scope.currentFlattenedTree = buildTree($scope.bottomUpTree);
-    }
-
     var findTestInTreeByTestid = function (tree, targetTestid) {
         var matchingTest = null;
 
@@ -708,7 +698,6 @@ app.directive('menu', function($http) {
         restrict: 'A',
         templateUrl: '/static/templateMenu.html',
         link: function(scope, element, attrs) {
-            scope.fetchMenu();
         }
     }
 });
