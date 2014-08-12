@@ -86,7 +86,7 @@
                 </div>
 
                 <div class="col-sm-10">
-                    <input type="text" value="https://localhost:4545/temp_get_metadata" id="metadataUrl">
+                    <input type="text" id="metadataUrl">
                     <button class="btn btn-default btn-sm" ng-click="uploadMetadataUrl();">Upload</button>
                     <br>
                     <br>

@@ -62,9 +62,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     $scope.testResult = "";
     $scope.currentFlattenedTree = "None";
     $scope.currentOriginalTree;
-    $scope.topDownTree;
     $scope.bottomUpTree;
-    $scope.flatBottomUpTree;
     $scope.numberOfTestsRunning = 0;
     var addedIds = [];
     var subTestList;
@@ -80,10 +78,7 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     $scope.selectedItem = $scope.items[1];
 
     var getListSuccessCallback = function (data, status, headers, config) {
-        $scope.topDownTree = data["topDownTree"];
         $scope.bottomUpTree = data["bottomUpTree"];
-        $scope.flatBottomUpTree = data["flatBottomUpTree"];
-
         changeCurrentTree($scope.selectedItem.type);
 
         $("[data-toggle='tooltip']").tooltip();
@@ -149,22 +144,12 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
 
         var test = findTestInTreeByTestid($scope.bottomUpTree, testid);
 
-        /*  If the current tree layout is a topdown tree the tree has to be converted since the "top
-            down" and "bottom up" doesn't contain the same testID numbers */
-        if (test == null){
-            convertedTestsToRun = convertFromBottomUpToTopDownNodes(id);
+        var testsToRun = getTestAndSubTests(test);
+        $scope.resetNodes(testsToRun);
 
-            for (var i = 0; i < convertedTestsToRun.length; i++){
-                runTestFactory.getTestResult(convertedTestsToRun[i].id, convertedTestsToRun[i].testid).success(getTestResultSuccessCallback).error(errorCallback);
-            }
-        }else{
-            var testsToRun = getTestAndSubTests(test);
-            $scope.resetNodes(testsToRun);
-
-            //Uses runOneTest in order to gather all result summay code in one place
-            for (var i = 0; i < testsToRun.length; i++){
-                $scope.runOneTest(testsToRun[i].id, testsToRun[i].testid), "multipleTest";
-            }
+        //Uses runOneTest in order to gather all result summay code in one place
+        for (var i = 0; i < testsToRun.length; i++){
+            $scope.runOneTest(testsToRun[i].id, testsToRun[i].testid), "multipleTest";
         }
 
         $scope.numberOfTestsRunning = testsToRun.length;
@@ -548,18 +533,6 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
         addedIds.push(id);
     }
 
-    var convertFromBottomUpToTopDownNodes = function (id){
-        var test = findTestInTreeByID($scope.bottomUpTree, id);
-        var testsToRun = getTestAndSubTests(test);
-        var convertedTestsToRun = [];
-
-        for (var j = 0; j < testsToRun.length; j++){
-            convertedTest = findTestInTreeByID($scope.topDownTree, testsToRun[j].id);
-            convertedTestsToRun.push(convertedTest);
-        }
-        return convertedTestsToRun;
-    }
-
     var getTestAndSubTests = function (test){
         var children = test.children;
         var subChildrenList = [];
@@ -588,18 +561,8 @@ app.controller('IndexCtrl', function ($scope, testFactory, notificationFactory, 
     }
 
     var changeCurrentTree = function (treeType) {
-        if (treeType == "Bottom up flat") {
-            $scope.currentOriginalTree = $scope.flatBottomUpTree;
-            $scope.currentFlattenedTree = buildTree($scope.flatBottomUpTree);
-
-        } else if (treeType == "Bottom up") {
             $scope.currentOriginalTree = $scope.bottomUpTree;
             $scope.currentFlattenedTree = buildTree($scope.bottomUpTree);
-
-        } else if (treeType == "Top down") {
-            $scope.currentOriginalTree = $scope.topDownTree;
-            $scope.currentFlattenedTree = buildTree($scope.topDownTree);
-        }
     }
 
     var findTestInTreeByTestid = function (tree, targetTestid) {

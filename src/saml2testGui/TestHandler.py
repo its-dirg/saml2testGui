@@ -31,6 +31,7 @@ class Test:
         :param session:        Beaker session
         :param logger:         Class to perform logging.
         """
+
         self.environ = environ
         self.start_response = start_response
         self.session = session
@@ -59,7 +60,6 @@ class Test:
             "upload_config_file" : None,
             "create_new_config_file": None,
             "does_config_file_exist": None,
-            "temp_get_metadata": None,
             "post_metadata_url": None,
 
             #Calles from home
@@ -74,9 +74,15 @@ class Test:
 
 
     def handle(self, path):
+        """
+        Handles the incoming rest requests
+        :param path: The path to the file or function requested by the client
+        :return A response which could be encode as Json for example
+        """
+
         #Calles from test_idp
         if path == "test_idp":
-            return self.handleTestIDP(self.urls[path])
+            return self.handleShowPage(self.urls[path])
         elif path == "list_tests":
             return self.handleListTests()
         elif path == "run_test":
@@ -92,7 +98,7 @@ class Test:
 
         #Calles from config_idp
         elif path == "idp_config":
-            return self.handleConfigIDP(self.urls[path])
+            return self.handleShowPage(self.urls[path])
         elif path == "get_basic_config":
             return self.handleGetBasicConfig()
         elif path == "post_basic_config":
@@ -111,18 +117,19 @@ class Test:
             return self.handleCreateNewConfigFile()
         elif path == "does_config_file_exist":
             return self.handleDoesConfigFileExist()
-        elif path == "temp_get_metadata":
-            return self.handleGetMetadata()
         elif path == "post_metadata_url":
             return self.handlePostMetadataUrl()
 
         #Calls made from home
         elif path == "":
-            return self.handleHomePage(self.urls[path])
+            return self.handleShowPage(self.urls[path])
 
     #TODO enter Dirgs mail settings
     def handlePostErrorReport(self):
-
+        """
+        Sends a error report which contains a message and the last test results to Dirgs mail
+        :return A default value which should be ignored
+        """
         reportEmail = self.parameters['reportEmail']
         reportMessage = self.parameters['reportMessage']
         testResults = self.parameters['testResults']
@@ -154,6 +161,10 @@ class Test:
 
 
     def handlePostMetadataUrl(self):
+        """
+        Saves the posted metadata into the configuration
+        :return A default value which should be ignored
+        """
         metadataUrl = self.parameters['metadataUrl']
         metadata = urllib2.urlopen(metadataUrl).read()
         self.addMetdataToSession(metadata)
@@ -162,57 +173,24 @@ class Test:
         return self.returnJSON({"asd": 1})
 
 
-    def handleGetMetadata(self):
-        return self.returnXml("<?xml version='1.0' encoding='UTF-8'?>\n<ns0:EntityDescriptor xmlns:ns0=\"urn:oasis:names:tc:SAML:2.0:metadata\" xmlns:ns1=\"http://www.w3.org/2000/09/xmldsig#\" entityID=\"http://localhost:8088/idp.xml\"><ns0:IDPSSODescriptor WantAuthnRequestsSigned=\"false\" protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\"><ns0:KeyDescriptor use=\"encryption\"><ns1:KeyInfo><ns1:X509Data><ns1:X509Certificate>MIIC8jCCAlugAwIBAgIJAJHg2V5J31I8MA0GCSqGSIb3DQEBBQUAMFoxCzAJBgNV\nBAYTAlNFMQ0wCwYDVQQHEwRVbWVhMRgwFgYDVQQKEw9VbWVhIFVuaXZlcnNpdHkx\nEDAOBgNVBAsTB0lUIFVuaXQxEDAOBgNVBAMTB1Rlc3QgU1AwHhcNMDkxMDI2MTMz\nMTE1WhcNMTAxMDI2MTMzMTE1WjBaMQswCQYDVQQGEwJTRTENMAsGA1UEBxMEVW1l\nYTEYMBYGA1UEChMPVW1lYSBVbml2ZXJzaXR5MRAwDgYDVQQLEwdJVCBVbml0MRAw\nDgYDVQQDEwdUZXN0IFNQMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDkJWP7\nbwOxtH+E15VTaulNzVQ/0cSbM5G7abqeqSNSs0l0veHr6/ROgW96ZeQ57fzVy2MC\nFiQRw2fzBs0n7leEmDJyVVtBTavYlhAVXDNa3stgvh43qCfLx+clUlOvtnsoMiiR\nmo7qf0BoPKTj7c0uLKpDpEbAHQT4OF1HRYVxMwIDAQABo4G/MIG8MB0GA1UdDgQW\nBBQ7RgbMJFDGRBu9o3tDQDuSoBy7JjCBjAYDVR0jBIGEMIGBgBQ7RgbMJFDGRBu9\no3tDQDuSoBy7JqFepFwwWjELMAkGA1UEBhMCU0UxDTALBgNVBAcTBFVtZWExGDAW\nBgNVBAoTD1VtZWEgVW5pdmVyc2l0eTEQMA4GA1UECxMHSVQgVW5pdDEQMA4GA1UE\nAxMHVGVzdCBTUIIJAJHg2V5J31I8MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEF\nBQADgYEAMuRwwXRnsiyWzmRikpwinnhTmbooKm5TINPE7A7gSQ710RxioQePPhZO\nzkM27NnHTrCe2rBVg0EGz7QTd1JIwLPvgoj4VTi/fSha/tXrYUaqc9AqU1kWI4WN\n+vffBGQ09mo+6CffuFTZYeOhzP/2stAPwCTU4kxEoiy0KpZMANI=\n</ns1:X509Certificate></ns1:X509Data></ns1:KeyInfo></ns0:KeyDescriptor><ns0:KeyDescriptor use=\"signing\"><ns1:KeyInfo><ns1:X509Data><ns1:X509Certificate>MIIC8jCCAlugAwIBAgIJAJHg2V5J31I8MA0GCSqGSIb3DQEBBQUAMFoxCzAJBgNV\nBAYTAlNFMQ0wCwYDVQQHEwRVbWVhMRgwFgYDVQQKEw9VbWVhIFVuaXZlcnNpdHkx\nEDAOBgNVBAsTB0lUIFVuaXQxEDAOBgNVBAMTB1Rlc3QgU1AwHhcNMDkxMDI2MTMz\nMTE1WhcNMTAxMDI2MTMzMTE1WjBaMQswCQYDVQQGEwJTRTENMAsGA1UEBxMEVW1l\nYTEYMBYGA1UEChMPVW1lYSBVbml2ZXJzaXR5MRAwDgYDVQQLEwdJVCBVbml0MRAw\nDgYDVQQDEwdUZXN0IFNQMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDkJWP7\nbwOxtH+E15VTaulNzVQ/0cSbM5G7abqeqSNSs0l0veHr6/ROgW96ZeQ57fzVy2MC\nFiQRw2fzBs0n7leEmDJyVVtBTavYlhAVXDNa3stgvh43qCfLx+clUlOvtnsoMiiR\nmo7qf0BoPKTj7c0uLKpDpEbAHQT4OF1HRYVxMwIDAQABo4G/MIG8MB0GA1UdDgQW\nBBQ7RgbMJFDGRBu9o3tDQDuSoBy7JjCBjAYDVR0jBIGEMIGBgBQ7RgbMJFDGRBu9\no3tDQDuSoBy7JqFepFwwWjELMAkGA1UEBhMCU0UxDTALBgNVBAcTBFVtZWExGDAW\nBgNVBAoTD1VtZWEgVW5pdmVyc2l0eTEQMA4GA1UECxMHSVQgVW5pdDEQMA4GA1UE\nAxMHVGVzdCBTUIIJAJHg2V5J31I8MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEF\nBQADgYEAMuRwwXRnsiyWzmRikpwinnhTmbooKm5TINPE7A7gSQ710RxioQePPhZO\nzkM27NnHTrCe2rBVg0EGz7QTd1JIwLPvgoj4VTi/fSha/tXrYUaqc9AqU1kWI4WN\n+vffBGQ09mo+6CffuFTZYeOhzP/2stAPwCTU4kxEoiy0KpZMANI=\n</ns1:X509Certificate></ns1:X509Data></ns1:KeyInfo></ns0:KeyDescriptor><ns0:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:SOAP\" Location=\"http://localhost:8088/slo/soap\" /><ns0:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"http://localhost:8088/slo/post\" /><ns0:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\" Location=\"http://localhost:8088/slo/redirect\" /><ns0:ManageNameIDService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:SOAP\" Location=\"http://localhost:8088/mni/soap\" /><ns0:ManageNameIDService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"http://localhost:8088/mni/post\" /><ns0:ManageNameIDService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\" Location=\"http://localhost:8088/mni/redirect\" /><ns0:ManageNameIDService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact\" Location=\"http://localhost:8088/mni/art\" /><ns0:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</ns0:NameIDFormat><ns0:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</ns0:NameIDFormat><ns0:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\" Location=\"http://localhost:8088/sso/redirect\" /><ns0:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"http://localhost:8088/sso/post\" /><ns0:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact\" Location=\"http://localhost:8088/sso/art\" /><ns0:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:SOAP\" Location=\"http://localhost:8088/sso/ecp\" /><ns0:NameIDMappingService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:SOAP\" Location=\"http://localhost:8088/nim\" /><ns0:AssertionIDRequestService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:URI\" Location=\"http://localhost:8088/airs\" /></ns0:IDPSSODescriptor><ns0:AuthnAuthorityDescriptor protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\"><ns0:KeyDescriptor use=\"encryption\"><ns1:KeyInfo><ns1:X509Data><ns1:X509Certificate>MIIC8jCCAlugAwIBAgIJAJHg2V5J31I8MA0GCSqGSIb3DQEBBQUAMFoxCzAJBgNV\nBAYTAlNFMQ0wCwYDVQQHEwRVbWVhMRgwFgYDVQQKEw9VbWVhIFVuaXZlcnNpdHkx\nEDAOBgNVBAsTB0lUIFVuaXQxEDAOBgNVBAMTB1Rlc3QgU1AwHhcNMDkxMDI2MTMz\nMTE1WhcNMTAxMDI2MTMzMTE1WjBaMQswCQYDVQQGEwJTRTENMAsGA1UEBxMEVW1l\nYTEYMBYGA1UEChMPVW1lYSBVbml2ZXJzaXR5MRAwDgYDVQQLEwdJVCBVbml0MRAw\nDgYDVQQDEwdUZXN0IFNQMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDkJWP7\nbwOxtH+E15VTaulNzVQ/0cSbM5G7abqeqSNSs0l0veHr6/ROgW96ZeQ57fzVy2MC\nFiQRw2fzBs0n7leEmDJyVVtBTavYlhAVXDNa3stgvh43qCfLx+clUlOvtnsoMiiR\nmo7qf0BoPKTj7c0uLKpDpEbAHQT4OF1HRYVxMwIDAQABo4G/MIG8MB0GA1UdDgQW\nBBQ7RgbMJFDGRBu9o3tDQDuSoBy7JjCBjAYDVR0jBIGEMIGBgBQ7RgbMJFDGRBu9\no3tDQDuSoBy7JqFepFwwWjELMAkGA1UEBhMCU0UxDTALBgNVBAcTBFVtZWExGDAW\nBgNVBAoTD1VtZWEgVW5pdmVyc2l0eTEQMA4GA1UECxMHSVQgVW5pdDEQMA4GA1UE\nAxMHVGVzdCBTUIIJAJHg2V5J31I8MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEF\nBQADgYEAMuRwwXRnsiyWzmRikpwinnhTmbooKm5TINPE7A7gSQ710RxioQePPhZO\nzkM27NnHTrCe2rBVg0EGz7QTd1JIwLPvgoj4VTi/fSha/tXrYUaqc9AqU1kWI4WN\n+vffBGQ09mo+6CffuFTZYeOhzP/2stAPwCTU4kxEoiy0KpZMANI=\n</ns1:X509Certificate></ns1:X509Data></ns1:KeyInfo></ns0:KeyDescriptor><ns0:KeyDescriptor use=\"signing\"><ns1:KeyInfo><ns1:X509Data><ns1:X509Certificate>MIIC8jCCAlugAwIBAgIJAJHg2V5J31I8MA0GCSqGSIb3DQEBBQUAMFoxCzAJBgNV\nBAYTAlNFMQ0wCwYDVQQHEwRVbWVhMRgwFgYDVQQKEw9VbWVhIFVuaXZlcnNpdHkx\nEDAOBgNVBAsTB0lUIFVuaXQxEDAOBgNVBAMTB1Rlc3QgU1AwHhcNMDkxMDI2MTMz\nMTE1WhcNMTAxMDI2MTMzMTE1WjBaMQswCQYDVQQGEwJTRTENMAsGA1UEBxMEVW1l\nYTEYMBYGA1UEChMPVW1lYSBVbml2ZXJzaXR5MRAwDgYDVQQLEwdJVCBVbml0MRAw\nDgYDVQQDEwdUZXN0IFNQMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDkJWP7\nbwOxtH+E15VTaulNzVQ/0cSbM5G7abqeqSNSs0l0veHr6/ROgW96ZeQ57fzVy2MC\nFiQRw2fzBs0n7leEmDJyVVtBTavYlhAVXDNa3stgvh43qCfLx+clUlOvtnsoMiiR\nmo7qf0BoPKTj7c0uLKpDpEbAHQT4OF1HRYVxMwIDAQABo4G/MIG8MB0GA1UdDgQW\nBBQ7RgbMJFDGRBu9o3tDQDuSoBy7JjCBjAYDVR0jBIGEMIGBgBQ7RgbMJFDGRBu9\no3tDQDuSoBy7JqFepFwwWjELMAkGA1UEBhMCU0UxDTALBgNVBAcTBFVtZWExGDAW\nBgNVBAoTD1VtZWEgVW5pdmVyc2l0eTEQMA4GA1UECxMHSVQgVW5pdDEQMA4GA1UE\nAxMHVGVzdCBTUIIJAJHg2V5J31I8MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEF\nBQADgYEAMuRwwXRnsiyWzmRikpwinnhTmbooKm5TINPE7A7gSQ710RxioQePPhZO\nzkM27NnHTrCe2rBVg0EGz7QTd1JIwLPvgoj4VTi/fSha/tXrYUaqc9AqU1kWI4WN\n+vffBGQ09mo+6CffuFTZYeOhzP/2stAPwCTU4kxEoiy0KpZMANI=\n</ns1:X509Certificate></ns1:X509Data></ns1:KeyInfo></ns0:KeyDescriptor><ns0:AuthnQueryService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:SOAP\" Location=\"http://localhost:8088/aqs\" /></ns0:AuthnAuthorityDescriptor><ns0:AttributeAuthorityDescriptor protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\"><ns0:KeyDescriptor use=\"encryption\"><ns1:KeyInfo><ns1:X509Data><ns1:X509Certificate>MIIC8jCCAlugAwIBAgIJAJHg2V5J31I8MA0GCSqGSIb3DQEBBQUAMFoxCzAJBgNV\nBAYTAlNFMQ0wCwYDVQQHEwRVbWVhMRgwFgYDVQQKEw9VbWVhIFVuaXZlcnNpdHkx\nEDAOBgNVBAsTB0lUIFVuaXQxEDAOBgNVBAMTB1Rlc3QgU1AwHhcNMDkxMDI2MTMz\nMTE1WhcNMTAxMDI2MTMzMTE1WjBaMQswCQYDVQQGEwJTRTENMAsGA1UEBxMEVW1l\nYTEYMBYGA1UEChMPVW1lYSBVbml2ZXJzaXR5MRAwDgYDVQQLEwdJVCBVbml0MRAw\nDgYDVQQDEwdUZXN0IFNQMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDkJWP7\nbwOxtH+E15VTaulNzVQ/0cSbM5G7abqeqSNSs0l0veHr6/ROgW96ZeQ57fzVy2MC\nFiQRw2fzBs0n7leEmDJyVVtBTavYlhAVXDNa3stgvh43qCfLx+clUlOvtnsoMiiR\nmo7qf0BoPKTj7c0uLKpDpEbAHQT4OF1HRYVxMwIDAQABo4G/MIG8MB0GA1UdDgQW\nBBQ7RgbMJFDGRBu9o3tDQDuSoBy7JjCBjAYDVR0jBIGEMIGBgBQ7RgbMJFDGRBu9\no3tDQDuSoBy7JqFepFwwWjELMAkGA1UEBhMCU0UxDTALBgNVBAcTBFVtZWExGDAW\nBgNVBAoTD1VtZWEgVW5pdmVyc2l0eTEQMA4GA1UECxMHSVQgVW5pdDEQMA4GA1UE\nAxMHVGVzdCBTUIIJAJHg2V5J31I8MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEF\nBQADgYEAMuRwwXRnsiyWzmRikpwinnhTmbooKm5TINPE7A7gSQ710RxioQePPhZO\nzkM27NnHTrCe2rBVg0EGz7QTd1JIwLPvgoj4VTi/fSha/tXrYUaqc9AqU1kWI4WN\n+vffBGQ09mo+6CffuFTZYeOhzP/2stAPwCTU4kxEoiy0KpZMANI=\n</ns1:X509Certificate></ns1:X509Data></ns1:KeyInfo></ns0:KeyDescriptor><ns0:KeyDescriptor use=\"signing\"><ns1:KeyInfo><ns1:X509Data><ns1:X509Certificate>MIIC8jCCAlugAwIBAgIJAJHg2V5J31I8MA0GCSqGSIb3DQEBBQUAMFoxCzAJBgNV\nBAYTAlNFMQ0wCwYDVQQHEwRVbWVhMRgwFgYDVQQKEw9VbWVhIFVuaXZlcnNpdHkx\nEDAOBgNVBAsTB0lUIFVuaXQxEDAOBgNVBAMTB1Rlc3QgU1AwHhcNMDkxMDI2MTMz\nMTE1WhcNMTAxMDI2MTMzMTE1WjBaMQswCQYDVQQGEwJTRTENMAsGA1UEBxMEVW1l\nYTEYMBYGA1UEChMPVW1lYSBVbml2ZXJzaXR5MRAwDgYDVQQLEwdJVCBVbml0MRAw\nDgYDVQQDEwdUZXN0IFNQMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDkJWP7\nbwOxtH+E15VTaulNzVQ/0cSbM5G7abqeqSNSs0l0veHr6/ROgW96ZeQ57fzVy2MC\nFiQRw2fzBs0n7leEmDJyVVtBTavYlhAVXDNa3stgvh43qCfLx+clUlOvtnsoMiiR\nmo7qf0BoPKTj7c0uLKpDpEbAHQT4OF1HRYVxMwIDAQABo4G/MIG8MB0GA1UdDgQW\nBBQ7RgbMJFDGRBu9o3tDQDuSoBy7JjCBjAYDVR0jBIGEMIGBgBQ7RgbMJFDGRBu9\no3tDQDuSoBy7JqFepFwwWjELMAkGA1UEBhMCU0UxDTALBgNVBAcTBFVtZWExGDAW\nBgNVBAoTD1VtZWEgVW5pdmVyc2l0eTEQMA4GA1UECxMHSVQgVW5pdDEQMA4GA1UE\nAxMHVGVzdCBTUIIJAJHg2V5J31I8MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEF\nBQADgYEAMuRwwXRnsiyWzmRikpwinnhTmbooKm5TINPE7A7gSQ710RxioQePPhZO\nzkM27NnHTrCe2rBVg0EGz7QTd1JIwLPvgoj4VTi/fSha/tXrYUaqc9AqU1kWI4WN\n+vffBGQ09mo+6CffuFTZYeOhzP/2stAPwCTU4kxEoiy0KpZMANI=\n</ns1:X509Certificate></ns1:X509Data></ns1:KeyInfo></ns0:KeyDescriptor><ns0:AttributeService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:SOAP\" Location=\"http://localhost:8088/attr\" /><ns0:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</ns0:NameIDFormat><ns0:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</ns0:NameIDFormat></ns0:AttributeAuthorityDescriptor><ns0:Organization><ns0:OrganizationName xml:lang=\"en\">Rolands Identiteter</ns0:OrganizationName><ns0:OrganizationDisplayName xml:lang=\"en\">Rolands Identiteter</ns0:OrganizationDisplayName><ns0:OrganizationURL xml:lang=\"en\">http://www.example.com</ns0:OrganizationURL></ns0:Organization><ns0:ContactPerson contactType=\"technical\"><ns0:GivenName>Roland</ns0:GivenName><ns0:SurName>Hedberg</ns0:SurName><ns0:EmailAddress>technical@example.com</ns0:EmailAddress></ns0:ContactPerson><ns0:ContactPerson contactType=\"support\"><ns0:GivenName>Support</ns0:GivenName><ns0:EmailAddress>support@example.com</ns0:EmailAddress></ns0:ContactPerson></ns0:EntityDescriptor>\n")
-
-
-    def doesConfigFileExist(self):
-        if self.CONFIG_KEY in self.session:
-            return True
-        else:
-            return False
-
-
     def handleDoesConfigFileExist(self):
-        result = json.dumps({"doesConfigFileExist": self.doesConfigFileExist()})
+        """
+        Handles the request checking if the configuration file exists
+        :return Returns a dictionary {"doesConfigFileExist" : true} if the session contains a config file else {"doesConfigFileExist" : false}
+        """
+        result = json.dumps({"doesConfigFileExist": self.CONFIG_KEY in self.session})
         return self.returnJSON(result)
 
 
-    def handleTestIDP(self, file):
+    def handleShowPage(self, file):
+        """
+        Handles the request for specific web page
+        :param file: The name of the .mako file requested by the user
+        :return The html page which is based on the .mako file
+        """
         resp = Response(mako_template=file,
                         template_lookup=self.lookup,
                         headers=[])
-        argv = {
-            "a_value": "Hello world"
-        }
-
-        #TODO only used in development purposes
-        #f = open(self.CONFIG_FILE_PATH + "working.json", "r+")
-        #self.session[self.CONFIG_KEY] = f.read();
-        #f.close()
-
-        return resp(self.environ, self.start_response, **argv)
-
-
-    def handleConfigIDP(self, file):
-
-        resp = Response(mako_template=file,
-                        template_lookup=self.lookup,
-                        headers=[])
-
-        argv = {
-            "a_value": "Hello world"
-        }
-
-        return resp(self.environ, self.start_response, **argv)
-
-
-    def handleHomePage(self, file):
-
-        resp = Response(mako_template=file,
-                        template_lookup=self.lookup,
-                        headers=[])
-
         argv = {
             "a_value": "Hello world"
         }
@@ -221,6 +199,10 @@ class Test:
 
 
     def handleListTests(self):
+        """
+        Run the underlying script in order to get a list containing all available tests
+        :return A list with all the available tests
+        """
         if "handleList_result" not in self.cache:
 
             if "test_list" not in self.cache:
@@ -233,22 +215,11 @@ class Test:
             allTests = json.loads(self.cache["test_list"])
 
             childTestsList, rootTestsList = self.identifyRootTests(allTests)
-
-            topDownChildList = copy.deepcopy(childTestsList)
-            topDownRootList = copy.deepcopy(rootTestsList)
-
-            topDownTree = self.insertRemaningChildTestsTopdown(topDownChildList, topDownRootList)
             bottomUpTree = self.insertRemaningChildTestsBottomUp(childTestsList, rootTestsList)
-
-            self.setupTestId(topDownTree)
             self.setupTestId(bottomUpTree)
 
-            flatBottomUpTree = self.convertToFlatBottomTree(bottomUpTree)
-
             result = {
-                "topDownTree": topDownTree,
                 "bottomUpTree": bottomUpTree,
-                "flatBottomUpTree": flatBottomUpTree
             }
 
             self.cache["handleList_result"] = result
@@ -264,7 +235,11 @@ class Test:
 
 
     def writeToConfig(self, password=None, username=None):
-
+        """
+        Write user login details to the config file
+        :param password: Login password which should be added to interaction config block
+        :param username: Login username which should be added to interaction config block
+        """
         interactionParameters = self.session['interactionParameters']
 
         title = interactionParameters['title']
@@ -305,6 +280,10 @@ class Test:
 
 
     def handlePostFinalInteractionData(self):
+        """
+        Adds the username and the password in order to complete the interaction gathering cycle
+        :return Returns a script tags which tells the gui to make a post back
+        """
         try:
             username = self.parameters['login'][0]
             password = self.parameters['password'][0]
@@ -318,6 +297,10 @@ class Test:
 
 
     def handlePostBasicInteractionData(self):
+        """
+        Adds the basic interaction information which doesn't need users input
+        :return Default response, should be ignored
+        """
         title = self.parameters['title']
         redirectUri = self.parameters['redirectUri']
         pageType = self.parameters['pageType']
@@ -329,6 +312,10 @@ class Test:
 
 
     def handleResetInteraction(self):
+        """
+        Removes previously collected interaction details
+        :return Default response, should be ignored
+        """
         targetStringContent = self.session[self.CONFIG_KEY]
         targetDict = ast.literal_eval(targetStringContent)
         targetDict['interaction'] = []
@@ -338,6 +325,10 @@ class Test:
 
 
     def handleRunTest(self):
+        """
+        Executes a test
+        :return The result of the executed test
+        """
         testToRun = self.parameters['testname']
 
         if 'testid' in self.parameters:
@@ -385,6 +376,9 @@ class Test:
         return self.serviceError("The test is not valid")
 
     def handleGetBasicConfig(self):
+        """
+        :return: Basic configuration stored in the session
+        """
         if self.CONFIG_KEY in self.session:
             configString = self.session[self.CONFIG_KEY]
             configDict = ast.literal_eval(configString)
@@ -394,6 +388,10 @@ class Test:
 
 
     def handlePostBasicConfig(self):
+        """
+        Stores the basic configuration in the session object.
+        :return A default value which should be ignored
+        """
         targetStringContent = self.session[self.CONFIG_KEY]
         targetDict = ast.literal_eval(targetStringContent)
 
@@ -408,17 +406,23 @@ class Test:
 
 
     def handleGetInteractionConfig(self):
-
+        """
+        :return: Interaction configurations stored in the session object
+        """
         if self.CONFIG_KEY in self.session:
             configString = self.session[self.CONFIG_KEY]
             configDict = ast.literal_eval(configString)
 
-        interactionConfigList = self.createInteractionConfigList(configDict)
+        interactionConfigList = self.addListIndexToInteractionBlockList(configDict)
 
         return self.returnJSON(json.dumps(interactionConfigList))
 
 
     def handlePostInteractionConfig(self):
+        """
+        Stores the interaction blocks int the session object
+        :return Default response, should be ignored
+        """
         interactionList = self.parameters['interactionList']
         interactionConfigList = []
 
@@ -436,6 +440,10 @@ class Test:
 
 
     def addMetdataToSession(self, metadata):
+        """
+        Adds metadata to session
+        :param metadata: Metadata which should be stored on the server
+        """
         if (metadata.startswith('<?xml')):
             metadata = metadata.replace('\n', "")
             metadata = metadata.replace('\"', "\'")
@@ -452,6 +460,9 @@ class Test:
 
 
     def handlePostMetadataFile(self):
+        """
+        Stores the metadata uploaded to the server
+        """
         metadata = str(self.parameters['metadataFile'])
 
         self.addMetdataToSession(metadata)
@@ -461,6 +472,10 @@ class Test:
 
 
     def handleCreateNewConfigFile(self):
+        """
+        Creates a new config file based on a temple and saves it in the session
+        :return Default response, should be ignored
+        """
         templateFile = open("src/saml2testGui/template_config.json", "r")
 
         try:
@@ -475,13 +490,19 @@ class Test:
 
 
     def handleUploadConfigFile(self):
+        """
+        Adds a uploaded config file to the session
+        :return Default response, should be ignored
+        """
         self.session[self.CONFIG_KEY] = str(self.parameters['configFileContent'])
-
         print "Upload target: " + self.session[self.CONFIG_KEY]
         return self.returnJSON({"target": "asd"})
 
 
     def handleDownloadConfigFile(self):
+        """
+        :return Return the configuration file stored in the session
+        """
         configString = self.session[self.CONFIG_KEY]
         configDict = ast.literal_eval(configString)
         fileDict = json.dumps({"configDict": configDict})
@@ -490,14 +511,25 @@ class Test:
         return self.returnJSON(fileDict)
 
 
-    def setDefaultValueInDict(self, key, dict, defaultValue):
+    def checkIfKeyExistsOrSetDefaultValue(self, key, dict, defaultValue):
+        """
+        Checks if the incoming key exists in dict or sets default value
+        :param key: The key to look up in the dictionary
+        :param dict: The dictionary which should be looked up
+        :param defaultValue: If the key does not this value will be returned
+        :return: The value corresponding to the incoming key value or the default value
+        """
         if key in dict:
-            pass
-        else:
-            dict[key] = defaultValue
-        return dict[key]
+            return dict[key]
+        return defaultValue
 
-    def createInteractionConfigList(self, targetDict):
+
+    def addListIndexToInteractionBlockList(self, targetDict):
+        """
+        Adds indexes to the configuration list
+        :param targetDict:
+        :return: A list of interaction blocks where every block has a specific index
+        """
         if not('interaction' in targetDict):
             targetDict['interaction'] = []
 
@@ -506,8 +538,8 @@ class Test:
 
         loopIndex = 0;
         for entry in interactionList:
-            entry['control']['index'] = self.setDefaultValueInDict("index", entry['control'], 0)
-            entry['control']['set'] = self.setDefaultValueInDict("set", entry['control'], {})
+            entry['control']['index'] = self.checkIfKeyExistsOrSetDefaultValue("index", entry['control'], 0)
+            entry['control']['set'] = self.checkIfKeyExistsOrSetDefaultValue("set", entry['control'], {})
 
             entry = {"id": loopIndex,
                      "entry": entry
@@ -518,17 +550,29 @@ class Test:
         return newInteractionList
 
 
-    def createNewTestDict(self, item, level=1):
+    def createNewTestDict(self, testItem, level=1):
+        """
+        Creates a new test dictionary
+        :param testItem: The test item on which the new test dict should be based upon
+        :param level: The level of the test or sub-test are 1 by default
+        :return: The new test dict
+        """
         newDict = {}
-        newDict['id'] = str(item["id"])
+        newDict['id'] = str(testItem["id"])
         newDict['children'] = []
         newDict['level'] = level
         newDict['testid'] = ""
-        newDict['descr'] = str(item["name"]) #"name" ska bytas up mot "descr" men alla test innehåller inte dessa attribut
+        newDict['descr'] = str(testItem["name"]) #TODO "name" ska bytas up mot "descr" men alla test innehåller inte dessa attribut
         return newDict
 
 
     def identifyRootTests(self, allTests):
+        """
+        Identifies the root tests which is all test which doesn't depend on any other test
+        :param allTests: A list containing all tests
+        :return First it returns a list containing all test tests which depend on other tests. Secondly it returns a
+                list containing all root tests.
+        """
         childTestsList = []
         rootTestsList = []
         for item in allTests:
@@ -541,6 +585,11 @@ class Test:
 
 
     def setupTestId(self, tree, visible=True):
+        """
+        Gives every test a unique id add show the root nodes
+        :param tree: The tree which should be traversed
+        :param visible: Boolean which indicates if the tree node should be visible or not.
+        """
         for element in tree:
             element["visible"] = visible
             element["testid"] = uuid.uuid4().urn
@@ -549,6 +598,11 @@ class Test:
 
 
     def insertRemaningChildTestsBottomUp(self, childTestsList, leafTestList):
+        """
+        Inserts the child node according to bottom up tree parsing algorithm
+        :param childTestsList: The child tests which depends on other tests
+        :param leafTestList: Leaf test are tests that no other test depends upon
+        """
         tree = []
 
         while len(leafTestList) > 0:
@@ -582,23 +636,20 @@ class Test:
 
 
     def updateChildrensLevel(self, child):
+        """
+        Updates the level of a specific test
+        :param child: The test who level should be updated
+        """
         childrenList = child['children']
         for unvisitedChild in childrenList:
             unvisitedChild['level'] = child['level'] + 1
             self.updateChildrensLevel(unvisitedChild)
 
 
-    def convertToFlatBottomTree(self, bottomUpTree):
-        flatBottomUpTree = []
-        for rootTest in bottomUpTree:
-            newTest = copy.deepcopy(rootTest)
-            children = self.getChildren(newTest)
-            newTest['children'] = children
-            flatBottomUpTree.append(newTest)
-        return flatBottomUpTree
-
-
     def getChildren(self, child):
+        """
+        :return Collects and returns all children and sub children of a given node
+        """
         childrenToVisitList = child['children']
         allChildren = []
 
@@ -625,42 +676,6 @@ class Test:
             else:
                 unvisitedChild['level'] = child['level'] + 1
             self.updateChildrensLevel(unvisitedChild)
-
-
-    def insertRemaningChildTestsTopdown(self, childTestsList, parentList):
-        tree = parentList
-
-        while len(childTestsList) > 0:
-            newParentTestsList = []
-            newChildTestsList = []
-
-            for parent in parentList:
-                for child in childTestsList:
-                    parentID = child['depend']
-
-                    if len(parentID) == 1:
-                        parentID = str(parentID[0])
-                    else:
-                        pass
-                        #Kasta ett fel.
-
-                    if parent['id'] == parentID:
-                        childLevel = parent["level"] + 1
-                        newChild = self.createNewTestDict(child, childLevel)
-                        parent["children"].append(newChild)
-                        parent["hasChildren"] = True
-                        newParentTestsList.append(newChild)
-
-            for child in childTestsList:
-                for newParent in newParentTestsList:
-                    if not (child['id'] == newParent['id']):
-                        if not (child in newChildTestsList):
-                            newChildTestsList.append(child)
-
-
-            childTestsList = newChildTestsList
-            parentList = newParentTestsList
-        return tree
 
 
     def checkIfIncommingTestIsLeagal(self, tmpTest):
